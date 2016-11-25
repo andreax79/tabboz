@@ -1,0 +1,7 @@
+*.obj
+*.OBJ
+*.csm
+*.CSM
+*.~*
+*.bak
+*.BAK

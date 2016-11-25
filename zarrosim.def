@@ -1,0 +1,7 @@
+NAME         ZarroSim
+DESCRIPTION 'Tabboz Simulator'
+
+EXETYPE      WINDOWS
+
+CODE         MOVEABLE DISCARDABLE
+DATA         MOVEABLE MULTIPLE
