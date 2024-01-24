@@ -1,0 +1,5 @@
+AlignArrayOfStructures: Left
+AlignConsecutiveDeclarations: true
+BasedOnStyle: Microsoft
+ColumnLimit: 0
+IndentWidth: 4

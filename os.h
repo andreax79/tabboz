@@ -1,7 +1,7 @@
 /*
-	 This file is part of Tabboz Simulator.
+     This file is part of Tabboz Simulator.
 
-	 Tabboz Simulator is free software: you can redistribute it and/or modify
+     Tabboz Simulator is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -12,7 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-	 along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // -------------------------------------------------------------------
@@ -33,7 +33,7 @@ etc...
 // Amiga -------------------------------------------------------------
 
 #ifdef TABBOZ_AMIGA
-etc...
+    etc...
 #endif
 
 // Windows 16bit -----------------------------------------------------
@@ -49,4 +49,3 @@ etc...
 #define TABBOZ_WIN
 #include <windows.h>
 #endif
-
