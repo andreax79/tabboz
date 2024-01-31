@@ -1,0 +1,49 @@
+ZARROSIM MENU
+{
+  POPUP "&File"
+  {
+    MENUITEM "&Apri...", 106
+    MENUITEM "&Salva con nome...", 107
+    MENUITEM SEPARATOR
+    MENUITEM "&Chiudi...", 108
+  }
+
+  POPUP "&Attivita'"
+  {
+    MENUITEM "&Scooter...", 130
+    MENUITEM "&Disco...", 132
+    MENUITEM SEPARATOR
+    MENUITEM "Sc&uola...", 136
+    MENUITEM "&Lavoro...", 137
+    MENUITEM SEPARATOR
+    MENUITEM "&Compagnia...", 134
+    MENUITEM "&Famiglia...", 135
+    MENUITEM "&Tipa...", 133
+  }
+
+  POPUP "&Negozi"
+  {
+    MENUITEM "&Bau House...", 143
+    MENUITEM "B&lue Rider...", 147
+    MENUITEM "&Zoccolaro...", 144
+    MENUITEM "&Footsmocker...", 145
+    MENUITEM "Footsmocker &II...", 146
+    MENUITEM SEPARATOR
+    MENUITEM "Bar &Tabacchi...", 141
+    MENUITEM "&Palestra...", 142
+    MENUITEM "T&elefonino...", 155
+  }
+
+  POPUP "&Special"
+  {
+    MENUITEM "&Personal Information...", 139
+    MENUITEM "&Configuration...", 140
+  }
+
+  POPUP "&Help"
+  {
+    MENUITEM "&About Tabboz Simulator...", 120
+    MENUITEM "&Startup Logo", 121
+  }
+
+}

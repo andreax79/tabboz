@@ -4,6 +4,9 @@ import cstruct
 
 __all__ = [
     "STRINGS_BLOCK_SIZE",
+    "POPUP",
+    "ENDMENU",
+    "HELP",
     "ResourceType",
     "ResourceHeaderPre",
     "ResourceHeaderPost",
@@ -21,6 +24,9 @@ __all__ = [
 ]
 
 STRINGS_BLOCK_SIZE = 16
+POPUP = 0x0010
+ENDMENU = 0x0080
+HELP = 0x4000
 
 
 class ResourceType(Enum):

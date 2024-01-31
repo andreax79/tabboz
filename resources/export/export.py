@@ -10,6 +10,9 @@ import cstruct
 
 from windef import (
     STRINGS_BLOCK_SIZE,
+    POPUP,
+    ENDMENU,
+    HELP,
     BitmapFileHeader,
     BitmapInfoHeader,
     BitmapV4Header,
@@ -38,6 +41,7 @@ base_path = Path.cwd() / ".."
 bitmaps_dir = base_path / "bitmaps"
 icons_dir = base_path / "icons"
 strings_dir = base_path / "strings"
+menus_dir = base_path / "menus"
 
 
 def read_word(f: BinaryIO) -> int:
@@ -133,10 +137,72 @@ def export_strings(resource: ResourceItem, resources: list[ResourceItem]) -> Non
                 t = f.read(string_len * 2).decode("UTF-16LE")
                 # print(f"{string_id=} {t=}")
                 data[str(string_id)] = t
-    print(json.dumps(data))
     strings_file = strings_dir / f"{resource.name}.json"
     with strings_file.open("w", encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+        f.write("\n")
+
+
+def export_menu(
+    resource: ResourceItem,
+    resources: list[ResourceItem],
+) -> None:
+    menus_dir.mkdir(exist_ok=True)
+    with io.BytesIO(resource.data) as f:
+        with (menus_dir / f"{resource.name}.rc").open("w") as menu_rc:
+            menu_rc.write(f"{resource.name} MENU\n{{\n")
+            read_word(f)
+            read_word(f)
+            menu_stack = [[]]
+            while True:
+                try:
+                    flags = read_word(f)
+                except:
+                    break
+                if flags & POPUP:
+                    menu_id = -1
+                    menu = {
+                        "kind": "popup",
+                        "label": read_str_or_id(f),
+                        "items": [],
+                    }
+                    menu_stack[-1].append(menu)
+                    rc_flags = ""
+                    if flags & HELP:
+                        menu["flags"] = ["menu"]
+                        rc_flags = ", HELP"
+                    menu_stack.append(menu_stack[-1][-1]["items"])
+                    menu_rc.write(f"  POPUP \"{menu['label']}\"\n")
+                    menu_rc.write("  {\n")
+                    continue
+                else:
+                    menu_id = read_word(f)
+                if flags == 0 and menu_id == 0:
+                    _ = read_word(f)
+                    menu_stack[-1].append(
+                        {
+                            "kind": "separator",
+                            "label": "",
+                        }
+                    )
+                    menu_rc.write("    MENUITEM SEPARATOR\n")
+                else:
+                    menu = {
+                        "kind": "menuitem",
+                        "label": read_str_or_id(f),
+                        "menu_id": menu_id,
+                    }
+                    menu_stack[-1].append(menu)
+                    menu_rc.write(
+                        f"    MENUITEM \"{menu['label']}\", {menu['menu_id']}\n"
+                    )
+                if flags & ENDMENU:
+                    menu_stack.pop()
+                    menu_rc.write("  }\n\n")
+            menu_rc.write("}\n")
+    menu_file = menus_dir / f"{resource.name}.json"
+    with menu_file.open("w", encoding='utf-8') as f:
+        json.dump(menu_stack[0], f, ensure_ascii=False, indent=4)
         f.write("\n")
 
 
@@ -153,6 +219,8 @@ def main() -> None:
                 export_bitmap(resource, resources)
             elif resource.type == ResourceType.string:
                 export_strings(resource, resources)
+            elif resource.type == ResourceType.menu:
+                export_menu(resource, resources)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,161 @@
+[
+    {
+        "kind": "popup",
+        "label": "&File",
+        "items": [
+            {
+                "kind": "menuitem",
+                "label": "&Apri...",
+                "menu_id": 106
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Salva con nome...",
+                "menu_id": 107
+            },
+            {
+                "kind": "separator",
+                "label": ""
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Chiudi...",
+                "menu_id": 108
+            }
+        ]
+    },
+    {
+        "kind": "popup",
+        "label": "&Attivita'",
+        "items": [
+            {
+                "kind": "menuitem",
+                "label": "&Scooter...",
+                "menu_id": 130
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Disco...",
+                "menu_id": 132
+            },
+            {
+                "kind": "separator",
+                "label": ""
+            },
+            {
+                "kind": "menuitem",
+                "label": "Sc&uola...",
+                "menu_id": 136
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Lavoro...",
+                "menu_id": 137
+            },
+            {
+                "kind": "separator",
+                "label": ""
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Compagnia...",
+                "menu_id": 134
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Famiglia...",
+                "menu_id": 135
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Tipa...",
+                "menu_id": 133
+            }
+        ]
+    },
+    {
+        "kind": "popup",
+        "label": "&Negozi",
+        "items": [
+            {
+                "kind": "menuitem",
+                "label": "&Bau House...",
+                "menu_id": 143
+            },
+            {
+                "kind": "menuitem",
+                "label": "B&lue Rider...",
+                "menu_id": 147
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Zoccolaro...",
+                "menu_id": 144
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Footsmocker...",
+                "menu_id": 145
+            },
+            {
+                "kind": "menuitem",
+                "label": "Footsmocker &II...",
+                "menu_id": 146
+            },
+            {
+                "kind": "separator",
+                "label": ""
+            },
+            {
+                "kind": "menuitem",
+                "label": "Bar &Tabacchi...",
+                "menu_id": 141
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Palestra...",
+                "menu_id": 142
+            },
+            {
+                "kind": "menuitem",
+                "label": "T&elefonino...",
+                "menu_id": 155
+            }
+        ]
+    },
+    {
+        "kind": "popup",
+        "label": "&Special",
+        "items": [
+            {
+                "kind": "menuitem",
+                "label": "&Personal Information...",
+                "menu_id": 139
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Configuration...",
+                "menu_id": 140
+            }
+        ]
+    },
+    {
+        "kind": "popup",
+        "label": "&Help",
+        "items": [
+            {
+                "kind": "menuitem",
+                "label": "&About Tabboz Simulator...",
+                "menu_id": 120
+            },
+            {
+                "kind": "menuitem",
+                "label": "&Startup Logo",
+                "menu_id": 121
+            }
+        ],
+        "flags": [
+            "menu"
+        ]
+    }
+]
