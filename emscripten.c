@@ -161,8 +161,8 @@ int LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax)
 // Show/hide a window
 //*******************************************************************
 
-EM_JS(BOOL, ShowWindowEm, (int dialogId, BOOL show), {
-    const win = document.querySelector('#win' + dialogId);
+EM_JS(BOOL, ShowWindowEm, (int windowId, BOOL show), {
+    const win = document.querySelector('#win' + windowId);
     if (win != null)
     {
         win.style.display = show ? 'block' : 'none';
@@ -189,11 +189,11 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 // Display a modal dialog box
 //*******************************************************************
 
-EM_ASYNC_JS(int, MessageBoxEm, (int dialogId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType), {
+EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType), {
     const element = document.getElementById('messagebox');
     const win = element.cloneNode(true);
-    win.id = 'win' + dialogId;
-    win.style.zIndex = '' + dialogId;
+    win.id = 'win' + windowId;
+    win.style.zIndex = '' + windowId;
     win.style.position = 'absolute';
     win.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
     win.querySelector('.content').innerText = UTF8ToString(lpText);
@@ -217,11 +217,23 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 // Create a modal dialog box from a dialog box template resource
 //*******************************************************************
 
-EM_ASYNC_JS(void, DialogBoxEm, (int dialogId, int dialog), {
+EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
+    // Load html
     const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
     const html = await response.text();
-    const c = fromHTML(html);
-    c.id = 'win' + dialogId;
+    const c = createElementFromHTML(html);
+    // Set window id
+    c.id = 'win' + windowId;
+    // Set window position
+    if (parentWindowId >= 0) {
+        const parent = document.getElementById('win' + parentWindowId);
+        if (parent != null) {
+            const style = getComputedStyle(parent);
+            c.style.left = (parseInt(style.left) + 40) + 'px';
+            c.style.top = (parseInt(style.top) + 40) + 'px';
+        }
+    }
+    // Add window to screen
     const destination = document.getElementById('screen');
     destination.appendChild(c);
     // Add menu
@@ -230,13 +242,13 @@ EM_ASYNC_JS(void, DialogBoxEm, (int dialogId, int dialog), {
     makeDraggable(c);
 });
 
-EM_ASYNC_JS(int, DialogBoxWaitEvent, (int dialogId), {
-    return await waitListenerS(`#win${dialogId} button, #win${dialogId} input, #win${dialogId} .menu`, "click");
+EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu`, "click");
 });
 
-EM_JS(void, RemoveDialogBoxEm, (int dialogId), {
+EM_JS(void, RemoveDialogBoxEm, (int windowId), {
     const destination = document.getElementById('screen');
-    destination.removeChild(document.getElementById('win' + dialogId));
+    destination.removeChild(document.getElementById('win' + windowId));
 });
 
 INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc)
@@ -244,8 +256,15 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     INT_PTR              retval;
     int                  controlId;
     int                  dialog = (int)lpTemplateName;
+    int                  parentWindowId = -1;
     struct handle_entry *handle = alloc_handle();
-    DialogBoxEm(handle->id, dialog);
+
+    if (hWndParent != NULL) {
+        parentWindowId = ((struct handle_entry *)hWndParent)->id;
+    }
+
+    DialogBoxEm(handle->id, dialog, parentWindowId);
+
     if (lpDialogFunc != NULL)
     {
         // Init
@@ -295,8 +314,8 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
 // Set the title or text of a control in a dialog box
 //*******************************************************************
 
-EM_JS(BOOL, SetDlgItemTextEm, (int dialogId, int nIDDlgItem, LPCSTR lpString), {
-    const control = document.querySelector('#win' + dialogId + ' .control' + nIDDlgItem);
+EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
+    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
     if (control != null)
     {
         control.innerText = UTF8ToString(lpString);
@@ -323,8 +342,8 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
 // Set the check state of a radio button or check box
 //*******************************************************************
 
-EM_JS(BOOL, SetCheckEM, (int dialogId, int nIDDlgItem, WPARAM wParam), {
-    const control = document.querySelector('#win' + dialogId + ' .control' + nIDDlgItem);
+EM_JS(BOOL, SetCheckEM, (int windowId, int nIDDlgItem, WPARAM wParam), {
+    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
     if (control != null)
     {
         control.checked = (wParam != 0);
