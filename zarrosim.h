@@ -9,13 +9,13 @@
      the Free Software Foundation, either version 3 of the License, or
      (at your option) any later version.
 
-     Nome-Programma is distributed in the hope that it will be useful,
+     Tabboz Simulator is distributed in the hope that it will be useful,
      but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      GNU General Public License for more details.
 
      You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // #define VERSION	      "Version 0.9pr"
@@ -287,11 +287,9 @@ extern void TabbozStartNet(HANDLE hDlg); // 24 Giugno 1998
 
 // POI LE STRONZATE PER LE FINESTRELLE...
 
-#ifdef TABBOZ_WIN
 extern HANDLE hInst;
 extern HWND   hWndMain;
 extern HANDLE hdlgr;
-#endif
 
 // ED I PROTOTIPI FUNZIONI...
 
@@ -352,3 +350,4 @@ extern void AggiornaPrincipale();
 extern void Giorno(HANDLE hInstance);
 extern void CalcolaStudio(void);
 extern void CalcolaVelocita(HANDLE hDlg);
+extern void SalvaTutto(void);

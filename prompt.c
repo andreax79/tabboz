@@ -10,13 +10,13 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
+    Tabboz Simulator is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // ------------------ Non piu' in uso... -----------------------
@@ -68,8 +68,10 @@ static CMDTAB cmdtab[] = {
     2, 1,
     "info", "1", 0,
     1, 1,
+#ifndef TABBOZ_EM
     "logo", "1", 0,
     1, 1,
+#endif
     "scoooter", "1", 0,
     1, 1,
     "status", "1", 0,
@@ -402,6 +404,7 @@ BOOL FAR PASCAL Prompt(HWND hDlg, WORD message,
                 FreeProcInstance(lpproc);
                 break;
             }
+#ifndef TABBOZ_EM
             else if (!strcmp(argv[0], "logo"))
             { /* LOGO ----------------------------------- */
                 /* Display startup logo. */
@@ -413,6 +416,7 @@ BOOL FAR PASCAL Prompt(HWND hDlg, WORD message,
                 FreeProcInstance(lpproc);
                 break;
             }
+#endif
             else if (!strcmp(argv[0], "config"))
             { /* CONFIG --------------------------------- */
                 /* Display configuration box. */

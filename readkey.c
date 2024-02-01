@@ -9,13 +9,13 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
+    Tabboz Simulator is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -42,14 +42,14 @@ char nome_del_file_su_cui_salvare[256];
 
 // Memorizza una stringa nel profilo.
 
-void TabbozAddKey(char *KeyName, char *KeyValue);
+void TabbozAddKey(char *KeyName, char *KeyValue)
 {
     WriteProfileString("Tabboz", KeyName, KeyValue);
 };
 
 // Legge una stringa dal profilo.
 
-extern char *TabbozReadKey(char *key, char *buf);
+extern char *TabbozReadKey(char *key, char *buf)
 {
     GetProfileString("Tabboz", key, NULL, buf, 32);
     if (*buf == NULL)
@@ -90,7 +90,7 @@ char *RRKey(char *xKey)
 void SpegniISuoni()
 {
     PlaySound(NULL, NULL, 0x0040);
-    //	PlaySound(NULL,NULL,SND_PURGE);
+    //  PlaySound(NULL,NULL,SND_PURGE);
 }
 
 // Aggiunge una stringa al registro di configurazione
@@ -159,6 +159,56 @@ void TabbozPlaySound(int number)
     char filename[20];
     sprintf(filename, "Tabs%04d.Wav", number);
     sndPlaySound(filename, SND_ASYNC | SND_NODEFAULT);
+};
+
+// Legge una stringa dal profilo memorizzandola in un buffer locale.
+char *RRKey(char *xKey)
+{
+    static char a[255];
+    if (TabbozReadKey(xKey, a) == 0)
+        *a = '\0';
+    return (a);
+}
+
+#endif
+
+// --------------------------------------------------------------------------
+// Emscripten --------------------------------------------------------
+
+#ifdef TABBOZ_EM
+
+EM_JS(void, WriteProfileString, (LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpString), {
+    localStorage.setItem(UTF8ToString(lpKeyName), UTF8ToString(lpString));
+});
+
+EM_JS(void, GetProfileString, (LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpDefault, LPSTR lpReturnedString, DWORD nSize), {
+    const value = localStorage.getItem(UTF8ToString(lpKeyName));
+    stringToUTF8(value || "", lpReturnedString, nSize);
+});
+
+// Store values in localStorage
+
+void TabbozAddKey(char *KeyName, char *KeyValue)
+{
+    WriteProfileString("Tabboz", KeyName, KeyValue);
+};
+
+// Get values from localStorage
+
+extern char *TabbozReadKey(char *key, char *buf)
+{
+    GetProfileString("Tabboz", key, NULL, buf, 32);
+    if (buf[0] == '\0')
+        return NULL;
+    return buf;
+};
+
+// Inizia la riproduzione di un suono
+void TabbozPlaySound(int number){
+    /* TODO */
+    /* char filename[20]; */
+    /* sprintf(filename,"Tabs%04.Wav",number); */
+    /* sndPlaySound(filename, SND_ASYNC | SND_NODEFAULT | SND_FILENAME); */
 };
 
 // Legge una stringa dal profilo memorizzandola in un buffer locale.

@@ -2,20 +2,20 @@
 // Copyright (c) 1997-2000 Andrea Bonomi
 
 /*
-     This file is part of Tabboz Simulator.
+       This file is part of Tabboz Simulator.
 
-     Tabboz Simulator is free software: you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
+       Tabboz Simulator is free software: you can redistribute it and/or modify
+       it under the terms of the GNU General Public License as published by
+       the Free Software Foundation, either version 3 of the License, or
+       (at your option) any later version.
 
-     Nome-Programma is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
+       Tabboz Simulator is distributed in the hope that it will be useful,
+       but WITHOUT ANY WARRANTY; without even the implied warranty of
+       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+       GNU General Public License for more details.
 
-     You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+       You should have received a copy of the GNU General Public License
+       along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -45,10 +45,11 @@ extern u_long new_counter;
 extern ATOM   RegisterBMPTipaClass(HANDLE hInst);
 extern ATOM   RegisterBMPViewClass(HANDLE hInst);
 extern char   nome_del_file_su_cui_salvare[];
-extern void   OpenFileDlg(HWND hwnd);
-extern void   SaveFileDlg(HWND hwnd);
-static void   SalvaTutto(void);
-static void   CaricaTutto(void);
+#ifdef TABBOZ_WIN
+extern void OpenFileDlg(HWND hwnd);
+extern void SaveFileDlg(HWND hwnd);
+#endif
+static void CaricaTutto(void);
 
 NEWSTSCOOTER ScooterData;
 
@@ -177,7 +178,11 @@ void ResetMe(int primavolta)
     LoadString(hInst, (400 + random(22)), City, (sizeof(City) - 1));
 
     LoadString(hInst, (450 + random(50)), tmp, (sizeof(tmp) - 1));
+#ifdef TABBOZ_EM
+    sprintf(Street, "%s n. %ld", tmp, (1 + random(150)));
+#else
     sprintf(Street, "%s n. %d", tmp, (1 + random(150)));
+#endif
 
     for (i = 1; i < 10; i++)
         MaterieMem[i].xxx = 0;
@@ -238,18 +243,19 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
     if (message == WM_INITDIALOG)
     {
+#ifndef TABBOZ_EM
         if (firsttime == 1)
             EnableWindow(GetDlgItem(hDlg, 2), 0);
         ;
-
+#endif
         SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, TRUE, 0L);
         if (random(2) == 1)
             tmpsesso = 'M';
         else
             tmpsesso = 'F';
 
-        //			sprintf(buf,"prova");
-        //			SendMessage(GetDlgItem(hDlg, 110), CB_ADDSTRING, 0, t);
+        // sprintf(buf,"prova");
+        // SendMessage(GetDlgItem(hDlg, 110), CB_ADDSTRING, 0, t);
 
         return (TRUE);
     }
@@ -300,22 +306,29 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 // InitTabboz
 //*******************************************************************
 #pragma argsused
-static void InitTabboz(void)
+void InitTabboz(void)
 {
-    char tmp[128];
-#ifdef TABBOZ_WIN
+    char    tmp[128];
     FARPROC lpproc;
-
+#ifdef TABBOZ_WIN
     // Init della liberia grafica...
     BWCCRegister(hInst); // Fanculo ! Mi sono magiato il fegato prima di trovare
                          // questa funzione ! non c'e' nessuno documento fottuto che mi abbia aiutato !
-
+#else
+    time_t t;
+#endif
+#ifdef TABBOZ_EM
+    LoadStringResources();
 #endif
 
     nome_del_file_su_cui_salvare[0] = 0;
 
     // Inizializzazione dei numeri casuali...
+#ifdef TABBOZ_WIN
     randomize();
+#else
+    srand((unsigned)time(&t));
+#endif
 
     // Inizializza un po' di variabile...
     boolean_shutdown = 0; /* 0=resta dentro, 1=uscita, 2=shutdown 19 Giugno 1999 / 14 Ottoble 1999 */
@@ -330,7 +343,7 @@ static void InitTabboz(void)
     current_tipa = 0;                  /* 6  Maggio  1999 */
 
 #ifdef PROMPT_ACTIVE
-    /* definitivamente rimosso il 		   10 Gennaio 1999 */
+    /* definitivamente rimosso il          10 Gennaio 1999 */
     prompt_mode = 0; /* 15 Maggio  1998 */
 #endif
 
@@ -353,13 +366,13 @@ static void InitTabboz(void)
     }
 #endif
 
-#ifdef TABBOZ_WIN
     // Ottieni i nomi dei creatori di sto coso...
     LoadString(hInst, 10, Andrea, sizeof(Andrea));
     LoadString(hInst, 11, Caccia, sizeof(Caccia));
     LoadString(hInst, 12, Daniele, sizeof(Daniele));
     LoadString(hInst, 2, Obscured, sizeof(Obscured));
 
+#ifdef TABBOZ_WIN
     /* Registra la Classe BMPView - E' giusto metterlo qui ??? - 25 Feb 1999 */
     RegisterBMPViewClass(hInst);
 
@@ -418,7 +431,7 @@ static void CaricaTutto(void)
     int  i;
 
     /* Prima che vengano caricate le informazioni... */
-    /* azzera il checksum... 15 Marzo 1999	        */
+    /* azzera il checksum... 15 Marzo 1999           */
     new_reset_check();
 
     /* Cerca le informazioni registrate */
@@ -579,7 +592,7 @@ static void CaricaTutto(void)
     if (benzina < 0)
         benzina = 0;
 
-    /*  antifurto		    = atoi (RRKey("Scooter\\Antifurto") ); */
+    /*  antifurto               = atoi (RRKey("Scooter\\Antifurto") ); */
 
     if (TabbozReadKey("Scooter\\Nome", ScooterData.nome) == 0)
         sprintf(ScooterData.nome, "nessuno");
@@ -619,18 +632,22 @@ static void CaricaTutto(void)
     Giorno(hInst);
 
 #ifdef TABBOZ_DEBUG
-// Non si possono mettere le infomazioni del counter nel file di log
-// perche' sarebbe facilissimo hackerale...
-//	 sprintf(tmp,"tabboz: (R) new_counter %lu", new_counter);
-//	 writelog(tmp);
-//	 sprintf(tmp,"tabboz: (R) read_counter %lu", atoi(RRKey("SoftCheck")) );
-//	 writelog(tmp);
+    // Non si possono mettere le infomazioni del counter nel file di log
+    // perche' sarebbe facilissimo hackerale...
+    //     sprintf(tmp,"tabboz: (R) new_counter %lu", new_counter);
+    //     writelog(tmp);
+    //     sprintf(tmp,"tabboz: (R) read_counter %lu", atoi(RRKey("SoftCheck")) );
+    //     writelog(tmp);
 #endif
 
     // ven 10 marzo 2000
     // Guarda se qualche "bastardino" ha modificato dei valori nel registro...
+    printf("SoftCheck check\n");
     if (new_counter - atoi(RRKey("SoftCheck")))
-        ResetMe(0);
+    {
+        printf("SoftCheck failed\n");
+        /* ResetMe(0); */ // TODO
+    }
 }
 
 //*******************************************************************
@@ -659,8 +676,12 @@ void FineProgramma(char *caller)
     {
         /* Salva lo stato del tabbozzo */
         /* 0.8.1pr 29 Novembre 1998 Ora non salva piu' nel WIN.INI con WriteProfileString,
-        ma salva nel registro di configurazione... */
+           ma salva nel registro di configurazione... */
+#ifdef TABBOZ_EM
+        TabbozAddKey("Exe", "zarrosim");
+#else
         TabbozAddKey("Exe", _argv[0]);
+#endif
     }
 
     SalvaTutto();
@@ -670,10 +691,11 @@ void FineProgramma(char *caller)
 //      Salva le caratteristiche nel registro o su di un file
 //*******************************************************************
 
-static void SalvaTutto(void)
+void SalvaTutto(void)
 {
     char tmp[128];
     int  i;
+    printf("SalvaTutto\n"); // TODO
 
     new_reset_check();
 
@@ -816,7 +838,7 @@ static void SalvaTutto(void)
     TabbozAddKey("Scooter\\Benzina", tmp);
 
     /*  sprintf(tmp,"%d",antifurto);
-         TabbozAddKey("Scooter\\Antifurto", tmp); */
+        TabbozAddKey("Scooter\\Antifurto", tmp); */
 
     TabbozAddKey("Scooter\\Nome", ScooterData.nome);
 
@@ -842,8 +864,8 @@ static void SalvaTutto(void)
     TabbozAddKey("Version", VERSION);
 
     // #ifdef TABBOZ_DEBUG
-    //	 sprintf(tmp,"tabboz: (W) new_counter %lu", new_counter);
-    //	 writelog(tmp);
+    //     sprintf(tmp,"tabboz: (W) new_counter %lu", new_counter);
+    //     writelog(tmp);
     // #endif
 }
 
@@ -954,6 +976,7 @@ BOOL FAR PASCAL About(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 /* Logo...                                                          */
 /********************************************************************/
 
+#ifndef TABBOZ_EM
 #pragma argsused
 
 BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
@@ -969,7 +992,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         /* [[[ Posiziona il logo a centro dello schermo ]]] Veneedi' 17 Aprile 1998 */
         /* GetWindowRect(hDlg, (LPRECT) &wrect);                                    */
         /* w = wrect.right - wrect.left;                                            */
-        /* h = wrect.bottom - wrect.top;					    */
+        /* h = wrect.bottom - wrect.top;                                */
 
         w = 522; /* dimensioni dell' immagine del logo */
         h = 402;
@@ -992,7 +1015,9 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
     {
         if (fase_di_avvio == 1)
         {
+#ifndef TABBOZ_EM
             KillTimer(hDlg, WM_TIMER); /* Distrugge il timer... */
+#endif
             EndDialog(hDlg, TRUE);
         }
     }
@@ -1006,7 +1031,9 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         case 203:
             if (fase_di_avvio == 1)
             {
+#ifndef TABBOZ_EM
                 KillTimer(hDlg, WM_TIMER);
+#endif
             }
             EndDialog(hDlg, TRUE);
             return (TRUE);
@@ -1017,6 +1044,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
     return (FALSE);
 }
+#endif
 
 /********************************************************************/
 /* Spegnimi... 11 giugno 1998                                       */
@@ -1025,11 +1053,14 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 #pragma argsused
 BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
-    int         x, y, w, h;
+    int x, y, w, h;
+#ifndef TABBOZ_EM
     static RECT wrect;
+#endif
 
     if (message == WM_INITDIALOG)
     {
+#ifndef TABBOZ_EM
         /* Centra la finestra... */
         GetWindowRect(hDlg, (LPRECT)&wrect);
         w = wrect.right - wrect.left;
@@ -1046,6 +1077,7 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, FALSE, 0L);
         SendMessage(GetDlgItem(hDlg, 101), BM_SETCHECK, TRUE, 0L);
+#endif
         return (TRUE);
     }
     else if (message == WM_COMMAND)
@@ -1516,7 +1548,7 @@ BOOL FAR PASCAL Compagnia(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
             if (i2 == IDYES)
             {
-                //		 	if ( (ScooterMem[i].speed + 70 + random(50)) > (ScooterData.speed + ScooterData.stato + Fortuna) ) {
+                //                if ( (ScooterMem[i].speed + 70 + random(50)) > (ScooterData.speed + ScooterData.stato + Fortuna) ) {
                 if ((ScooterMem[i].speed + 80 + random(40)) > (ScooterData.speed + ScooterData.stato + Fortuna))
                 {
                     // perdi
@@ -1767,15 +1799,19 @@ void AggiornaPrincipale(HWND parent)
 
     if (sesso == 'M')
     { // Non usare la variabile "ao" xche' qui e' necessario
+#ifndef NOMENU
         DeleteMenu(GetMenu(parent), QX_TIPA, MF_BYCOMMAND);
         AppendMenu(GetSubMenu(GetMenu(parent), 1), MF_STRING, QX_TIPA, "&Tipa...");
+#endif
         SetDlgItemText(parent, 133, "Tipa"); // che ci sia scritto Tipa x il maschietto e
         SetDlgItemText(parent, 170, "Rapporto con la tipa");
     }
     else
-    { //	Tipo x la femminuccia...
+    { //  Tipo x la femminuccia...
+#ifndef NOMENU
         DeleteMenu(GetMenu(parent), QX_TIPA, MF_BYCOMMAND);
         AppendMenu(GetSubMenu(GetMenu(parent), 1), MF_STRING, QX_TIPA, "&Tipo...");
+#endif
         SetDlgItemText(parent, 133, "Tipo");
         SetDlgItemText(parent, 170, "Rapporto con il tipo");
     }
@@ -1805,8 +1841,10 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 #endif
 {
+#ifndef TABBOZ_EM
     static HICON hIcon;
-    FARPROC      lpproc;
+#endif
+    FARPROC lpproc;
 
     switch (message)
     {
@@ -1816,16 +1854,20 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
             FineProgramma("end session");
         break;
 
+#ifndef TABBOZ_EM
     case WM_QUERYDRAGICON: // 25 Feb 1999 - Questa e' l' icona per ALT-TAB...
         if (!hIcon)
             hIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
         return (long)hIcon;
+#endif
 
+#ifndef TABBOZ_EM
     case WM_DESTROY:
         if (hIcon)
             DestroyIcon(hIcon);
         KillTimer(hWnd, WM_TIMER);
         break;
+#endif
 
     case WM_SYSCOMMAND:
         switch (LOWORD(wParam))
@@ -1860,27 +1902,27 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
         return (FALSE);
 
     case WM_INITDIALOG:
+#ifndef TABBOZ_EM
         hIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
+#endif
         hWndMain = hWnd;
         // Scrive quanti soldi ci sono... ( ed ora scrive anche molta altra roba...)
         AggiornaPrincipale(hWnd);
 
 #ifndef NONETWORK
         hModule = GetModuleHandle("WINSOCK.DLL");
-
         NEThDlg = hWnd;
-
         if (net_enable)
             TabbozStartNet(NEThDlg);
 #endif
 
+#ifndef NOMENU
         /* 11 Jun 98 - Modifika il menu' di sistema... */
         AppendMenu(GetSystemMenu(hWnd, 0), MF_SEPARATOR, 0, 0);
         AppendMenu(GetSystemMenu(hWnd, 0), MF_STRING, QX_ABOUT, "&About Tabboz Simulator...");
-
-        //	    AppendMenu( GetSubMenu(GetMenu(hWnd),1), MF_STRING, QX_ABOUT, "&Chiesa..."); // Aggiunge la chiesa ai negozi :-)))
-        //	    DeleteMenu(GetMenu(hWnd), QX_ABOUT, MF_BYCOMMAND); // Cancella l' about(per esempio...)
-        //	    EnableMenuItem(GetMenu(hWnd), QX_NETWORK, MF_GRAYED); // Disabilita un menu'
+        //        AppendMenu( GetSubMenu(GetMenu(hWnd),1), MF_STRING, QX_ABOUT, "&Chiesa..."); // Aggiunge la chiesa ai negozi :-)))
+        //        DeleteMenu(GetMenu(hWnd), QX_ABOUT, MF_BYCOMMAND); // Cancella l' about(per esempio...)
+        //        EnableMenuItem(GetMenu(hWnd), QX_NETWORK, MF_GRAYED); // Disabilita un menu'
 
 #ifndef NONETWORK
         // Aggiunge la voce "Network..." al menu' "Special" - 04 Jan 1999
@@ -1893,17 +1935,21 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 #endif
 
         DrawMenuBar(hWnd);
+#endif
 
-        /*	    MessageBeep(0x0050); Crea un beep. Non e' necessario qui, ma e' solo x ricordarselo... */
+        /*        MessageBeep(0x0050); Crea un beep. Non e' necessario qui, ma e' solo x ricordarselo... */
 
         /* Inizio implementazione timer: 9 giugno 1998 */
+#ifndef TABBOZ_EM
         SetTimer(hWnd, WM_TIMER, 60000, NULL); /* 60 secondi.. (il massimo e' 65534, 65 secondi...) */
-        t_random = 6 + random(20);             /* 6 - 26 minuti tra un evento ed il seguente...*/
+#endif
+        t_random = 6 + random(20); /* 6 - 26 minuti tra un evento ed il seguente...*/
         t_random = 1;
 
         fase_di_avvio = 0; /* 11 Giugno 1998 */
         return TRUE;
 
+#ifndef TABBOZ_EM
     case WM_TIMER:
         if (timer_active == 1)
         {
@@ -1927,6 +1973,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
             }
         }
         return TRUE;
+#endif
 
 #ifndef NONETWORK
     case SOCKET_MESSAGE:
@@ -1966,6 +2013,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
+#ifdef TABBOZ_WIN
         case QX_LOAD:
             OpenFileDlg(hWnd);
             AggiornaPrincipale(hWnd);
@@ -1975,9 +2023,10 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
             SaveFileDlg(hWnd);
             AggiornaPrincipale(hWnd);
             break;
+#endif
 
+#ifndef TABBOZ_EM
         case QX_CLOSE:
-
             lpproc = MakeProcInstance(Spegnimi, hInst);
             DialogBox(hInst,
                       MAKEINTRESOURCE(SPEGNIMI),
@@ -1989,6 +2038,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
                 EndDialog(hWnd, TRUE); // Chiudi la baracca...
 
             return (TRUE);
+#endif
 
         case QX_ABOUT:
             /* Display about box. */
@@ -2001,6 +2051,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
+#ifndef TABBOZ_EM
         case QX_LOGO:
             lpproc = MakeProcInstance(Logo, hInst);
             DialogBox(hInst,
@@ -2011,6 +2062,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
+#endif
         case QX_CONFIG:
             /* Display configuration box. */
             lpproc = MakeProcInstance(Configuration, hInst);
@@ -2022,7 +2074,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
-            //		case 251: /* Ex Immagine Tabbozzo */
+            //          case 251: /* Ex Immagine Tabbozzo */
         case QX_INFO:
             /* Display Personal Information box. */
             lpproc = MakeProcInstance(PersonalInfo, hInst);
@@ -2256,24 +2308,32 @@ int vvc(int i) /* 15 Giugno 1998 - v0.7.1 - Verifica Valori Chiave */
 #ifdef TABBOZ_DEBUG
 void openlog()
 {
+#ifndef TABBOZ_EM
     debugfile = fopen("\\ZARROSIM.LOG", "w");
+#endif
 }
 
 void closelog()
 {
+#ifndef TABBOZ_EM
     fclose(debugfile);
+#endif
 }
 
 void writelog(char *s)
 {
     time_t t;
-
+#ifdef TABBOZ_EM
+    time(&t);
+    printf("%24.24s %s\n", ctime(&t), s);
+#else
     if (debug_active)
     {
         time(&t);
         fprintf(debugfile, "%24.24s %s\n", ctime(&t), s);
         fflush(debugfile); // Escegue il flush del file, cosi' anche se il Tabboz craschia si ha il file di log...
     }
+#endif
 }
 #endif
 
@@ -2365,13 +2425,13 @@ int main(int argc, char **argv)
 
     gtk_exit(0);
 }
-
 #endif
 
 //*******************************************************************
 // Dialog x la scelta del file da aprire...
 //*******************************************************************
 
+#ifdef TABBOZ_WIN
 void OpenFileDlg(HWND hwnd)
 {
 #define OFN_LONGNAMES 0x00200000L
@@ -2396,11 +2456,13 @@ void OpenFileDlg(HWND hwnd)
         nome_del_file_su_cui_salvare[0] = '\0';
     }
 }
+#endif
 
 //*******************************************************************
 // Dialog x la scelta del file da salvare...
 //*******************************************************************
 
+#ifdef TABBOZ_WIN
 void SaveFileDlg(HWND hwnd)
 {
 #define OFN_LONGNAMES 0x00200000L
@@ -2424,6 +2486,7 @@ void SaveFileDlg(HWND hwnd)
         nome_del_file_su_cui_salvare[0] = '\0';
     }
 }
+#endif
 
 //*******************************************************************
 // Copyright (c) 1997-2000 Andrea Bonomi

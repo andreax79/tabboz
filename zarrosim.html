@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Tabboz Simulator</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="resources/dialogs/css/98.css" />
+    <link rel="stylesheet" href="resources/dialogs/css/bwcc.css" />
+    <script src="resources/dialogs/js/menu.js"></script>
+    <link rel="icon" type="image/x-icon" href="resources/icons/1.ico" />
+  </head>
+  <body>
+    <div class="screen" id="screen">
+    </div>
+    <div style="display: none">
+    <div class="window" id="messagebox" style="margin: 32px; width: 250px">
+      <div class="title-bar">
+        <div class="title-bar-text">title</div>
+        <div class="title-bar-controls">
+          <!-- <button class="close" aria-label="Close"></button> -->
+        </div>
+      </div>
+      <div class="window-body">
+        <p class="content">content</p>
+        <section class="field-row" style="justify-content: flex-end">
+          <button class="ok">OK</button>
+        </section>
+      </div>
+    </div>
+    </div>
+
+    <script type='text/javascript'>
+
+    function waitListener(element, listenerName) {
+        return new Promise(function (resolve, reject) {
+            var listener = event => {
+                element.removeEventListener(listenerName, listener);
+                resolve(event);
+            };
+            element.addEventListener(listenerName, listener);
+        });
+    }
+
+    function waitListenerS(selector, listenerName) {
+        return new Promise(function (resolve, reject) {
+            var listener = event => {
+                document.querySelectorAll(selector).forEach(element =>
+                    element.removeEventListener(listenerName, listener)
+                );
+                const match = event.target.className.match(/\d+/);
+                const controlId = match ? Number(match[0]) : 0;
+                resolve(controlId);
+            };
+            document.querySelectorAll(selector).forEach(element =>
+                element.addEventListener(listenerName, listener)
+            );
+        });
+    }
+
+    function fromHTML(html) {
+        var template = document.createElement('template');
+        template.innerHTML = html.trim();
+        var result = template.content.children;
+        if (result.length === 1) {
+            return result[0];
+        } else {
+            return result;
+        }
+    }
+/*
+    function dragElement(elmnt) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "title-bar")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "title-bar").onmousedown = dragMouseDown;
+        } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+*/
+    var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+            return function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                console.log(text);
+            };
+        })(),
+    };
+    </script>
+    <script async type="text/javascript" src="/zarrosim.js"></script>
+  </body>
+</html>
+
+
