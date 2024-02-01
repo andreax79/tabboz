@@ -49,6 +49,12 @@ button {
     background-color: #d4d0c8;
 }
 
+button.default {
+    min-width: 75px;
+    min-height: 23px;
+    font-size: 11px;
+}
+
 .button_ok, .button_cancel {
     background-color: silver;
     padding: 0;

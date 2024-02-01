@@ -189,26 +189,49 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 // Display a modal dialog box
 //*******************************************************************
 
-EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType), {
+EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, int parentWindowId), {
     const element = document.getElementById('messagebox');
-    const win = element.cloneNode(true);
-    win.id = 'win' + windowId;
-    win.style.zIndex = '' + windowId;
-    win.style.position = 'absolute';
-    win.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
-    win.querySelector('.content').innerText = UTF8ToString(lpText);
+    const c = element.cloneNode(true);
+    // Set window id
+    c.id = 'win' + windowId;
+    // Set window position
+    if (parentWindowId >= 0) {
+        const parent = document.getElementById('win' + parentWindowId);
+        if (parent != null) {
+            const style = getComputedStyle(parent);
+            c.style.left = (parseInt(style.left) + 40) + 'px';
+            c.style.top = (parseInt(style.top) + 40) + 'px';
+        }
+    }
+    c.id = 'win' + windowId;
+    c.style.zIndex = '' + windowId;
+    c.style.position = 'absolute';
+    // Set title and message
+    c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
+    c.querySelector('.content').innerText = UTF8ToString(lpText);
+    // Add window to screen
     const destination = document.getElementById('screen');
-    destination.appendChild(win);
-    await waitListener(win.querySelector("button"), "click");
-    destination.removeChild(win);
-    return 0; // TODO
+    destination.appendChild(c);
+    // Make the window draggrable
+    makeDraggable(c);
+    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu`, "click");
+    // Remove the window
+    destination.removeChild(c);
+    return result;
 });
 
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
     int                  result;
+    int                  parentWindowId = -1;
     struct handle_entry *handle = alloc_handle();
-    result = MessageBoxEm(handle->id, lpText, lpCaption, uType);
+
+    // Get parent window number
+    if (hWnd != NULL) {
+        parentWindowId = ((struct handle_entry *)hWnd)->id;
+    }
+
+    result = MessageBoxEm(handle->id, lpText, lpCaption, uType, parentWindowId);
     release_handle(handle);
     return result;
 }
@@ -259,6 +282,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     int                  parentWindowId = -1;
     struct handle_entry *handle = alloc_handle();
 
+    // Get parent window number
     if (hWndParent != NULL) {
         parentWindowId = ((struct handle_entry *)hWndParent)->id;
     }
