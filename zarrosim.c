@@ -248,7 +248,7 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             EnableWindow(GetDlgItem(hDlg, 2), 0);
         ;
 #endif
-        SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, TRUE, 0L);
+        SetCheck(hDlg, 102, TRUE);
         if (random(2) == 1)
             tmpsesso = 'M';
         else
@@ -1075,8 +1075,8 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         MoveWindow(hDlg, x, y, w, h, 1);
         boolean_shutdown = 1; // Uscita normale...
 
-        SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, FALSE, 0L);
-        SendMessage(GetDlgItem(hDlg, 101), BM_SETCHECK, TRUE, 0L);
+        SetCheck(hDlg, 102, FALSE);
+        SetCheck(hDlg, 101, TRUE);
 #endif
         return (TRUE);
     }
@@ -1138,30 +1138,30 @@ BOOL FAR PASCAL Configuration(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 #endif
 
         if (STARTcmdShow)
-            SendMessage(GetDlgItem(hDlg, 106), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 106, TRUE);
         if (euro)
-            SendMessage(GetDlgItem(hDlg, 107), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 107, TRUE);
         if (timer_active)
-            SendMessage(GetDlgItem(hDlg, 108), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 108, TRUE);
 
 #ifdef TABBOZ_DEBUG
         if (debug_active)
-            SendMessage(GetDlgItem(hDlg, 109), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 109, TRUE);
 #endif
 
         if (sound_active)
-            SendMessage(GetDlgItem(hDlg, 110), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 110, TRUE);
 
         if (Fortuna >= 20)
-            SendMessage(GetDlgItem(hDlg, 101), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 101, TRUE);
         else if (Fortuna >= 15)
-            SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 102, TRUE);
         else if (Fortuna >= 10)
-            SendMessage(GetDlgItem(hDlg, 103), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 103, TRUE);
         else if (Fortuna >= 5)
-            SendMessage(GetDlgItem(hDlg, 104), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 104, TRUE);
         else
-            SendMessage(GetDlgItem(hDlg, 105), BM_SETCHECK, TRUE, 0L);
+            SetCheck(hDlg, 105, TRUE);
 
         return (TRUE);
     }

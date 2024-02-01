@@ -319,6 +319,31 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
     return SetDlgItemTextEm(handle->id, nIDDlgItem, lpString);
 }
 
+//*******************************************************************
+// Set the check state of a radio button or check box
+//*******************************************************************
+
+EM_JS(BOOL, SetCheckEM, (int dialogId, int nIDDlgItem, WPARAM wParam), {
+    const control = document.querySelector('#win' + dialogId + ' .control' + nIDDlgItem);
+    if (control != null)
+    {
+        control.checked = (wParam != 0);
+    }
+    return 0;
+});
+
+LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
+    struct handle_entry *handle = (struct handle_entry *)hDlg;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return 0;
+    }
+    return SetCheckEM(handle->id, nIDDlgItem, wParam);
+}
+
+//*******************************************************************
+
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {
     return NULL; // TODO
@@ -331,12 +356,6 @@ HWND SetFocus(HWND hWnd)
 
 UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 {
-    return 0; // TODO
-}
-
-LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    // SendMessage(GetDlgItem(hDlg, 110), BM_SETCHECK, TRUE, 0L); /* Seleziona agraria */
     return 0; // TODO
 }
 

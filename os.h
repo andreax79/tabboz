@@ -45,6 +45,8 @@ etc...
 #ifdef TABBOZ_WIN16
 #define TABBOZ_WIN
 #include <windows.h>
+
+#define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
 #endif
 
 // Windows 32bit -----------------------------------------------------
@@ -52,6 +54,8 @@ etc...
 #ifdef TABBOZ_WIN32
 #define TABBOZ_WIN
 #include <windows.h>
+
+#define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
 #endif
 
 // Emscripten --------------------------------------------------------
@@ -64,7 +68,7 @@ etc...
 #define PASCAL
 #define WINAPI
 
-    typedef int        BOOL;
+typedef int            BOOL;
 typedef int            INT_PTR;
 typedef unsigned int   UINT;
 typedef unsigned char  BYTE;
@@ -142,10 +146,11 @@ extern INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndPa
 extern BOOL    EndDialog(HWND hwnd, INT_PTR retval);
 extern BOOL    SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
 extern UINT    GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
-extern LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 extern int     MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
 extern BOOL    ShowWindow(HWND hWnd, int nCmdShow);
 extern int     LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
 extern void    LoadStringResources(void);
 extern void    InitTabboz(void);
+extern LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
+
 #endif

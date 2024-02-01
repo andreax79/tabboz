@@ -1739,6 +1739,7 @@ var ASM_CONSTS = {
 };
 function GetProfileString(lpAppName,lpKeyName,lpDefault,lpReturnedString,nSize){ const value = localStorage.getItem(UTF8ToString(lpKeyName)); stringToUTF8(value || "", lpReturnedString, nSize); }
 function RemoveDialogBoxEm(dialogId){ const destination = document.getElementById('screen'); destination.removeChild(document.getElementById('win' + dialogId)); }
+function SetCheckEM(dialogId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + dialogId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
 function SetDlgItemTextEm(dialogId,nIDDlgItem,lpString){ const control = document.querySelector('#win' + dialogId + ' .control' + nIDDlgItem); if (control != null) { control.innerText = UTF8ToString(lpString); return true; } else { return false; } }
 function ShowWindowEm(dialogId,show){ const win = document.querySelector('#win' + dialogId); if (win != null) { win.style.display = show ? 'block' : 'none'; return true; } else { return false; } }
 function WriteProfileString(lpAppName,lpKeyName,lpString){ localStorage.setItem(UTF8ToString(lpKeyName), UTF8ToString(lpString)); }
@@ -2273,6 +2274,7 @@ function checkIncomingModuleAPI() {
 var asmLibraryArg = {
   "GetProfileString": GetProfileString,
   "RemoveDialogBoxEm": RemoveDialogBoxEm,
+  "SetCheckEM": SetCheckEM,
   "SetDlgItemTextEm": SetDlgItemTextEm,
   "ShowWindowEm": ShowWindowEm,
   "WriteProfileString": WriteProfileString,
