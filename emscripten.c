@@ -386,6 +386,61 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
 }
 
 //*******************************************************************
+// Retrieve the specified system metric
+//*******************************************************************
+
+EM_JS(int, GetSystemMetricsEM, (int nIndex), {
+    switch (nIndex) {
+        case 0: // SM_CXSCREEN
+            return parseInt(getComputedStyle(document.getElementById('screen')).width);
+        case 1: // SM_CYSCREEN
+            return parseInt(getComputedStyle(document.getElementById('screen')).height);
+        default:
+            return 0;
+    }
+    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+    if (control != null)
+    {
+        control.checked = (wParam != 0);
+    }
+    return 0;
+});
+
+int GetSystemMetrics(int nIndex) {
+    return GetSystemMetricsEM(nIndex);
+}
+
+//*******************************************************************
+// Change the position and dimensions of the specified window
+//*******************************************************************
+
+EM_JS(BOOL, MoveWindowEM, (int windowId, int X, int Y, int nWidth, int nHeight), {
+    const win = document.querySelector('#win' + windowId);
+    if (win == null)
+    {
+        return false;
+    }
+    else
+    {
+        win.style.left = X + 'px';
+        win.style.top = Y + 'px';
+        win.style.width = nWidth + 'px';
+        win.style.height = nHeight + 'px';
+        return true;
+    }
+});
+
+BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint) {
+    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    return MoveWindowEM(handle->id, X, Y, nWidth, nHeight);
+}
+
+//*******************************************************************
 
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {

@@ -976,9 +976,7 @@ BOOL FAR PASCAL About(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 /* Logo...                                                          */
 /********************************************************************/
 
-#ifndef TABBOZ_EM
 #pragma argsused
-
 BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
     int x, y, w, h;
@@ -1005,8 +1003,10 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         MoveWindow(hDlg, x, y, w, h, 1);
 
+#ifndef TABBOZ_EM
         if (fase_di_avvio == 1)
             SetTimer(hDlg, WM_TIMER, 10000, NULL); /* 10 Secondi */
+#endif
 
         return (TRUE);
     }
@@ -1044,7 +1044,6 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
     return (FALSE);
 }
-#endif
 
 /********************************************************************/
 /* Spegnimi... 11 giugno 1998                                       */
@@ -1054,9 +1053,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
     int x, y, w, h;
-#ifndef TABBOZ_EM
     static RECT wrect;
-#endif
 
     if (message == WM_INITDIALOG)
     {
@@ -1073,11 +1070,12 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         y = (y - h) / 2;
 
         MoveWindow(hDlg, x, y, w, h, 1);
+#endif
         boolean_shutdown = 1; // Uscita normale...
 
         SetCheck(hDlg, 102, FALSE);
         SetCheck(hDlg, 101, TRUE);
-#endif
+
         return (TRUE);
     }
     else if (message == WM_COMMAND)
@@ -2025,7 +2023,6 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
             break;
 #endif
 
-#ifndef TABBOZ_EM
         case QX_CLOSE:
             lpproc = MakeProcInstance(Spegnimi, hInst);
             DialogBox(hInst,
@@ -2038,7 +2035,6 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
                 EndDialog(hWnd, TRUE); // Chiudi la baracca...
 
             return (TRUE);
-#endif
 
         case QX_ABOUT:
             /* Display about box. */
@@ -2051,7 +2047,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
-#ifndef TABBOZ_EM
+
         case QX_LOGO:
             lpproc = MakeProcInstance(Logo, hInst);
             DialogBox(hInst,
@@ -2062,7 +2058,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
-#endif
+
         case QX_CONFIG:
             /* Display configuration box. */
             lpproc = MakeProcInstance(Configuration, hInst);

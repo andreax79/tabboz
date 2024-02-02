@@ -97,6 +97,13 @@ typedef void *FARPROC;
 typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
 /* typedef void *DLGPROC; */
 
+typedef struct {
+    LONG left;
+    LONG top;
+    LONG right;
+    LONG bottom;
+} RECT, *PRECT, *NPRECT, *LPRECT;
+
 #define NOMENU
 
 #define FALSE 0
@@ -132,6 +139,9 @@ typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
 
 #define SC_CLOSE 0xf060
 
+#define SM_CXSCREEN 0
+#define SM_CYSCREEN 1
+
 #define random(x) (random() % x)
 #define LOWORD(x) (x & 0xffff)
 #define HIWORD(x) ((x >> 16) & 0xffff)
@@ -152,5 +162,7 @@ extern int     LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cch
 extern void    LoadStringResources(void);
 extern void    InitTabboz(void);
 extern LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
+extern int     GetSystemMetrics(int nIndex);
+extern BOOL    MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
 
 #endif
