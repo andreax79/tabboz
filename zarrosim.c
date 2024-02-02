@@ -1057,7 +1057,6 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
     if (message == WM_INITDIALOG)
     {
-#ifndef TABBOZ_EM
         /* Centra la finestra... */
         GetWindowRect(hDlg, (LPRECT)&wrect);
         w = wrect.right - wrect.left;
@@ -1070,7 +1069,7 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         y = (y - h) / 2;
 
         MoveWindow(hDlg, x, y, w, h, 1);
-#endif
+
         boolean_shutdown = 1; // Uscita normale...
 
         SetCheck(hDlg, 102, FALSE);

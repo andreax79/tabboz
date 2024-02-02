@@ -195,9 +195,11 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     // Set window id
     c.id = 'win' + windowId;
     // Set window position
-    if (parentWindowId >= 0) {
+    if (parentWindowId >= 0)
+    {
         const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null) {
+        if (parent != null)
+        {
             const style = getComputedStyle(parent);
             c.style.left = (parseInt(style.left) + 40) + 'px';
             c.style.top = (parseInt(style.top) + 40) + 'px';
@@ -214,7 +216,7 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     destination.appendChild(c);
     // Make the window draggrable
     makeDraggable(c);
-    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu`, "click");
+    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu`, "click");
     // Remove the window
     destination.removeChild(c);
     return result;
@@ -227,7 +229,8 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
     struct handle_entry *handle = alloc_handle();
 
     // Get parent window number
-    if (hWnd != NULL) {
+    if (hWnd != NULL)
+    {
         parentWindowId = ((struct handle_entry *)hWnd)->id;
     }
 
@@ -243,14 +246,16 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
     // Load html
     const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
-    const html = await response.text();
+    const html = await     response.text();
     const c = createElementFromHTML(html);
     // Set window id
     c.id = 'win' + windowId;
     // Set window position
-    if (parentWindowId >= 0) {
+    if (parentWindowId >= 0)
+    {
         const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null) {
+        if (parent != null)
+        {
             const style = getComputedStyle(parent);
             c.style.left = (parseInt(style.left) + 40) + 'px';
             c.style.top = (parseInt(style.top) + 40) + 'px';
@@ -266,7 +271,7 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
 });
 
 EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu`, "click");
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu`, "click");
 });
 
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
@@ -283,7 +288,8 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     struct handle_entry *handle = alloc_handle();
 
     // Get parent window number
-    if (hWndParent != NULL) {
+    if (hWndParent != NULL)
+    {
         parentWindowId = ((struct handle_entry *)hWndParent)->id;
     }
 
@@ -375,7 +381,8 @@ EM_JS(BOOL, SetCheckEM, (int windowId, int nIDDlgItem, WPARAM wParam), {
     return 0;
 });
 
-LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
+LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
+{
     struct handle_entry *handle = (struct handle_entry *)hDlg;
     if (handle == NULL)
     {
@@ -390,13 +397,14 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
 //*******************************************************************
 
 EM_JS(int, GetSystemMetricsEM, (int nIndex), {
-    switch (nIndex) {
-        case 0: // SM_CXSCREEN
-            return parseInt(getComputedStyle(document.getElementById('screen')).width);
-        case 1: // SM_CYSCREEN
-            return parseInt(getComputedStyle(document.getElementById('screen')).height);
-        default:
-            return 0;
+    switch (nIndex)
+    {
+    case 0: // SM_CXSCREEN
+        return parseInt(getComputedStyle(document.getElementById('screen')).width);
+    case 1: // SM_CYSCREEN
+        return parseInt(getComputedStyle(document.getElementById('screen')).height);
+    default:
+        return 0;
     }
     const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
     if (control != null)
@@ -406,8 +414,53 @@ EM_JS(int, GetSystemMetricsEM, (int nIndex), {
     return 0;
 });
 
-int GetSystemMetrics(int nIndex) {
+int GetSystemMetrics(int nIndex)
+{
     return GetSystemMetricsEM(nIndex);
+}
+
+//*******************************************************************
+// Retrieve the dimensions of a specified window
+//*******************************************************************
+
+EM_JS(BOOL, GetWindowRectEm, (int windowId, int dimension), {
+    const win = document.querySelector('#win' + windowId);
+    if (win == null)
+    {
+        return 0;
+    }
+    const style = getComputedStyle(win);
+    switch (dimension)
+    {
+    case 0: // left
+        return style.left;
+    case 1: // top
+        return style.top;
+    case 2: // right
+        return style.left + style.width;
+    case 3: // bottom
+        return style.top + style.height;
+    default:
+        return 0;
+    }
+});
+
+BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
+{
+    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    else
+    {
+        lpRect->left = GetWindowRectEm(handle->id, 0);
+        lpRect->top = GetWindowRectEm(handle->id, 1);
+        lpRect->right = GetWindowRectEm(handle->id, 2);
+        lpRect->bottom = GetWindowRectEm(handle->id, 3);
+        return TRUE;
+    }
 }
 
 //*******************************************************************
@@ -430,7 +483,8 @@ EM_JS(BOOL, MoveWindowEM, (int windowId, int X, int Y, int nWidth, int nHeight),
     }
 });
 
-BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint) {
+BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
+{
     struct handle_entry *handle = (struct handle_entry *)hWnd;
     if (handle == NULL)
     {

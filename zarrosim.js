@@ -1739,6 +1739,7 @@ var ASM_CONSTS = {
 };
 function GetProfileString(lpAppName,lpKeyName,lpDefault,lpReturnedString,nSize){ const value = localStorage.getItem(UTF8ToString(lpKeyName)); stringToUTF8(value || "", lpReturnedString, nSize); }
 function GetSystemMetricsEM(nIndex){ switch (nIndex) { case 0: return parseInt(getComputedStyle(document.getElementById('screen')).width); case 1: return parseInt(getComputedStyle(document.getElementById('screen')).height); default: return 0; } const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
+function GetWindowRectEm(windowId,dimension){ const win = document.querySelector('#win' + windowId); if (win == null) { return 0; } const style = getComputedStyle(win); switch(dimension) { case 0: return style.left; case 1: return style.top; case 2: return style.left + style.width; case 3: return style.top + style.height; default: return 0; } }
 function MoveWindowEM(windowId,X,Y,nWidth,nHeight){ const win = document.querySelector('#win' + windowId); if (win == null) { return false; } else { win.style.left = X + 'px'; win.style.top = Y + 'px'; win.style.width = nWidth + 'px'; win.style.height = nHeight + 'px'; return true; } }
 function RemoveDialogBoxEm(windowId){ const destination = document.getElementById('screen'); destination.removeChild(document.getElementById('win' + windowId)); }
 function SetCheckEM(windowId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
@@ -2276,6 +2277,7 @@ function checkIncomingModuleAPI() {
 var asmLibraryArg = {
   "GetProfileString": GetProfileString,
   "GetSystemMetricsEM": GetSystemMetricsEM,
+  "GetWindowRectEm": GetWindowRectEm,
   "MoveWindowEM": MoveWindowEM,
   "RemoveDialogBoxEm": RemoveDialogBoxEm,
   "SetCheckEM": SetCheckEM,
