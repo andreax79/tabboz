@@ -191,19 +191,23 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 
 EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, int parentWindowId), {
     const element = document.getElementById('messagebox');
+    const wall = document.getElementById('wall').cloneNode(true);
     const c = element.cloneNode(true);
     // Set window id
+    wall.id = 'wall' + windowId;
     c.id = 'win' + windowId;
     // Set window position
-    if (parentWindowId >= 0) {
+    if (parentWindowId >= 0)
+    {
         const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null) {
+        if (parent != null)
+        {
             const style = getComputedStyle(parent);
             c.style.left = (parseInt(style.left) + 40) + 'px';
             c.style.top = (parseInt(style.top) + 40) + 'px';
         }
     }
-    c.id = 'win' + windowId;
+    wall.style.zIndex = '' + windowId;
     c.style.zIndex = '' + windowId;
     c.style.position = 'absolute';
     // Set title and message
@@ -211,11 +215,13 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     c.querySelector('.content').innerText = UTF8ToString(lpText);
     // Add window to screen
     const destination = document.getElementById('screen');
+    destination.appendChild(wall);
     destination.appendChild(c);
     // Make the window draggrable
     makeDraggable(c);
-    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu, #win${windowId} img`, "click");
     // Remove the window
+    destination.removeChild(wall);
     destination.removeChild(c);
     return result;
 });
@@ -227,7 +233,8 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
     struct handle_entry *handle = alloc_handle();
 
     // Get parent window number
-    if (hWnd != NULL) {
+    if (hWnd != NULL)
+    {
         parentWindowId = ((struct handle_entry *)hWnd)->id;
     }
 
@@ -243,21 +250,28 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
     // Load html
     const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
-    const html = await response.text();
+    const html = await     response.text();
+    const wall = document.getElementById('wall').cloneNode(true);
     const c = createElementFromHTML(html);
     // Set window id
+    wall.id = 'wall' + windowId;
     c.id = 'win' + windowId;
     // Set window position
-    if (parentWindowId >= 0) {
+    if (parentWindowId >= 0)
+    {
         const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null) {
+        if (parent != null)
+        {
             const style = getComputedStyle(parent);
             c.style.left = (parseInt(style.left) + 40) + 'px';
             c.style.top = (parseInt(style.top) + 40) + 'px';
         }
     }
+    /* wall.style.zIndex = '' + windowId; */
+    /* c.style.zIndex = '' + windowId; */
     // Add window to screen
     const destination = document.getElementById('screen');
+    destination.appendChild(wall);
     destination.appendChild(c);
     // Add menu
     addMainMenu(c);
@@ -266,11 +280,12 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
 });
 
 EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu, #win${windowId} img`, "click");
 });
 
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
     const destination = document.getElementById('screen');
+    destination.removeChild(document.getElementById('wall' + windowId));
     destination.removeChild(document.getElementById('win' + windowId));
 });
 
@@ -283,7 +298,8 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     struct handle_entry *handle = alloc_handle();
 
     // Get parent window number
-    if (hWndParent != NULL) {
+    if (hWndParent != NULL)
+    {
         parentWindowId = ((struct handle_entry *)hWndParent)->id;
     }
 
@@ -375,7 +391,8 @@ EM_JS(BOOL, SetCheckEM, (int windowId, int nIDDlgItem, WPARAM wParam), {
     return 0;
 });
 
-LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
+LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
+{
     struct handle_entry *handle = (struct handle_entry *)hDlg;
     if (handle == NULL)
     {
@@ -390,13 +407,14 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam) {
 //*******************************************************************
 
 EM_JS(int, GetSystemMetricsEM, (int nIndex), {
-    switch (nIndex) {
-        case 0: // SM_CXSCREEN
-            return parseInt(getComputedStyle(document.getElementById('screen')).width);
-        case 1: // SM_CYSCREEN
-            return parseInt(getComputedStyle(document.getElementById('screen')).height);
-        default:
-            return 0;
+    switch (nIndex)
+    {
+    case 0: // SM_CXSCREEN
+        return parseInt(getComputedStyle(document.getElementById('screen')).width);
+    case 1: // SM_CYSCREEN
+        return parseInt(getComputedStyle(document.getElementById('screen')).height);
+    default:
+        return 0;
     }
     const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
     if (control != null)
@@ -406,7 +424,8 @@ EM_JS(int, GetSystemMetricsEM, (int nIndex), {
     return 0;
 });
 
-int GetSystemMetrics(int nIndex) {
+int GetSystemMetrics(int nIndex)
+{
     return GetSystemMetricsEM(nIndex);
 }
 
@@ -416,25 +435,28 @@ int GetSystemMetrics(int nIndex) {
 
 EM_JS(BOOL, GetWindowRectEm, (int windowId, int dimension), {
     const win = document.querySelector('#win' + windowId);
-    if (win == null) {
+    if (win == null)
+    {
         return 0;
     }
     const style = getComputedStyle(win);
-    switch(dimension) {
-        case 0: // left
-            return style.left;
-        case 1: // top
-            return style.top;
-        case 2: // right
-            return style.left + style.width;
-        case 3: // bottom
-            return style.top + style.height;
-        default:
-            return 0;
+    switch (dimension)
+    {
+    case 0: // left
+        return style.left;
+    case 1: // top
+        return style.top;
+    case 2: // right
+        return style.left + style.width;
+    case 3: // bottom
+        return style.top + style.height;
+    default:
+        return 0;
     }
 });
 
-BOOL GetWindowRect(HWND hWnd, LPRECT lpRect) {
+BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
+{
     struct handle_entry *handle = (struct handle_entry *)hWnd;
     if (handle == NULL)
     {
@@ -471,7 +493,8 @@ EM_JS(BOOL, MoveWindowEM, (int windowId, int X, int Y, int nWidth, int nHeight),
     }
 });
 
-BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint) {
+BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
+{
     struct handle_entry *handle = (struct handle_entry *)hWnd;
     if (handle == NULL)
     {
