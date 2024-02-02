@@ -31,7 +31,7 @@ TITLE_BAR_CLOSE = """
 """
 
 PRE_WIN = """
-  <div class="window" style="position: absolute; margin: 32px; width: {width}px; height: {height}px">
+  <div class="{classes}" style="position: absolute; margin: 32px; width: {width}px; height: {height}px">
     <div class="title-bar">
       <div class="title-bar-text">
         {title}
@@ -94,6 +94,7 @@ class Dialog:
     dialog_id: int | None = None
     elements: list[str] | None = None
     title: str | None = None
+    style: list[str] | None = None
     menu: str | None = None
     width: int | None = None
     height: int | None = None
@@ -111,6 +112,13 @@ class Dialog:
     def add(self, element: str) -> None:
         self.elements.insert(0, element)
 
+    @property
+    def classes(self) -> str:
+        classes = "window"
+        if "WS_DLGFRAME" in self.style:
+            classes += " dlgframe"
+        return classes
+
     def write(self) -> None:
         controls = ""
         with (html_dir / f"{self.dialog_id}.html").open("w") as out:
@@ -122,6 +130,7 @@ class Dialog:
                     height=self.height,
                     controls=controls,
                     menu=self.menu,
+                    classes=self.classes,
                 )
             )
             for element in self.elements:
@@ -136,6 +145,7 @@ class Dialog:
                     height=self.height,
                     controls=controls,
                     menu=self.menu,
+                    classes=self.classes,
                 )
             )
             for element in self.elements:
@@ -347,6 +357,7 @@ def convert_rc(filename: str) -> None:
                     if dialog is not None:
                         dialog.write()
                     dialog = Dialog(t, line)
+                    sys.stdout.write(".")
             else:
                 t = line
             if t == "LANGUAGE":
@@ -355,6 +366,9 @@ def convert_rc(filename: str) -> None:
                 continue
             if t == "CAPTION":
                 dialog.title = unquote(line)
+                continue
+            if t == "STYLE":
+                dialog.style = strip(line.split("|"))
                 continue
             if t == "MENU":
                 dialog.load_menu(unquote(line).upper())
@@ -379,6 +393,7 @@ def convert_rc(filename: str) -> None:
 def main() -> None:
     for filename in sys.argv[1:]:
         convert_rc(filename)
+    sys.stdout.write("\n")
 
 
 if __name__ == "__main__":

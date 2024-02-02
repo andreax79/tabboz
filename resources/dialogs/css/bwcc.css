@@ -19,6 +19,17 @@ ul.tree-view {
     font-size: 12px;
 }
 
+/* dlgframe - window without title bar */
+.window.dlgframe {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.window.dlgframe .title-bar {
+    display: none
+}
+
 .title-bar {
     font-size: 11px;
 }
