@@ -219,7 +219,7 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     destination.appendChild(c);
     // Make the window draggrable
     makeDraggable(c);
-    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu, #win${windowId} img`, "click");
+    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
     // Remove the window
     destination.removeChild(wall);
     destination.removeChild(c);
@@ -280,7 +280,7 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
 });
 
 EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId}.menu, #win${windowId} img`, "click");
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
 });
 
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
@@ -443,13 +443,13 @@ EM_JS(BOOL, GetWindowRectEm, (int windowId, int dimension), {
     switch (dimension)
     {
     case 0: // left
-        return style.left;
+        return parseInt(style.left);
     case 1: // top
-        return style.top;
+        return parseInt(style.top);
     case 2: // right
-        return style.left + style.width;
+        return parseInt(style.left) + parseInt(style.width);
     case 3: // bottom
-        return style.top + style.height;
+        return parseInt(style.top) + parseInt(style.height);
     default:
         return 0;
     }

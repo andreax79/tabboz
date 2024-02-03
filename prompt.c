@@ -68,10 +68,8 @@ static CMDTAB cmdtab[] = {
     2, 1,
     "info", "1", 0,
     1, 1,
-#ifndef TABBOZ_EM
     "logo", "1", 0,
     1, 1,
-#endif
     "scoooter", "1", 0,
     1, 1,
     "status", "1", 0,
@@ -404,7 +402,6 @@ BOOL FAR PASCAL Prompt(HWND hDlg, WORD message,
                 FreeProcInstance(lpproc);
                 break;
             }
-#ifndef TABBOZ_EM
             else if (!strcmp(argv[0], "logo"))
             { /* LOGO ----------------------------------- */
                 /* Display startup logo. */
@@ -416,7 +413,6 @@ BOOL FAR PASCAL Prompt(HWND hDlg, WORD message,
                 FreeProcInstance(lpproc);
                 break;
             }
-#endif
             else if (!strcmp(argv[0], "config"))
             { /* CONFIG --------------------------------- */
                 /* Display configuration box. */
