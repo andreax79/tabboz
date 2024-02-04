@@ -314,8 +314,6 @@ void InitTabboz(void)
     // Init della liberia grafica...
     BWCCRegister(hInst); // Fanculo ! Mi sono magiato il fegato prima di trovare
                          // questa funzione ! non c'e' nessuno documento fottuto che mi abbia aiutato !
-#else
-    time_t t;
 #endif
 #ifdef TABBOZ_EM
     LoadStringResources();
@@ -324,11 +322,7 @@ void InitTabboz(void)
     nome_del_file_su_cui_salvare[0] = 0;
 
     // Inizializzazione dei numeri casuali...
-#ifdef TABBOZ_WIN
     randomize();
-#else
-    srand((unsigned)time(&t));
-#endif
 
     // Inizializza un po' di variabile...
     boolean_shutdown = 0; /* 0=resta dentro, 1=uscita, 2=shutdown 19 Giugno 1999 / 14 Ottoble 1999 */
@@ -2324,17 +2318,16 @@ void closelog()
 void writelog(char *s)
 {
     time_t t;
-#ifdef TABBOZ_EM
-    time(&t);
-    printf("%24.24s %s\n", ctime(&t), s);
-#else
     if (debug_active)
     {
         time(&t);
+#ifdef TABBOZ_EM
+        printf("%24.24s %s\n", ctime(&t), s);
+#else
         fprintf(debugfile, "%24.24s %s\n", ctime(&t), s);
         fflush(debugfile); // Escegue il flush del file, cosi' anche se il Tabboz craschia si ha il file di log...
-    }
 #endif
+    }
 }
 #endif
 

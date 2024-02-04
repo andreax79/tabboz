@@ -226,7 +226,7 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
             Soldi -= 15;
 #ifdef TABBOZ_DEBUG
-            sprintf(tmp, "tipa: Esci con la tipa\/o (%s)", MostraSoldi(15));
+            sprintf(tmp, "tipa: Esci con la tipa/o (%s)", MostraSoldi(15));
             writelog(tmp);
 #endif
 
@@ -476,7 +476,7 @@ void DescrizioneTipa(int f)
     else
         sprintf(buf, "E' un tipo...");
 
-    sprintf(descrizione, buf);
+    strncpy(descrizione, buf, sizeof(buf));
 }
 
 // ------------------------------------------------------------------------------------------
@@ -506,7 +506,7 @@ void DescrizioneTipo(int f)
     else
         sprintf(buf, "Inutile...");
 
-    sprintf(descrizione, buf);
+    strncpy(descrizione, buf, sizeof(buf));
 }
 
 // ------------------------------------------------------------------------------------------
@@ -552,7 +552,7 @@ BOOL FAR PASCAL DueDiPicche(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             i++;
             if (i > 5)
             {
-                sprintf(tmp, "Fino ad ora hai preso %d due di picche !\nNon ti preoccupare, capita a tutti di prendere qualche due di picche nella vita ...", DDP);
+                sprintf(tmp, "Fino ad ora hai preso %lu due di picche !\nNon ti preoccupare, capita a tutti di prendere qualche due di picche nella vita ...", DDP);
                 MessageBox(hDlg,
                            tmp, "La vita e' bella...", MB_OK | MB_ICONINFORMATION);
                 i = 0;

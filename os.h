@@ -165,5 +165,6 @@ extern LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
 extern int     GetSystemMetrics(int nIndex);
 extern BOOL    GetWindowRect(HWND hWnd, LPRECT lpRect);
 extern BOOL    MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
+extern void    randomize();
 
 #endif

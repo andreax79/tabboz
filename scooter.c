@@ -600,7 +600,7 @@ void AggiornaScooter(HWND hDlg)
         SetDlgItemText(hDlg, 112, n_carburatore[ScooterData.carburatore]);
         SetDlgItemText(hDlg, 113, n_cc[ScooterData.cc]);
         SetDlgItemText(hDlg, 114, n_filtro[ScooterData.filtro]);
-        sprintf(tmp, "%d%", ScooterData.stato);
+        sprintf(tmp, "%d%%", ScooterData.stato);
         SetDlgItemText(hDlg, 115, tmp);
 
         SetDlgItemText(hDlg, 117, MostraSoldi(ScooterData.prezzo));

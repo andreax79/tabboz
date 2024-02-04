@@ -487,6 +487,7 @@ void Evento(HANDLE hInstance)
         case 44:
 
             if ((Rapporti > 0) && (sesso == 'M'))
+            {
                 if (caso == 43)
                 {
                     i = MessageBox(hInstance,
@@ -517,6 +518,7 @@ void Evento(HANDLE hInstance)
                             Rapporti = 5;
                     }
                 }
+            }
 
 #ifdef TABBOZ_DEBUG
             writelog("eventi: Domande inutili della tipa...");

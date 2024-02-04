@@ -141,7 +141,7 @@ BOOL FAR PASCAL AbbonaCellulare(HWND hDlg, WORD message, WORD wParam, LONG lPara
         SetDlgItemText(hDlg, 104, MostraSoldi(Soldi));
         if (AbbonamentData.creditorest > -1)
         {
-            sprintf(tmp, AbbonamentData.nome);
+            strncpy(tmp, AbbonamentData.nome, sizeof(tmp));
             SetDlgItemText(hDlg, 105, tmp);
         }
         for (i = 0; i < 9; i++)
@@ -224,7 +224,7 @@ void AggiornaCell(HWND hDlg)
 
     if (CellularData.stato > -1)
     {
-        sprintf(tmp, CellularData.nome);
+        strncpy(tmp, CellularData.nome, sizeof(tmp));
         SetDlgItemText(hDlg, 120, tmp);
     }
     else
@@ -234,7 +234,7 @@ void AggiornaCell(HWND hDlg)
 
     if (AbbonamentData.creditorest > -1)
     {
-        sprintf(tmp, AbbonamentData.nome);
+        strncpy(tmp, AbbonamentData.nome, sizeof(tmp));
         SetDlgItemText(hDlg, 121, tmp);                                     // Abbonamento
         SetDlgItemText(hDlg, 122, MostraSoldi(AbbonamentData.creditorest)); // Credito
     }

@@ -207,8 +207,8 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
             c.style.top = (parseInt(style.top) + 40) + 'px';
         }
     }
-    wall.style.zIndex = '' + windowId;
-    c.style.zIndex = '' + windowId;
+    wall.style.zIndex = windowId;
+    c.style.zIndex = windowId;
     c.style.position = 'absolute';
     // Set title and message
     c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
@@ -550,6 +550,15 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
         return 0;
     }
     return GetDlgItemTextEM(handle->id, nIDDlgItem, lpString, nMaxCount);
+}
+
+//*******************************************************************
+// Set the random number generator seed
+//*******************************************************************
+
+extern void randomize() {
+    time_t t;
+    srand((unsigned)time(&t));
 }
 
 //*******************************************************************
