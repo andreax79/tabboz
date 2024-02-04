@@ -185,3 +185,15 @@ ul.main-menu li.separator
     border-bottom: 1px solid #fff;
     margin: 5px;
 }
+
+/* Radio */
+input[type="radio"].bwcc + label::before
+{
+    background: url("../../bitmaps/130.png") !important;
+}
+
+
+input[type="radio"].bwcc:checked + label::before
+{
+    background: url("../../bitmaps/131.png") !important;
+}

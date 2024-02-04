@@ -210,7 +210,7 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="radio" id="{id}" name="bor_radio{dialog_id}" />
+<input class="{css_class} bwcc" {extra} type="radio" id="{id}" name="bor_radio{dialog_id}" />
 <label for="{id}">{text}</label>
 </div>""".format(
                     dialog_id=self.dialog_id,
