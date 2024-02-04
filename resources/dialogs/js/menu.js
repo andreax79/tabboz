@@ -118,7 +118,41 @@ function makeDraggable (element) {
     });
 }
 
+async function waitListener(windowId) {
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+}
+
+function waitListenerS(selector, listenerName) {
+    return new Promise(function (resolve, reject) {
+        var listener = event => {
+            document.querySelectorAll(selector).forEach(element =>
+                element.removeEventListener(listenerName, listener)
+            );
+            const match = event.target.className.match(/\d+/);
+            const controlId = match ? Number(match[0]) : 0;
+            resolve(controlId);
+        };
+        document.querySelectorAll(selector).forEach(element =>
+            element.addEventListener(listenerName, listener)
+        );
+    });
+}
+
+function createElementFromHTML(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html.trim();
+    const result = template.content.children;
+    if (result.length === 1) {
+        return result[0];
+    } else {
+        return result;
+    }
+}
+
 exports.addMainMenu = addMainMenu;
 exports.makeDraggable = makeDraggable;
+exports.waitListenerS = waitListenerS;
+exports.waitListener = waitListener;
+exports.createElementFromHTML = createElementFromHTML;
 
 })(window);

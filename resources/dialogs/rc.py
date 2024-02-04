@@ -264,6 +264,16 @@ class Dialog:
                 )
             )
 
+        elif control["class"] == "EDIT":
+            self.add(
+                """
+<input style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" class="{css_class}" {extra} type="text" id="{id}" />
+""".format(
+                    dialog_id=self.dialog_id,
+                    **control,
+                )
+            )
+
         elif control["class"] == "BorBtn":
             if control["id"] == 1:
                 control["text"] = "OK"

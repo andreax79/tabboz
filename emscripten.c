@@ -219,7 +219,7 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     destination.appendChild(c);
     // Make the window draggrable
     makeDraggable(c);
-    const result = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+    const result = await waitListener(windowId);
     // Remove the window
     destination.removeChild(wall);
     destination.removeChild(c);
@@ -280,7 +280,7 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
 });
 
 EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+    return await waitListener(windowId);
 });
 
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
@@ -355,7 +355,12 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
 //*******************************************************************
 
 EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
-    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+    let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
+    if (control != null) {
+        control.value = UTF8ToString(lpString);
+        return true;
+    }
+    control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
     if (control != null)
     {
         control.innerText = UTF8ToString(lpString);
