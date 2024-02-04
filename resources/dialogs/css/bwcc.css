@@ -89,15 +89,26 @@ button.default {
     padding: 0;
     min-width: 0px;
     min-height: 0px;
-    box-shadow: inset -2px -2px #0a0a0a,inset 2px 2px #fff,inset -2px -2px gray,inset 2px 2px #dfdfdf;
 }
 
-.button_ok img, .button_cancel img {
-    background-color: silver;
-    width: 20px;
-    height: 20px;
-    object-fit: cover;
-    vertical-align: middle;
+.button_ok {
+    background: url("../../bitmaps/1001.png") no-repeat;
+    box-shadow: none !important;
+}
+
+.button_ok:active {
+    background: url("../../bitmaps/3001.png") no-repeat;
+    box-shadow: none !important;
+}
+
+.button_cancel {
+    background: url("../../bitmaps/1002.png") no-repeat;
+    box-shadow: none !important;
+}
+
+.button_cancel:active {
+    background: url("../../bitmaps/3002.png") no-repeat;
+    box-shadow: none !important;
 }
 
 /* Main menu */

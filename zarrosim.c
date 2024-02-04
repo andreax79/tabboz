@@ -1317,9 +1317,7 @@ BOOL FAR PASCAL PersonalInfo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             break;
 
         case 101: /* Cognome del tabbozzo */
-            printf("cognome\n");
             GetDlgItemText(hDlg, wParam, Cognome, sizeof(Cognome));
-            printf("%s\n", Cognome);
             break;
 
         case QX_NOME: /* Nome del tabbozzo */

@@ -280,8 +280,6 @@ class Dialog:
                 self.add(
                     """
                       <button class="button_ok {css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-                      <img class="{css_class}" src="resources/bitmaps/1.png" />
-                      {text}
                       </button>
 """.format(
                         **control
@@ -292,8 +290,6 @@ class Dialog:
                 self.add(
                     """
                       <button class="button_cancel {css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-                      <img class="{css_class}" src="resources/bitmaps/2.png" />
-                      {text}
                       </button>
 """.format(
                         **control
