@@ -1737,6 +1737,7 @@ var tempI64;
 var ASM_CONSTS = {
   
 };
+function GetDlgItemTextEM(windowId,nIDDlgItem,lpString,nMaxCount){ let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem); if (control != null) { stringToUTF8(control.value, lpString, nMaxCount); return control.value.length; } control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { stringToUTF8(control.innerText, lpString, nMaxCount); return control.innerText.length; } else { return 0; } }
 function GetProfileString(lpAppName,lpKeyName,lpDefault,lpReturnedString,nSize){ const value = localStorage.getItem(UTF8ToString(lpKeyName)); stringToUTF8(value || "", lpReturnedString, nSize); }
 function GetSystemMetricsEM(nIndex){ switch (nIndex) { case 0: return parseInt(getComputedStyle(document.getElementById('screen')).width); case 1: return parseInt(getComputedStyle(document.getElementById('screen')).height); default: return 0; } const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
 function GetWindowRectEm(windowId,dimension){ const win = document.querySelector('#win' + windowId); if (win == null) { return 0; } const style = getComputedStyle(win); switch (dimension) { case 0: return parseInt(style.left); case 1: return parseInt(style.top); case 2: return parseInt(style.left) + parseInt(style.width); case 3: return parseInt(style.top) + parseInt(style.height); default: return 0; } }
@@ -2275,6 +2276,7 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var asmLibraryArg = {
+  "GetDlgItemTextEM": GetDlgItemTextEM,
   "GetProfileString": GetProfileString,
   "GetSystemMetricsEM": GetSystemMetricsEM,
   "GetWindowRectEm": GetWindowRectEm,

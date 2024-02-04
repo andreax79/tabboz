@@ -119,22 +119,24 @@ function makeDraggable (element) {
 }
 
 async function waitListener(windowId) {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`, "click");
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`);
 }
 
-function waitListenerS(selector, listenerName) {
+function waitListenerS(selector) {
     return new Promise(function (resolve, reject) {
         var listener = event => {
-            document.querySelectorAll(selector).forEach(element =>
+            document.querySelectorAll(selector).forEach(element => {
+                const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
                 element.removeEventListener(listenerName, listener)
-            );
+            });
             const match = event.target.className.match(/\d+/);
             const controlId = match ? Number(match[0]) : 0;
             resolve(controlId);
         };
-        document.querySelectorAll(selector).forEach(element =>
+        document.querySelectorAll(selector).forEach(element => {
+            const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
             element.addEventListener(listenerName, listener)
-        );
+        });
     });
 }
 
@@ -151,7 +153,6 @@ function createElementFromHTML(html) {
 
 exports.addMainMenu = addMainMenu;
 exports.makeDraggable = makeDraggable;
-exports.waitListenerS = waitListenerS;
 exports.waitListener = waitListener;
 exports.createElementFromHTML = createElementFromHTML;
 

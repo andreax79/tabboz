@@ -24,9 +24,9 @@
 /* 1 Giugno 1999 -                      */
 /* Conversione Tabbozzo -> Tabbozza     */
 
+#include <stdio.h>
 #include "os.h"
 #include "zarrosim.h"
-#include <stdio.h>
 
 #define IMG_SIZEX 143
 #define IMG_SIZEY 275

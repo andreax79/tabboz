@@ -510,6 +510,39 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 }
 
 //*******************************************************************
+// Retrieve the title or text associated with a control in a dialog box
+//*******************************************************************
+
+EM_JS(BOOL, GetDlgItemTextEM, (int windowId, int nIDDlgItem, LPCSTR lpString, int nMaxCount), {
+    let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
+    if (control != null) {
+        stringToUTF8(control.value, lpString, nMaxCount);
+        return control.value.length;
+    }
+    control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+    if (control != null)
+    {
+        stringToUTF8(control.innerText, lpString, nMaxCount);
+        return control.innerText.length;
+    }
+    else
+    {
+        return 0;
+    }
+});
+
+UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
+{
+    struct handle_entry *handle = (struct handle_entry *)hDlg;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return 0;
+    }
+    return GetDlgItemTextEM(handle->id, nIDDlgItem, lpString, nMaxCount);
+}
+
+//*******************************************************************
 
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {
@@ -519,11 +552,6 @@ HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 HWND SetFocus(HWND hWnd)
 {
     return NULL; // TODO
-}
-
-UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
-{
-    return 0; // TODO
 }
 
 extern BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam);

@@ -1218,6 +1218,9 @@ BOOL FAR PASCAL Configuration(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         case IDOK:
         case IDCANCEL:
+#ifdef TABBOZ_EM
+            SalvaTutto();
+#endif
 #ifdef TABBOZ_DEBUG
             if (debug_active != temp_debug)
             {
@@ -1325,6 +1328,9 @@ BOOL FAR PASCAL PersonalInfo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         case IDOK:
         case IDCANCEL:
+#ifdef TABBOZ_EM
+            SalvaTutto();
+#endif
             EndDialog(hDlg, TRUE);
             return (TRUE);
 
