@@ -355,21 +355,31 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
 //*******************************************************************
 
 EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
-    let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
-    if (control != null) {
-        control.value = UTF8ToString(lpString);
-        return true;
-    }
-    control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
-    if (control != null)
-    {
-        control.innerText = UTF8ToString(lpString);
-        return true;
-    }
-    else
+    let control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+    if (control == null)
     {
         return false;
     }
+    else if (control.tagName == "INPUT")
+    {
+        if (control.type == "radio")
+        {
+            // Set radio label
+            const label = control.parentNode.querySelector("label");
+            if (label != null)
+            {
+                label.innerText = UTF8ToString(lpString);
+            }
+        }
+        else
+        {
+            // Set text
+            control.value = UTF8ToString(lpString);
+        }
+    } else {
+        control.innerText = UTF8ToString(lpString);
+    }
+    return true;
 });
 
 BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
