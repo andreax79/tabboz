@@ -166,10 +166,10 @@ class Dialog:
             "css_class": f"control{int(x[1])}" if int(x[1]) != -1 else "",
             "extra": "",
         }
-        if "WS_BORDER" in control["style"]:
-            control["css_class"] += " ws_border"
         if "WS_DISABLED" in control["style"]:
             control["extra"] += ' disabled="disabled"'
+            control["style"] = [x for x in control["style"] if x != "WS_DISABLED"]
+
         if control["class"] != "BorCheck":
             if "0x2" in control["style"]:  # horizontal bump ALT
                 control["css_class"] += " horizontal_bump_alt"
@@ -183,6 +183,43 @@ class Dialog:
             if "0x5" in control["style"]:  # vertical bump
                 control["css_class"] += " vertical_bump"
                 control["width"] = "auto"
+
+        styles = [
+            x.lower()
+            for x in control["style"]
+            if x
+            not in (
+                "BS_PUSHBUTTON",
+                "BS_DEFPUSHBUTTON",
+                "BS_AUTORADIOBUTTON",
+                "ES_AUTOHSCROLL",
+                "WS_CHILD",
+                "WS_GROUP",
+                "SS_LEFT",
+                "WS_TABSTOP",
+                "WS_VISIBLE",
+                "SS_ICON",
+                "CBS_DROPDOWNLIST",
+                "CBS_SORT",
+                "ES_OEMCONVERT",
+                "ES_LEFT",
+            )
+            and not x.startswith("0")
+        ]
+        for style in styles:
+            control["css_class"] += f" {style}"
+        if control["class"] not in (
+            "STATIC",
+            "BUTTON",
+            "COMBOBOX",
+            "EDIT",
+            "BorShade",
+            "BorStatic",
+            "BorCheck",
+            "BorRadio",
+            "BorBtn",
+        ):
+            control["css_class"] += " " + control["class"].lower()
         return control
 
     def add_control(self, line: str) -> dict[str, str | int]:
@@ -330,7 +367,7 @@ class Dialog:
         menu_json_file = Path.cwd() / ".." / "menus" / f"{menu_name}.json"
         with menu_json_file.open("r") as f:
             menu_json = json.load(f)
-            self.menu += "<ul class=\"main-menu\">\n"
+            self.menu += '<ul class="main-menu">\n'
             for item in menu_json:
                 self.menu += "<li>"
                 self.menu += prepare_text(item["label"], alt=False)
@@ -343,7 +380,7 @@ class Dialog:
                             self.menu += prepare_text(item["label"], alt=False)
                             self.menu += "</li>\n"
                         elif item["kind"] == "separator":
-                            self.menu += "<li class=\"separator\"></li>\n"
+                            self.menu += '<li class="separator"></li>\n'
                     self.menu += "</ul>\n"
                 self.menu += "</li>"
             self.menu += "</ul>\n"

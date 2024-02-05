@@ -55,6 +55,14 @@ ul.tree-view {
     border-right: 1px solid #fff;
 }
 
+.ss_center {
+    text-align: center;
+}
+
+.ss_right {
+    text-align: right;
+}
+
 .horizontal_bump, .vertical_bump {
     box-sizing: border-box;
     border-top: 1px solid #fff;
@@ -109,6 +117,16 @@ button.default {
 .button_cancel:active {
     background: url("../../bitmaps/3002.png") no-repeat;
     box-shadow: none !important;
+}
+
+/* Message box */
+.messagebox {
+    max-width: 60%;
+}
+
+.messagebox .window-body .field-row {
+    justify-content: center;
+    margin-top: 2em;
 }
 
 /* Main menu */
