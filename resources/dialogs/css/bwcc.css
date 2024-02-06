@@ -122,11 +122,23 @@ button.default {
 /* Message box */
 .messagebox {
     max-width: 60%;
+    padding: 5px;
 }
 
 .messagebox .window-body .field-row {
     justify-content: center;
     margin-top: 2em;
+}
+
+.messagebox .container {
+    display: flex;
+    flex-direction: row;
+}
+
+.messagebox img.icon {
+    margin-top: 10px;
+    margin-right: 20px;
+    margin-left: 5px;
 }
 
 /* Main menu */
