@@ -28,106 +28,6 @@
 #include "zarrosim.h"
 #ifdef TABBOZ_EM
 
-#define MIN_HANDLE_ENTRIES 32
-
-struct handle_entry
-{
-    unsigned int refcount;
-    unsigned int id;
-    BOOL         end;
-    INT_PTR      retval; // the value to be returned from the function that created the dialog box
-};
-
-struct handle_table
-{
-    int                  count;
-    struct handle_entry *entries;
-};
-
-static struct handle_table *global_table;
-
-/* allocate a new handle table */
-struct handle_table *alloc_handle_table(int count)
-{
-    struct handle_table *table;
-
-    if (count < MIN_HANDLE_ENTRIES)
-    {
-        count = MIN_HANDLE_ENTRIES;
-    }
-    if (!(table = malloc(sizeof(struct handle_table))))
-    {
-        return NULL;
-    }
-    table->count = count;
-    if ((table->entries = malloc(count * sizeof(*table->entries))))
-    {
-        bzero(table->entries, count * sizeof(*table->entries));
-        return table;
-    }
-    else
-    {
-        free(table);
-        return NULL;
-    }
-}
-
-struct handle_entry *alloc_handle()
-{
-    int i;
-    if (!global_table)
-    {
-        if (!(global_table = alloc_handle_table(0)))
-            return NULL;
-    }
-    for (i = 0; i < global_table->count; i++)
-    {
-        struct handle_entry *h = &global_table->entries[i];
-        if (h->refcount == 0)
-        {
-            h->refcount++;
-            h->id = i + 1;
-            h->end = FALSE;
-            return (HANDLE)h;
-        }
-    }
-    return NULL;
-}
-
-void release_handle(HANDLE p)
-{
-    struct handle_entry *h = (struct handle_entry *)p;
-    if (h != NULL)
-    {
-        if (h->refcount > 0)
-        {
-            h->refcount--;
-            if (h->refcount == 0)
-            {
-                h->id = 0;
-            }
-        }
-    }
-}
-
-struct handle_entry *get_handle(int index)
-{
-    struct handle_entry *h;
-    if (!global_table || index < 1 || index > global_table->count)
-    {
-        return NULL;
-    }
-    h = &global_table->entries[index - 1];
-    if (h->refcount > 0)
-    {
-        return h;
-    }
-    else
-    {
-        return h; // TODO - NULL
-    }
-}
-
 //*******************************************************************
 // Load string resources
 //*******************************************************************
@@ -376,7 +276,9 @@ EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
             // Set text
             control.value = UTF8ToString(lpString);
         }
-    } else {
+    }
+    else
+    {
         control.innerText = UTF8ToString(lpString);
     }
     return true;
@@ -525,7 +427,8 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 
 EM_JS(BOOL, GetDlgItemTextEM, (int windowId, int nIDDlgItem, LPCSTR lpString, int nMaxCount), {
     let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
-    if (control != null) {
+    if (control != null)
+    {
         stringToUTF8(control.value, lpString, nMaxCount);
         return control.value.length;
     }
@@ -553,10 +456,57 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 }
 
 //*******************************************************************
+// Get an entry from the property list of the specified window
+//*******************************************************************
+
+HANDLE GetProp(HWND hWnd, LPCSTR lpString)
+{
+    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    return properties_get(handle->props, lpString);
+}
+
+//*******************************************************************
+// Add/change an entry in the property list of the specified window
+//*******************************************************************
+
+BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
+{
+    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    properties_set(handle->props, lpString, hData);
+    return TRUE;
+}
+
+//*******************************************************************
+// Remove an entry from the property list of the specified window
+//*******************************************************************
+
+HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
+{
+    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    return properties_remove(handle->props, lpString);
+}
+
+//*******************************************************************
 // Set the random number generator seed
 //*******************************************************************
 
-extern void randomize() {
+extern void randomize()
+{
     time_t t;
     srand((unsigned)time(&t));
 }
@@ -577,43 +527,12 @@ extern BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG 
 
 int main()
 {
-    /* printf("Hello Tabboz %s\n", MostraSoldi(10)); */
-    /* char City[100]; */
-
-    /* LoadStringResources(); */
-    /* LoadString(NULL, (400 + random(22) ), City, (sizeof(City)-1)); */
-    /* printf("%s\n", City); */
-    /**/
-    TabbozAddKey("Debug", "1");
     /* Inizializza il programma */
     InitTabboz();
 
     /* Finestra principale */
     DialogBox(hInst, MAKEINTRESOURCE(1), NULL, (DLGPROC)TabbozWndProc);
-    //    MessageBox( NULL, "Test", "Test", MB_OK | MB_ICONINFORMATION);
 
-    /*     MessageBox( NULL, */
-    /* "Il biglietto e' valido solo dopo la convalida.Il biglietto deve essere conservato per tutta la durata \ */
-    /* del viaggio. Il diritto a viaggiare cessa al termine della tratta corrispondente al valore del biglietto. \ */
-    /* Il passeggero che al controllo non fosse in grado di presentare il biglietto o lo presentasse irriconoscibile, \ */
-    /* o comunque non valido, verra' abbattuto. La notifica del decesso verra' inviata ai parenti solo previo pagamento \ */
-    /* delle spese postali.", "Norme di utilizzo", MB_OK | MB_ICONINFORMATION); */
-
-    /* printf("--test--\n"); */
-    /* TabbozAddKey("ciao","RTest RTest 2 1234567890 ABCD @@@"); */
-    /* printf("%s\n",RRKey("ciao")); */
-    /**/
-    /* printf("%s\n",RRKey("TestKey")); */
-    /* TabbozAddKey("TestKey","RTest RTest 2 1234567890 ABCD @@@"); */
-    /* printf("%s\n",RRKey("TestKey")); */
-    /* TabbozAddKey("TestKey","short key..."); */
-    /* printf("%s\n",RRKey("TestKey")); */
-    /* printf("%s\n",RRKey("NoKey")); */
-    /* printf("%s\n",RRKey("Nome")); */
-    /* printf("%s\n",RRKey("Cognome")); */
-    /* printf("--end--\n"); */
-
-    printf("Done\n");
     return 0;
 }
 

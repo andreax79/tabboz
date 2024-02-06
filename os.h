@@ -65,11 +65,13 @@ etc...
 #include <stdlib.h>
 
 #define FAR
+#define NEAR
 #define PASCAL
 #define WINAPI
 
 typedef int            BOOL;
 typedef int            INT_PTR;
+typedef int            INT;
 typedef unsigned int   UINT;
 typedef unsigned char  BYTE;
 typedef unsigned short WORD;
@@ -78,6 +80,7 @@ typedef unsigned long  LONG;
 typedef BYTE           BOOLEAN;
 typedef WORD           ATOM;
 typedef void          *PVOID;
+typedef void          *LPVOID;
 typedef char           CHAR;
 typedef CHAR          *LPSTR;
 typedef const CHAR    *LPCSTR;
@@ -86,6 +89,11 @@ typedef PVOID          HANDLE;
 typedef HANDLE         HWND;
 typedef HANDLE         HINSTANCE;
 typedef HANDLE         HICON;
+typedef HANDLE         HDC;
+typedef HANDLE         HBITMAP;
+typedef HANDLE         HCURSOR;
+typedef HANDLE         HBRUSH;
+typedef HANDLE         HMENU;
 typedef long           LONG_PTR;
 typedef unsigned int   UINT_PTR;
 typedef unsigned long  ULONG_PTR;
@@ -95,14 +103,73 @@ typedef LONG_PTR       LRESULT;
 
 typedef void *FARPROC;
 typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
-/* typedef void *DLGPROC; */
+typedef INT_PTR (*WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 
-typedef struct {
+typedef struct
+{
     LONG left;
     LONG top;
     LONG right;
     LONG bottom;
 } RECT, *PRECT, *NPRECT, *LPRECT;
+
+typedef struct
+{
+    UINT      style;
+    WNDPROC   lpfnWndProc;
+    INT       cbClsExtra;
+    INT       cbWndExtra;
+    HINSTANCE hInstance;
+    HICON     hIcon;
+    HCURSOR   hCursor;
+    HBRUSH    hbrBackground;
+    LPCSTR    lpszMenuName;
+    LPCSTR    lpszClassName;
+} WNDCLASS, *PWNDCLASS, *LPWNDCLASS;
+
+typedef struct
+{
+    LPVOID    lpCreateParams;
+    HINSTANCE hInstance;
+    HMENU     hMenu;
+    HWND      hwndParent;
+    int       cy;
+    int       cx;
+    int       y;
+    int       x;
+    LONG      style;
+    LPCSTR    lpszName;
+    LPCSTR    lpszClass;
+    DWORD     dwExStyle;
+} CREATESTRUCT, *LPCREATESTRUCT;
+
+struct property
+{
+    LPCSTR key;
+    HANDLE hData;
+};
+
+struct properties
+{
+    int              len;
+    int              capacity;
+    struct property *entry;
+};
+
+struct handle_entry
+{
+    unsigned int       refcount;
+    unsigned int       id;
+    BOOL               end;
+    INT_PTR            retval; // the value to be returned from the function that created the dialog box
+    struct properties *props;  // window properties
+};
+
+struct handle_table
+{
+    int                  count;
+    struct handle_entry *entries;
+};
 
 #define NOMENU
 
@@ -150,21 +217,29 @@ typedef struct {
 #define FreeProcInstance(p) (void)(p)
 #define MAKEINTRESOURCE(i) ((LPSTR)(ULONG_PTR)LOWORD(i))
 
-extern HWND    GetDlgItem(HWND DhDlg, int nIDDlgItem);
-extern HWND    SetFocus(HWND hWnd);
-extern INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
-extern BOOL    EndDialog(HWND hwnd, INT_PTR retval);
-extern BOOL    SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
-extern UINT    GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
-extern int     MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
-extern BOOL    ShowWindow(HWND hWnd, int nCmdShow);
-extern int     LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
-extern void    LoadStringResources(void);
-extern void    InitTabboz(void);
-extern LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
-extern int     GetSystemMetrics(int nIndex);
-extern BOOL    GetWindowRect(HWND hWnd, LPRECT lpRect);
-extern BOOL    MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
-extern void    randomize();
+extern HWND                 GetDlgItem(HWND DhDlg, int nIDDlgItem);
+extern HWND                 SetFocus(HWND hWnd);
+extern INT_PTR              DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
+extern BOOL                 EndDialog(HWND hwnd, INT_PTR retval);
+extern BOOL                 SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
+extern UINT                 GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
+extern int                  MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
+extern BOOL                 ShowWindow(HWND hWnd, int nCmdShow);
+extern int                  LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
+extern void                 LoadStringResources(void);
+extern void                 InitTabboz(void);
+extern LRESULT              SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
+extern int                  GetSystemMetrics(int nIndex);
+extern BOOL                 GetWindowRect(HWND hWnd, LPRECT lpRect);
+extern BOOL                 MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
+extern HANDLE               GetProp(HWND hWnd, LPCSTR lpString);
+extern BOOL                 SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
+extern HANDLE               RemoveProp(HWND hWnd, LPCSTR lpString);
+extern void                 randomize();
+extern HANDLE               properties_get(struct properties *props, LPCSTR key);
+extern HANDLE               properties_set(struct properties *props, LPCSTR key, HANDLE hData);
+extern HANDLE               properties_remove(struct properties *props, LPCSTR key);
+extern struct handle_entry *alloc_handle();
+extern void                 release_handle(HANDLE p);
 
 #endif
