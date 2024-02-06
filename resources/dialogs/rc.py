@@ -157,6 +157,7 @@ class Dialog:
         control = {
             "text": prepare_text(x[0]),
             "id": int(x[1]),
+            "combined_id": (int(x[1]) << 16) + int(self.dialog_id),
             "class": unquote(x[2]),
             "style": strip(x[3].split("|")),
             "x": int(x[4]) * SCALE + self.dx,
@@ -247,8 +248,8 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class} bwcc" {extra} type="radio" id="{id}" name="bor_radio{dialog_id}" />
-<label for="{id}">{text}</label>
+<input class="{css_class} bwcc" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
+<label for="{combined_id}">{text}</label>
 </div>""".format(
                     dialog_id=self.dialog_id,
                     **control,
@@ -259,8 +260,8 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="radio" id="{id}" name="bor_radio{dialog_id}" />
-<label for="{id}">{text}</label>
+<input class="{css_class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
+<label for="{combined_id}">{text}</label>
 </div>""".format(
                     dialog_id=self.dialog_id,
                     **control,
@@ -273,8 +274,8 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="checkbox" id="{id}" />
-<label for="{id}">{text}</label>
+<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
+<label for="{combined_id}">{text}</label>
 </div>""".format(
                     **control
                 )
@@ -284,8 +285,8 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="checkbox" id="{id}" />
-<label for="{id}">{text}</label>
+<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
+<label for="{combined_id}">{text}</label>
 </div>""".format(
                     **control
                 )
@@ -295,7 +296,7 @@ class Dialog:
             self.add(
                 """
 <div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<select class="{css_class}" {extra} id="{id}" style="width: {width}px;"></select>
+<select class="{css_class}" {extra} id="{combined_id}" style="width: {width}px;"></select>
 </div>""".format(
                     **control
                 )
