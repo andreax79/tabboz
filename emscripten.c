@@ -28,6 +28,7 @@
 #include "zarrosim.h"
 #ifdef TABBOZ_EM
 
+#include <emscripten/html5.h>
 //*******************************************************************
 // Load string resources
 //*******************************************************************
@@ -620,12 +621,26 @@ void ExitWindows(int dwReserved, int code)
     // TODO
 }
 
-int main()
+// Start Tabboz Simulator
+int start_zarrosim()
 {
     struct handle_entry *handle = alloc_handle();
     WinMain((HANDLE)handle, NULL, "", 0);
     release_handle(handle);
     return 0;
+}
+
+// Icon click callback
+int zarrosim_icon_cb(int eventType, const struct EmscriptenMouseEvent *someEvent, void *userData)
+{
+    return start_zarrosim();
+}
+
+int main()
+{
+    emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &zarrosim_icon_cb);
+    return 0;
+    /* return start_zarrosim(); */
 }
 
 #endif

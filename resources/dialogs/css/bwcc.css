@@ -1,5 +1,15 @@
 #screen {
     height: 100vh;
+    background-color: #008080;
+
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    width: auto;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 html, body {
@@ -237,4 +247,28 @@ input[type="radio"].bwcc + label::before
 input[type="radio"].bwcc:checked + label::before
 {
     background: url("../../bitmaps/131.png") !important;
+}
+
+/* Desktop */
+.desktop-item {
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    align-items: center;
+    border: 1px solid transparent;
+    flex-direction: column;
+    max-width: 7rem;
+    width: 75rem;
+    justify-content: center;
+    min-height: 6.25rem;
+    margin: 0 0 2rem 0;
+    padding: 0.25rem 0;
+}
+.desktop-item .icon {
+    display: block;
+}
+.desktop-item .icon-text {
+    margin-top: 5px;
+    display: block;
+    text-align: center;
 }
