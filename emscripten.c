@@ -239,12 +239,6 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
     makeDraggable(c);
 });
 
-EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
-    // Activate the window
-    setActiveWindow(windowId);
-    return await waitListener(windowId);
-});
-
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
     const destination = document.getElementById('screen');
     destination.removeChild(document.getElementById('wall' + windowId));
@@ -258,38 +252,29 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     int                  dialog = (int)lpTemplateName;
     int                  parentWindowId = -1;
     struct handle_entry *handle = alloc_handle();
+    MSG                  msg = {.hwnd = (HWND)handle};
 
+    if (lpDialogFunc == NULL)
+    {
+        return 0;
+    }
+    handle->lpDialogFunc = lpDialogFunc;
     // Get parent window number
     if (hWndParent != NULL)
     {
         parentWindowId = ((struct handle_entry *)hWndParent)->id;
     }
-
+    // Show dialog
     DialogBoxEm(handle->id, dialog, parentWindowId);
-
-    if (lpDialogFunc != NULL)
+    // Init
+    lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
+    // Message loop
+    while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
-        // Init
-        lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
-        // Loop
-        while (!handle->end)
-        {
-            controlId = DialogBoxWaitEvent(handle->id);
-            printf("%d\n", controlId);
-            if (controlId == SC_CLOSE)
-            {
-                if (!lpDialogFunc((HWND)handle, WM_SYSCOMMAND, controlId, 0))
-                {
-                    EndDialog((HWND)handle, TRUE);
-                }
-            }
-            else
-            {
-                lpDialogFunc((HWND)handle, WM_COMMAND, controlId, 0);
-            }
-        }
-        retval = handle->retval;
+        printf("%d\n", msg.wParam);
+        DispatchMessage(&msg);
     }
+    retval = handle->retval;
     RemoveDialogBoxEm(handle->id);
     release_handle(handle);
     return retval;
@@ -571,6 +556,51 @@ extern void randomize()
 {
     time_t t;
     srand((unsigned)time(&t));
+}
+
+//*******************************************************************
+// Retrieve a message
+//*******************************************************************
+
+EM_ASYNC_JS(int, GetMessageEM, (int windowId), {
+    // Activate the window
+    setActiveWindow(windowId);
+    // Wait for message
+    return await waitListener(windowId);
+});
+
+BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax)
+{
+    if (hWnd != NULL) {
+        lpMsg->hwnd = hWnd;
+    }
+    if (((struct handle_entry *)lpMsg->hwnd)->end)
+    {
+        return FALSE;
+    }
+    lpMsg->wParam = GetMessageEM(((struct handle_entry *)lpMsg->hwnd)->id);
+    return TRUE;
+}
+
+//*******************************************************************
+// Dispatche a message to a window procedure
+//*******************************************************************
+
+LRESULT DispatchMessage(const MSG *lpMsg)
+{
+    DLGPROC lpDialogFunc = ((struct handle_entry *)lpMsg->hwnd)->lpDialogFunc;
+    if (lpMsg->wParam == SC_CLOSE)
+    {
+        if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
+        {
+            EndDialog(lpMsg->hwnd, TRUE);
+        }
+    }
+    else
+    {
+        lpDialogFunc(lpMsg->hwnd, WM_COMMAND, lpMsg->wParam, 0);
+    }
+    return 0;
 }
 
 //*******************************************************************

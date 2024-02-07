@@ -143,6 +143,22 @@ typedef struct
     DWORD     dwExStyle;
 } CREATESTRUCT, *LPCREATESTRUCT;
 
+typedef struct {
+    LONG x;
+    LONG y;
+} POINT, *PPOINT, *NPPOINT, *LPPOINT;
+
+typedef struct
+{
+    HWND   hwnd;
+    UINT   message;
+    WPARAM wParam;
+    LPARAM lParam;
+    DWORD  time;
+    POINT  pt;
+    DWORD  lPrivate;
+} MSG, *PMSG, *NPMSG, *LPMSG;
+
 struct property
 {
     LPCSTR key;
@@ -160,6 +176,7 @@ struct handle_entry
 {
     unsigned int       refcount;
     unsigned int       id;
+    DLGPROC            lpDialogFunc;
     BOOL               end;
     INT_PTR            retval; // the value to be returned from the function that created the dialog box
     struct properties *props;  // window properties
@@ -240,6 +257,8 @@ extern BOOL                 SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
 extern HANDLE               RemoveProp(HWND hWnd, LPCSTR lpString);
 extern void                 ExitWindows(int dwReserved, int code);
 extern int                  WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
+extern BOOL                 GetMessage(LPMSG lpMsg, HWND  hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax);
+extern LRESULT              DispatchMessage(const MSG *lpMsg);
 extern void                 randomize();
 extern HANDLE               properties_get(struct properties *props, LPCSTR key);
 extern HANDLE               properties_set(struct properties *props, LPCSTR key, HANDLE hData);
