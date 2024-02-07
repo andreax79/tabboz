@@ -1046,7 +1046,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 #pragma argsused
 BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
-    int x, y, w, h;
+    int         x, y, w, h;
     static RECT wrect;
 
     if (message == WM_INITDIALOG)
@@ -2334,7 +2334,7 @@ void writelog(char *s)
 //*******************************************************************
 // PROCEDURA PRINCIPALE per la versione Windows.
 
-#ifdef TABBOZ_WIN
+#ifndef LINUX
 
 #pragma argsused
 int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance,
@@ -2352,7 +2352,7 @@ int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance,
     InitTabboz();
 
     /* Finestra principale */
-    DialogBox(hInst, MAKEINTRESOURCE(1), NULL, TabbozWndProc);
+    DialogBox(hInst, MAKEINTRESOURCE(1), NULL, (DLGPROC)TabbozWndProc);
 
     /* Chiusura */
 

@@ -151,9 +151,22 @@ function createElementFromHTML(html) {
     }
 }
 
+function setActiveWindow(windowId) {
+    document.querySelectorAll(".title-bar").forEach(element => {
+        if (!element.classList.contains("inactive")) {
+            element.classList.add("inactive");
+        }
+    });
+    const element = document.querySelector(`#win${windowId} .title-bar`);
+    if (element != null) {
+        element.classList.remove("inactive");
+    }
+};
+
 exports.addMainMenu = addMainMenu;
 exports.makeDraggable = makeDraggable;
 exports.waitListener = waitListener;
 exports.createElementFromHTML = createElementFromHTML;
+exports.setActiveWindow = setActiveWindow;
 
 })(window);

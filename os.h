@@ -238,6 +238,8 @@ extern BOOL                 MoveWindow(HWND hWnd, int X, int Y, int nWidth, int 
 extern HANDLE               GetProp(HWND hWnd, LPCSTR lpString);
 extern BOOL                 SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
 extern HANDLE               RemoveProp(HWND hWnd, LPCSTR lpString);
+extern void                 ExitWindows(int dwReserved, int code);
+extern int                  WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
 extern void                 randomize();
 extern HANDLE               properties_get(struct properties *props, LPCSTR key);
 extern HANDLE               properties_set(struct properties *props, LPCSTR key, HANDLE hData);

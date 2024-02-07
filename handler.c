@@ -235,7 +235,7 @@ struct handle_entry *get_handle(int index)
     }
     else
     {
-        return h; // TODO - NULL
+        return NULL;
     }
 }
 

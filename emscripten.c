@@ -108,29 +108,40 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
         }
     }
     // Icon
-    if (uType & 0x00000030) { // MB_ICONEXCLAMATION
+    if (uType & 0x00000030)
+    { // MB_ICONEXCLAMATION
         c.querySelector('img').src = "resources/icons/101.png";
-    } else if (uType & 0x00000020) { // MB_ICONQUESTION
+    }
+    else if (uType & 0x00000020)
+    { // MB_ICONQUESTION
         c.querySelector('img').src = "resources/icons/102.png";
-    } else if (uType & 0x00000010) { // MB_ICONSTOP
+    }
+    else if (uType & 0x00000010)
+    { // MB_ICONSTOP
         c.querySelector('img').src = "resources/icons/103.png";
-    } else if (uType & 0x00000040) { // MB_ICONINFORMATION
+    }
+    else if (uType & 0x00000040)
+    { // MB_ICONINFORMATION
         c.querySelector('img').src = "resources/icons/104.png";
     }
     // Buttons
-    if (uType & 0x00000001) { // MB_OKCANCEL
+    if (uType & 0x00000001)
+    { // MB_OKCANCEL
         c.querySelector('.control1').innerText = 'OK';
         c.querySelector('.control2').innerText = 'Cancel';
         c.querySelector('.control2').style.display = 'inline';
-    } else if (uType & 0x00000004) { // MB_YESNO
+    }
+    else if (uType & 0x00000004)
+    { // MB_YESNO
         c.querySelector('.control1').innerText = 'Yes';
         c.querySelector('.control2').innerText = 'No';
         c.querySelector('.control2').style.display = 'inline';
-    } else { // MB_OK
+    }
+    else
+    { // MB_OK
         c.querySelector('.control1').innerText = 'OK';
         c.querySelector('.control2').style.display = 'none';
     }
-
     wall.style.zIndex = windowId;
     c.style.zIndex = windowId;
     c.style.position = 'absolute';
@@ -150,16 +161,23 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     y = (y - h) / 2;
     c.style.left = x + 'px';
     c.style.top = y + 'px';
+    // Activate the window
+    setActiveWindow(windowId);
     // Make the window draggrable
     makeDraggable(c);
+    // Wait for events
     let result = await waitListener(windowId);
     // Convert the result
-    if (uType & 0x00000004) { // MB_YESNO
-        switch (result) {
-            case 1: result = 6; // IDYES
-                    break;
-            case 2: result = 7; // IDNO
-                    break;
+    if (uType & 0x00000004)
+    { // MB_YESNO
+        switch (result)
+        {
+        case 1:
+            result = 6; // IDYES
+            break;
+        case 2:
+            result = 7; // IDNO
+            break;
         }
     }
     // Remove the window
@@ -209,12 +227,12 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
             c.style.top = (parseInt(style.top) + 40) + 'px';
         }
     }
-    /* wall.style.zIndex = '' + windowId; */
-    /* c.style.zIndex = '' + windowId; */
     // Add window to screen
     const destination = document.getElementById('screen');
     destination.appendChild(wall);
     destination.appendChild(c);
+    // Activate the window
+    setActiveWindow(windowId);
     // Add menu
     addMainMenu(c);
     // Make the window draggrable
@@ -222,6 +240,8 @@ EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
 });
 
 EM_ASYNC_JS(int, DialogBoxWaitEvent, (int windowId), {
+    // Activate the window
+    setActiveWindow(windowId);
     return await waitListener(windowId);
 });
 
@@ -565,15 +585,16 @@ HWND SetFocus(HWND hWnd)
     return NULL; // TODO
 }
 
-extern BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam);
+void ExitWindows(int dwReserved, int code)
+{
+    // TODO
+}
 
 int main()
 {
-    /* Inizializza il programma */
-    InitTabboz();
-    /* Finestra principale */
-    DialogBox(hInst, MAKEINTRESOURCE(1), NULL, (DLGPROC)TabbozWndProc);
-
+    struct handle_entry *handle = alloc_handle();
+    WinMain((HANDLE)handle, NULL, "", 0);
+    release_handle(handle);
     return 0;
 }
 
