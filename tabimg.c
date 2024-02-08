@@ -39,9 +39,27 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 /* Parte per (cercare) di disegnare le immagini trasparenti...       */
 /*********************************************************************/
 
+#ifdef TABBOZ_EM
+
+EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, int imageId, int x, int y), {
+    drawImage(windowId, imageId, x, y);
+});
+
+#pragma argsused
+static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
+                                  HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
+{
+    struct handle_entry *handle = (struct handle_entry *)hdc;
+    if (handle != NULL)
+    {
+        DrawTransparentBitmapEM(handle->id, (int)hbmpSrc, x, y);
+    }
+}
+
+#else
+
 // Disegna una BMP trasparente
 // Necessita della BMP stessa e di una maschera.
-
 #pragma argsused
 static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
                                   HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
@@ -65,6 +83,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     DeleteDC(hdcSrc);
     DeleteDC(hdcMsk);
 }
+#endif
 
 /*********************************************************************/
 // Genera una maschera per una determinata immagine ed adatta
@@ -73,6 +92,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
 #pragma argsused
 static HBITMAP CreateTransparentMask(HBITMAP hbmpSrc, COLORREF rgbTransparent)
 {
+#ifndef TABBOZ_EM
     BITMAP  bm;
     HBITMAP hbmpMsk;
     HDC     hdc = GetDC(NULL); // get the screen DC
@@ -105,6 +125,9 @@ static HBITMAP CreateTransparentMask(HBITMAP hbmpSrc, COLORREF rgbTransparent)
     DeleteDC(hdcMsk);
     DeleteDC(hdcSrc);
     return hbmpMsk;
+#else
+    return NULL;
+#endif
 }
 
 /*********************************************************************/
@@ -344,15 +367,22 @@ long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
         return WMDestroy(hWnd);
     case WM_PAINT:
         return WMPaint(hWnd);
+#ifndef TABBOZ_EM
     case WM_LBUTTONDOWN:
         /* Display Personal Information box. */
-        DialogBox(hInst, MAKEINTRESOURCE(PERSONALINFO), hWnd, PersonalInfo);
+        DialogBox(hInst, MAKEINTRESOURCE(PERSONALINFO), hWnd, (DLGPROC)PersonalInfo);
         AggiornaPrincipale(hWndMain);
         return (0);
+#endif
     }
+#ifndef TABBOZ_EM
     return DefWindowProc(hWnd, msg, wParam, lParam);
+#else
+    return 0;
+#endif
 }
 
+#ifndef TABBOZ_EM
 /*********************************************************************/
 // Registra la Classe BMPView
 
@@ -519,3 +549,4 @@ ATOM RegisterBMPTipaClass(HANDLE hInst)
     wc.lpszClassName = "BMPTipa";
     return RegisterClass(&wc);
 }
+#endif

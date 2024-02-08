@@ -163,10 +163,30 @@ function setActiveWindow(windowId) {
     }
 };
 
+async function drawImage(windowId, imageId, x, y) {
+    // Add the canvas if it does not exist
+    const parent = document.querySelector(`#win${windowId} .bmpview`);
+    let canvas = parent.querySelector("canvas");
+    if (canvas == null) {
+        parent.innerHTML = "";
+        canvas = createElementFromHTML("<canvas></canvas>");
+        canvas.width = parent.clientWidth;
+        canvas.height = parent.clientHeight;
+        parent.appendChild(canvas);
+    }
+    // Load image
+    const url = `resources/bitmaps/${imageId}.png`;
+    const image = new Image();
+    await new Promise(r => image.onload = r, image.src = url);
+    // Draw image
+    canvas.getContext("2d").drawImage(image, x, y);
+}
+
 exports.addMainMenu = addMainMenu;
 exports.makeDraggable = makeDraggable;
 exports.waitListener = waitListener;
 exports.createElementFromHTML = createElementFromHTML;
 exports.setActiveWindow = setActiveWindow;
+exports.drawImage = drawImage;
 
 })(window);

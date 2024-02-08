@@ -100,6 +100,7 @@ typedef unsigned long  ULONG_PTR;
 typedef LONG_PTR       LPARAM;
 typedef UINT_PTR       WPARAM;
 typedef LONG_PTR       LRESULT;
+typedef DWORD          COLORREF;
 
 typedef void *FARPROC;
 typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
@@ -159,6 +160,15 @@ typedef struct
     DWORD  lPrivate;
 } MSG, *PMSG, *NPMSG, *LPMSG;
 
+typedef struct {
+    HDC  hdc;
+    BOOL fErase;
+    RECT rcPaint;
+    BOOL fRestore;
+    BOOL fIncUpdate;
+    BYTE rgbReserved[32];
+} PAINTSTRUCT, *PPAINTSTRUCT, *NPPAINTSTRUCT, *LPPAINTSTRUCT;
+
 struct property
 {
     LPCSTR key;
@@ -211,13 +221,16 @@ struct handle_table
 #define MB_ICONINFORMATION 0x00000040L
 #define MB_ICONASTERISK 0x00000040L
 
+#define WM_CREATE 0x0001
 #define WM_DESTROY 0x0002
+#define WM_PAINT 0x000f
 #define WM_ENDSESSION 0x0016
 #define WM_QUERYDRAGICON 0x0037
 #define WM_INITDIALOG 0x0110
 #define WM_COMMAND 0x0111
 #define WM_SYSCOMMAND 0x0112
 #define WM_TIMER 0x0113
+#define WM_LBUTTONDOWN 0x0201
 
 #define BM_SETCHECK 0xf0f1
 
@@ -229,6 +242,9 @@ struct handle_table
 #define SM_CXSCREEN 0
 #define SM_CYSCREEN 1
 
+#define SWP_NOMOVE 0x0002
+#define SWP_NOZORDER 0x0004
+
 #define random(x) (random() % x)
 #define LOWORD(x) (x & 0xffff)
 #define HIWORD(x) ((x >> 16) & 0xffff)
@@ -236,6 +252,7 @@ struct handle_table
 #define MakeProcInstance(p, i) (p)
 #define FreeProcInstance(p) (void)(p)
 #define MAKEINTRESOURCE(i) ((LPSTR)(ULONG_PTR)LOWORD(i))
+#define RGB(r,g,b) ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
 
 extern HWND                 GetDlgItem(HWND DhDlg, int nIDDlgItem);
 extern HWND                 SetFocus(HWND hWnd);
@@ -259,6 +276,13 @@ extern void                 ExitWindows(int dwReserved, int code);
 extern int                  WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
 extern BOOL                 GetMessage(LPMSG lpMsg, HWND  hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax);
 extern LRESULT              DispatchMessage(const MSG *lpMsg);
+extern HICON                LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
+extern HBITMAP              LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
+extern BOOL                 DestroyIcon(HICON hIcon);
+extern BOOL                 DeleteObject(void *ho);
+extern HDC                  BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
+extern BOOL                 EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
+extern BOOL                 SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
 extern void                 randomize();
 extern HANDLE               properties_get(struct properties *props, LPCSTR key);
 extern HANDLE               properties_set(struct properties *props, LPCSTR key, HANDLE hData);

@@ -39,12 +39,12 @@
 
 static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 
-extern void   Atinom(HANDLE hInstance);
-extern int    vvc(int i); /* 15 Giugno 1998 - v0.7.1 - Verifica Valori Chiave */
-extern u_long new_counter;
-extern ATOM   RegisterBMPTipaClass(HANDLE hInst);
-extern ATOM   RegisterBMPViewClass(HANDLE hInst);
-extern char   nome_del_file_su_cui_salvare[];
+extern void            Atinom(HANDLE hInstance);
+extern int             vvc(int i); /* 15 Giugno 1998 - v0.7.1 - Verifica Valori Chiave */
+extern u_long          new_counter;
+extern ATOM            RegisterBMPTipaClass(HANDLE hInst);
+extern long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg, WORD wParam, LONG lParam);
+extern char            nome_del_file_su_cui_salvare[];
 #ifdef TABBOZ_WIN
 extern void OpenFileDlg(HWND hwnd);
 extern void SaveFileDlg(HWND hwnd);
@@ -178,11 +178,7 @@ void ResetMe(int primavolta)
     LoadString(hInst, (400 + random(22)), City, (sizeof(City) - 1));
 
     LoadString(hInst, (450 + random(50)), tmp, (sizeof(tmp) - 1));
-#ifdef TABBOZ_EM
-    sprintf(Street, "%s n. %ld", tmp, (1 + random(150)));
-#else
-    sprintf(Street, "%s n. %d", tmp, (1 + random(150)));
-#endif
+    sprintf(Street, "%s n. %d", tmp, (int)(1 + random(150)));
 
     for (i = 1; i < 10; i++)
         MaterieMem[i].xxx = 0;
@@ -1828,8 +1824,6 @@ void AggiornaPrincipale(HWND parent)
 //
 //*******************************************************************
 
-#pragma argsused
-
 #ifdef WIN32
 #pragma argsused
 BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1838,10 +1832,8 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 #endif
 {
-#ifndef TABBOZ_EM
     static HICON hIcon;
-#endif
-    FARPROC lpproc;
+    FARPROC      lpproc;
 
     switch (message)
     {
@@ -1851,18 +1843,24 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
             FineProgramma("end session");
         break;
 
-#ifndef TABBOZ_EM
     case WM_QUERYDRAGICON: // 25 Feb 1999 - Questa e' l' icona per ALT-TAB...
         if (!hIcon)
             hIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
         return (long)hIcon;
-#endif
 
-#ifndef TABBOZ_EM
     case WM_DESTROY:
         if (hIcon)
             DestroyIcon(hIcon);
+#ifdef TABBOZ_EM
+        BMPViewWndProc(hWnd, WM_DESTROY, 0, 0);
+#else
         KillTimer(hWnd, WM_TIMER);
+#endif
+        break;
+
+#ifdef TABBOZ_EM
+    case WM_PAINT:
+        BMPViewWndProc(hWnd, WM_PAINT, 0, 0);
         break;
 #endif
 
@@ -1899,9 +1897,7 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
         return (FALSE);
 
     case WM_INITDIALOG:
-#ifndef TABBOZ_EM
         hIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
-#endif
         hWndMain = hWnd;
         // Scrive quanti soldi ci sono... ( ed ora scrive anche molta altra roba...)
         AggiornaPrincipale(hWnd);
@@ -1944,6 +1940,10 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
         t_random = 1;
 
         fase_di_avvio = 0; /* 11 Giugno 1998 */
+#ifdef TABBOZ_EM
+        BMPViewWndProc(hWnd, WM_CREATE, 0, 0);
+        TabbozRedraw = 1;
+#endif
         return TRUE;
 
 #ifndef TABBOZ_EM

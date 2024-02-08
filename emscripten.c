@@ -381,11 +381,6 @@ EM_JS(int, GetSystemMetricsEM, (int nIndex), {
     default:
         return 0;
     }
-    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
-    if (control != null)
-    {
-        control.checked = (wParam != 0);
-    }
     return 0;
 });
 
@@ -570,9 +565,10 @@ EM_ASYNC_JS(int, GetMessageEM, (int windowId), {
     return await waitListener(windowId);
 });
 
-BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax)
+BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
-    if (hWnd != NULL) {
+    if (hWnd != NULL)
+    {
         lpMsg->hwnd = hWnd;
     }
     if (((struct handle_entry *)lpMsg->hwnd)->end)
@@ -584,7 +580,7 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax
 }
 
 //*******************************************************************
-// Dispatche a message to a window procedure
+// Dispatch a message to a window procedure
 //*******************************************************************
 
 LRESULT DispatchMessage(const MSG *lpMsg)
@@ -595,13 +591,89 @@ LRESULT DispatchMessage(const MSG *lpMsg)
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
+            // Repaint Destroy
+            lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
     }
     else
     {
+        // Dispatch Commmand
         lpDialogFunc(lpMsg->hwnd, WM_COMMAND, lpMsg->wParam, 0);
+        // Dispatch Repaint
+        lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
     }
     return 0;
+}
+
+//*******************************************************************
+// Return icon id
+//*******************************************************************
+
+HICON LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName)
+{
+    if (HIWORD((unsigned long)lpIconName) != 0)
+    {
+        return NULL;
+    }
+    return (HICON)lpIconName;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL DestroyIcon(HICON hIcon)
+{
+    return TRUE;
+}
+
+//*******************************************************************
+// Return bitmap id
+//*******************************************************************
+
+HBITMAP LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName)
+{
+    if (HIWORD((unsigned long)lpBitmapName) != 0)
+    {
+        return NULL;
+    }
+    return (HBITMAP)lpBitmapName;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL DeleteObject(void *ho)
+{
+    return TRUE;
+}
+
+//*******************************************************************
+// Return window handle
+//*******************************************************************
+
+HDC BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint)
+{
+    return (HDC)hWnd;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint)
+{
+    return TRUE;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
+{
+    return TRUE;
 }
 
 //*******************************************************************
