@@ -1,3 +1,4 @@
+/* Tabboz Windows Custom Controls */
 ((exports) => {
 
 function addMainMenu(mainMenuEl) {

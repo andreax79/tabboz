@@ -12,8 +12,8 @@ PRE = """
   <meta charset="UTF-8" />
   <base href="../../.." />
   <link rel="stylesheet" href="resources/dialogs/css/98.css" />
-  <link rel="stylesheet" href="resources/dialogs/css/bwcc.css" />
-  <script src="resources/dialogs/js/menu.js"></script>
+  <link rel="stylesheet" href="resources/dialogs/css/twcc.css" />
+  <script src="resources/dialogs/js/twcc.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {{
         addMainMenu(document.querySelector('ul.main-menu'));
