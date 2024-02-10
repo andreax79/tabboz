@@ -53,19 +53,32 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
     FARPROC lpproc;
     int     lasciaoraddoppia;
 
-    if (message == WM_INITDIALOG)
+    switch (message)
     {
+
+    case WM_INITDIALOG:
         if (sesso == 'M')
             spostamento = 0;
         else
             spostamento = 100;
         AggiornaTipa(hDlg);
         tipahDlg = hDlg;
+#ifdef TABBOZ_EM
+        BMPTipaWndProc(hDlg, WM_CREATE, 0, 0);
+#endif
         return (TRUE);
-    }
 
-    else if (message == WM_COMMAND)
-    {
+#ifdef TABBOZ_EM
+    case WM_DESTROY:
+        BMPTipaWndProc(hDlg, WM_DESTROY, 0, 0);
+        break;
+
+    case WM_PAINT:
+        BMPTipaWndProc(hDlg, WM_PAINT, 0, 0);
+        break;
+#endif
+
+    case WM_COMMAND:
         switch (wParam)
         {
         case 110: // Cerca tipa

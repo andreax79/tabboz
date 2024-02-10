@@ -120,7 +120,8 @@ function makeDraggable (element) {
 }
 
 async function waitListener(windowId) {
-    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`);
+    return await waitListenerS(`#win${windowId}`);
+    // return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`);
 }
 
 function waitListenerS(selector) {

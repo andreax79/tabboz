@@ -24,9 +24,9 @@
 /* 1 Giugno 1999 -                      */
 /* Conversione Tabbozzo -> Tabbozza     */
 
-#include <stdio.h>
 #include "os.h"
 #include "zarrosim.h"
+#include <stdio.h>
 
 #define IMG_SIZEX 143
 #define IMG_SIZEY 275
@@ -41,8 +41,8 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 
 #ifdef TABBOZ_EM
 
-EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, int imageId, int x, int y), {
-    drawImage(windowId, "BMPView", imageId, x, y);
+EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, LPSTR lpszClassName, int imageId, int x, int y), {
+    drawImage(windowId, UTF8ToString(lpszClassName), imageId, x, y);
 });
 
 #pragma argsused
@@ -52,7 +52,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     struct handle_entry *handle = (struct handle_entry *)hdc;
     if (handle != NULL)
     {
-        DrawTransparentBitmapEM(handle->id, (int)hbmpSrc, x, y);
+        DrawTransparentBitmapEM(handle->id, "BMPView", (int)hbmpSrc, x, y);
     }
 }
 
@@ -365,6 +365,12 @@ long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
     case WM_DESTROY:
         return WMDestroy(hWnd);
     case WM_PAINT:
+#ifdef TABBOZ_EM
+        if (!TabbozRedraw)
+        {
+            return (0);
+        }
+#endif
         return WMPaint(hWnd);
     case WM_LBUTTONDOWN:
         /* Display Personal Information box. */
@@ -449,23 +455,25 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
 {
     PAINTSTRUCT ps;
     HDC         hdc = BeginPaint(hwnd, &ps);
-#ifndef TABBOZ_EM
-    HDC         hdcMem = CreateCompatibleDC(hdc);
-#endif
     HBITMAP     hbmp = GetProp(hwnd, "hTipa");
     if (hbmp)
     {
-#ifndef TABBOZ_EM
+#ifdef TABBOZ_EM
+        struct handle_entry *handle = (struct handle_entry *)hwnd;
+        if (handle != NULL)
+        {
+            DrawTransparentBitmapEM(handle->id, "BMPTipa", (int)hbmp, 0, 0);
+        }
+#else
         BITMAP bm;
+        HDC hdcMem = CreateCompatibleDC(hdc);
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         hbmp = SelectObject(hdcMem, hbmp);
         BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
         hbmp = SelectObject(hdcMem, hbmp);
+        DeleteDC(hdcMem);
 #endif
     }
-#ifndef TABBOZ_EM
-    DeleteDC(hdcMem);
-#endif
     EndPaint(hwnd, &ps);
     return 0;
 }
@@ -520,7 +528,7 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
             else
             {
                 MessageBox(hWnd, "Mmhhhhhhhh.........", "Palpatina...", MB_OK | MB_ICONINFORMATION);
-                Rapporti + 3;
+                Rapporti += 3;
                 if (Rapporti < 100)
                     Rapporti = 100;
                 Giorno(hWnd);
