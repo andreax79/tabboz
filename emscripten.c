@@ -167,7 +167,8 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
     // Make the window draggrable
     makeDraggable(c);
     // Wait for events
-    let result = await waitListener(windowId);
+    let result = (await waitListener(windowId)).controlId;
+    console.log(result);
     // Convert the result
     if (uType & 0x00000004)
     { // MB_YESNO
@@ -560,15 +561,20 @@ extern void randomize()
 // Retrieve a message
 //*******************************************************************
 
-EM_ASYNC_JS(int, GetMessageEM, (int windowId), {
+EM_ASYNC_JS(int, GetMessageEM, (int windowId, int32_t *x, int32_t *y), {
     // Activate the window
     setActiveWindow(windowId);
     // Wait for message
-    return await waitListener(windowId);
+    let msg = await waitListener(windowId);
+    // Set return values
+    setValue(x, msg.x, "i32");
+    setValue(y, msg.y, "i32");
+    return msg.controlId;
 });
 
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
+    int32_t x, y;
     if (hWnd != NULL)
     {
         lpMsg->hwnd = hWnd;
@@ -577,7 +583,9 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
     {
         return FALSE;
     }
-    lpMsg->wParam = GetMessageEM(((struct handle_entry *)lpMsg->hwnd)->id);
+    lpMsg->wParam = GetMessageEM(((struct handle_entry *)lpMsg->hwnd)->id, &x, &y);
+    // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
+    lpMsg->lParam = ((y & 0xffff) << 16) + (x & 0xffff);
     return TRUE;
 }
 
@@ -593,14 +601,14 @@ LRESULT DispatchMessage(const MSG *lpMsg)
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
-            // Repaint Destroy
+            // Dispatch Destroy
             lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
     }
     else
     {
         // Dispatch Commmand
-        lpDialogFunc(lpMsg->hwnd, WM_COMMAND, lpMsg->wParam, 0);
+        lpDialogFunc(lpMsg->hwnd, WM_COMMAND, lpMsg->wParam, lpMsg->lParam);
         // Dispatch Repaint
         lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
     }

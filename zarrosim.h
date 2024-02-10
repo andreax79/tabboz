@@ -46,7 +46,6 @@ static char copyright[] =
 #endif /* not lint */
 
 #ifdef NOT_WINDOWS
-
 #define IDOK 1
 #define IDCANCEL 2
 #define IDABORT 3
@@ -55,6 +54,7 @@ static char copyright[] =
 #endif
 
 #define QX_NOME 102
+#define QX_BMP 103
 #define QX_SOLDI 105
 #define QX_LOAD 106
 #define QX_SAVE 107

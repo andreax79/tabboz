@@ -2219,6 +2219,13 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
 
             AggiornaPrincipale(hWnd);
             break;
+
+#ifdef TABBOZ_EM
+        case QX_BMP:
+            BMPViewWndProc(hWnd, WM_LBUTTONDOWN, wParam, lParam);
+            break;
+#endif
+
 #ifdef PROMPT_ACTIVE
         case QX_PROMPT: /* Display Tabboz Simulator Prompt */
             lpproc = MakeProcInstance(Prompt, hInst);
@@ -2321,7 +2328,7 @@ void writelog(char *s)
         printf("%24.24s %s\n", ctime(&t), s);
 #else
         fprintf(debugfile, "%24.24s %s\n", ctime(&t), s);
-        fflush(debugfile); // Escegue il flush del file, cosi' anche se il Tabboz craschia si ha il file di log...
+        fflush(debugfile); // Esegue il flush del file, cosi' anche se il Tabboz craschia si ha il file di log...
 #endif
     }
 }

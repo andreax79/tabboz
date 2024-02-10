@@ -120,7 +120,7 @@ function makeDraggable (element) {
 }
 
 async function waitListener(windowId) {
-    return await waitListenerS(`#win${windowId}`);
+    return await waitListenerS(`#win${windowId}, #win${windowId} input`);
     // return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`);
 }
 
@@ -133,7 +133,11 @@ function waitListenerS(selector) {
             });
             const match = event.target.className.match(/\d+/);
             const controlId = match ? Number(match[0]) : 0;
-            resolve(controlId);
+            console.log(event);
+            let rect = event.target.getBoundingClientRect();
+            let x = event.clientX - rect.left;
+            let y = event.clientY - rect.top;
+            resolve({ controlId: controlId, x: x, y: y });
         };
         document.querySelectorAll(selector).forEach(element => {
             const listenerName = (element.nodeName == "INPUT") ? "input" : "click";

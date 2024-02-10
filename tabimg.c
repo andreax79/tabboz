@@ -466,7 +466,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
         }
 #else
         BITMAP bm;
-        HDC hdcMem = CreateCompatibleDC(hdc);
+        HDC    hdcMem = CreateCompatibleDC(hdc);
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         hbmp = SelectObject(hdcMem, hbmp);
         BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
@@ -529,7 +529,7 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
             {
                 MessageBox(hWnd, "Mmhhhhhhhh.........", "Palpatina...", MB_OK | MB_ICONINFORMATION);
                 Rapporti += 3;
-                if (Rapporti < 100)
+                if (Rapporti > 100)
                     Rapporti = 100;
                 Giorno(hWnd);
                 AggiornaTipa(tipahDlg);

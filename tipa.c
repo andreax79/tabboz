@@ -261,6 +261,12 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             AggiornaTipa(hDlg);
             return (TRUE);
 
+#ifdef TABBOZ_EM
+        case 130:
+            BMPTipaWndProc(hDlg, WM_LBUTTONDOWN, wParam, lParam);
+            break;
+#endif
+
         case IDCANCEL:
         case IDOK:
             tipahDlg = 0; // Non si sa' mai...
