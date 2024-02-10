@@ -38,7 +38,8 @@ BOOL FAR PASCAL CercaTipa(HWND hDlg, WORD message, WORD wParam, LONG lParam);
 BOOL FAR PASCAL DueDiPicche(HWND hDlg, WORD message, WORD wParam, LONG lParam);
 void            DescrizioneTipa(int f);
 void            DescrizioneTipo(int f);
-void            AggiornaTipa(HWND hDlg);
+long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
+                               WORD wParam, LONG lParam);
 
 // ------------------------------------------------------------------------------------------
 // Tipa...

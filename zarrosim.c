@@ -311,10 +311,6 @@ void InitTabboz(void)
     BWCCRegister(hInst); // Fanculo ! Mi sono magiato il fegato prima di trovare
                          // questa funzione ! non c'e' nessuno documento fottuto che mi abbia aiutato !
 #endif
-#ifdef TABBOZ_EM
-    LoadStringResources();
-#endif
-
     nome_del_file_su_cui_salvare[0] = 0;
 
     // Inizializzazione dei numeri casuali...

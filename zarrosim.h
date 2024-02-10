@@ -351,3 +351,4 @@ extern void Giorno(HANDLE hInstance);
 extern void CalcolaStudio(void);
 extern void CalcolaVelocita(HANDLE hDlg);
 extern void SalvaTutto(void);
+extern void AggiornaTipa(HWND hDlg);

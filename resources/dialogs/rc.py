@@ -228,7 +228,7 @@ class Dialog:
         if (
             "BS_PUSHBUTTON" in control["style"]
             or "BS_DEFPUSHBUTTON" in control["style"]
-        ):
+        ):  # Button
             self.add(
                 """
                       <button class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">{text}</button>
@@ -236,7 +236,7 @@ class Dialog:
                     **control
                 )
             )
-        elif "SS_ICON" in control["style"]:
+        elif "SS_ICON" in control["style"]:  # Icon
             self.add(
                 """
 <img src="resources/icons/{text}.gif" class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" />
@@ -244,7 +244,7 @@ class Dialog:
                     **control
                 )
             )
-        elif control["class"] == "BorRadio":
+        elif control["class"] == "BorRadio":  # Radio button
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
@@ -256,21 +256,43 @@ class Dialog:
                 )
             )
 
-        elif control["class"] == "BUTTON" and "BS_AUTORADIOBUTTON" in control["style"]:
-            self.add(
+        elif control["class"] == "BUTTON":
+            if "BS_AUTORADIOBUTTON" in control["style"]:  # Radio button
+                self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
 <input class="{css_class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
-                    dialog_id=self.dialog_id,
-                    **control,
+                        dialog_id=self.dialog_id,
+                        **control,
+                    )
                 )
-            )
+            elif "BS_CHECKBOX" in control["style"] or "BS_AUTOCHECKBOX" in control["style"]:  # Checkbox
+                self.add(
+                """
+<div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
+<label for="{combined_id}">{text}</label>
+</div>""".format(
+                        **control
+                    )
+                )
+            elif "BS_GROUPBOX" in control["style"]:  #  Group box
+                control["height"] -= 25
+                control["width"] -= 25
+                self.add(
+                """
+<fieldset class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+  <legend>{text}</legend>
+</fieldset>""".format(
+                        **control
+                    )
+                )
+            else:
+                print(control)
 
-        elif control["class"] == "BUTTON" and (
-            "BS_CHECKBOX" in control["style"] or "BS_AUTOCHECKBOX" in control["style"]
-        ):
+        elif control["class"] == "BorCheck":  # Checkbox
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
@@ -281,18 +303,7 @@ class Dialog:
                 )
             )
 
-        elif control["class"] == "BorCheck":
-            self.add(
-                """
-<div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
-<label for="{combined_id}">{text}</label>
-</div>""".format(
-                    **control
-                )
-            )
-
-        elif control["class"] == "COMBOBOX" and "CBS_DROPDOWNLIST" in control["style"]:
+        elif control["class"] == "COMBOBOX" and "CBS_DROPDOWNLIST" in control["style"]:  # Dropdown
             self.add(
                 """
 <div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
@@ -302,7 +313,7 @@ class Dialog:
                 )
             )
 
-        elif control["class"] == "EDIT":
+        elif control["class"] == "EDIT":  # Text input
             self.add(
                 """
 <input style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" class="{css_class}" {extra} type="text" id="{id}" />
@@ -312,8 +323,8 @@ class Dialog:
                 )
             )
 
-        elif control["class"] == "BorBtn":
-            if control["id"] == 1:
+        elif control["class"] == "BorBtn":  # Buttons
+            if control["id"] == 1:  # Ok
                 control["text"] = "OK"
                 self.add(
                     """
@@ -323,7 +334,7 @@ class Dialog:
                         **control
                     )
                 )
-            elif control["id"] == 2:
+            elif control["id"] == 2:  # Cancel
                 control["text"] = "Cancel"
                 self.add(
                     """
@@ -352,12 +363,32 @@ class Dialog:
                     **control
                 )
             )
-        else:
+        elif control["class"] == "msctls_progress":  # Progress bars
+            control["css_class"] += " ws_border"
             self.add(
                 """
 <div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
 {text}
 </div>""".format(
+                    **control
+                )
+            )
+        elif control["class"] == "STATIC" or control["class"] == "BorStatic":
+            self.add(
+
+                """
+<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+{text}
+</div>""".format(
+                    **control
+                )
+            )
+        else:  # Custom
+            self.add(
+
+                """
+<canvas class="{css_class} {class}" width="{width}" height="{height}" style="position: absolute; left: {x}px; top: {y}px;">
+</canvas>""".format(
                     **control
                 )
             )

@@ -47,7 +47,7 @@ void LoadStringResources(void)
 // Load a string resource into a buffer
 //*******************************************************************
 
-EM_ASYNC_JS(int, LoadStringEm, (HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax), {
+EM_JS(int, LoadStringEm, (HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax), {
     const value = window.strings[uID] || "";
     stringToUTF8(value, lpBuffer, cchBufferMax);
     return value.length;
@@ -267,8 +267,10 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     }
     // Show dialog
     DialogBoxEm(handle->id, dialog, parentWindowId);
-    // Init
+    // Dispatch Init
     lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
+    // Dispatch Repaint
+    lpDialogFunc((HWND)handle, WM_PAINT, 0, 0);
     // Message loop
     while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
@@ -677,6 +679,15 @@ BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy,
 }
 
 //*******************************************************************
+// No nothing
+//*******************************************************************
+
+LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    return 0;
+}
+
+//*******************************************************************
 
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {
@@ -693,23 +704,35 @@ void ExitWindows(int dwReserved, int code)
     // TODO
 }
 
+static BOOL is_open = FALSE;
+
 // Start Tabboz Simulator
 int start_zarrosim()
 {
+    is_open = TRUE;
     struct handle_entry *handle = alloc_handle();
     WinMain((HANDLE)handle, NULL, "", 0);
     release_handle(handle);
+    is_open = FALSE;
     return 0;
 }
 
 // Icon click callback
 int zarrosim_icon_cb(int eventType, const struct EmscriptenMouseEvent *someEvent, void *userData)
 {
-    return start_zarrosim();
+    if (is_open)
+    {
+        return 0;
+    }
+    else
+    {
+        return start_zarrosim();
+    }
 }
 
 int main()
 {
+    LoadStringResources();
     emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &zarrosim_icon_cb);
     return 0;
     /* return start_zarrosim(); */

@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 #ifdef TABBOZ_EM
 
 EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, int imageId, int x, int y), {
-    drawImage(windowId, imageId, x, y);
+    drawImage(windowId, "BMPView", imageId, x, y);
 });
 
 #pragma argsused
@@ -355,7 +355,6 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
 // Classe BMPView
 
 #pragma argsused
-
 long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
                                WORD wParam, LONG lParam)
 {
@@ -367,25 +366,19 @@ long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
         return WMDestroy(hWnd);
     case WM_PAINT:
         return WMPaint(hWnd);
-#ifndef TABBOZ_EM
     case WM_LBUTTONDOWN:
         /* Display Personal Information box. */
         DialogBox(hInst, MAKEINTRESOURCE(PERSONALINFO), hWnd, (DLGPROC)PersonalInfo);
         AggiornaPrincipale(hWndMain);
         return (0);
-#endif
     }
-#ifndef TABBOZ_EM
     return DefWindowProc(hWnd, msg, wParam, lParam);
-#else
-    return 0;
-#endif
 }
 
-#ifndef TABBOZ_EM
 /*********************************************************************/
 // Registra la Classe BMPView
 
+#ifndef TABBOZ_EM
 #pragma argsused
 ATOM RegisterBMPViewClass(HANDLE hInst)
 {
@@ -403,7 +396,7 @@ ATOM RegisterBMPViewClass(HANDLE hInst)
     wc.lpszClassName = "BMPView";
     return RegisterClass(&wc);
 }
-
+#endif
 /*********************************************************************/
 /*********************************************************************/
 
@@ -419,11 +412,15 @@ int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
     HBITMAP hbmp = LoadBitmap(hInst, MAKEINTRESOURCE(current_tipa + 1204));
     if (hbmp)
     {
+#ifndef TABBOZ_EM
         BITMAP bm;
+#endif
         SetProp(hwnd, "hTipa", hbmp);
+#ifndef TABBOZ_EM
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         SetWindowPos(hwnd, NULL, 0, 0, bm.bmWidth, bm.bmHeight,
                      SWP_NOMOVE | SWP_NOZORDER);
+#endif
         return 0;
     }
     return -1; // report failure
@@ -452,17 +449,23 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
 {
     PAINTSTRUCT ps;
     HDC         hdc = BeginPaint(hwnd, &ps);
+#ifndef TABBOZ_EM
     HDC         hdcMem = CreateCompatibleDC(hdc);
+#endif
     HBITMAP     hbmp = GetProp(hwnd, "hTipa");
     if (hbmp)
     {
+#ifndef TABBOZ_EM
         BITMAP bm;
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         hbmp = SelectObject(hdcMem, hbmp);
         BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
         hbmp = SelectObject(hdcMem, hbmp);
+#endif
     }
+#ifndef TABBOZ_EM
     DeleteDC(hdcMem);
+#endif
     EndPaint(hwnd, &ps);
     return 0;
 }
@@ -532,6 +535,7 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
 /*********************************************************************/
 // Registra la Classe BMPTipa
 
+#ifndef TABBOZ_EM
 #pragma argsused
 ATOM RegisterBMPTipaClass(HANDLE hInst)
 {

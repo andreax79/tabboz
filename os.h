@@ -283,6 +283,7 @@ extern BOOL                 DeleteObject(void *ho);
 extern HDC                  BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
 extern BOOL                 EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
 extern BOOL                 SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
+extern LRESULT              DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 extern void                 randomize();
 extern HANDLE               properties_get(struct properties *props, LPCSTR key);
 extern HANDLE               properties_set(struct properties *props, LPCSTR key, HANDLE hData);
