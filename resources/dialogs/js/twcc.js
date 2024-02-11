@@ -120,8 +120,8 @@ function makeDraggable (element) {
 }
 
 async function waitListener(windowId) {
-    return await waitListenerS(`#win${windowId}, #win${windowId} input`);
-    // return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img`);
+    // return await waitListenerS(`#win${windowId}, #win${windowId} input`);
+    return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`);
 }
 
 function waitListenerS(selector) {
@@ -133,7 +133,6 @@ function waitListenerS(selector) {
             });
             const match = event.target.className.match(/\d+/);
             const controlId = match ? Number(match[0]) : 0;
-            console.log(event);
             let rect = event.target.getBoundingClientRect();
             let x = event.clientX - rect.left;
             let y = event.clientY - rect.top;
