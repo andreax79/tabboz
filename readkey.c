@@ -177,38 +177,32 @@ char *RRKey(char *xKey)
 
 #ifdef TABBOZ_EM
 
-EM_JS(void, WriteProfileString, (LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpString), {
-    localStorage.setItem(UTF8ToString(lpKeyName), UTF8ToString(lpString));
-});
-
-EM_JS(void, GetProfileString, (LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpDefault, LPSTR lpReturnedString, DWORD nSize), {
-    const value = localStorage.getItem(UTF8ToString(lpKeyName));
-    stringToUTF8(value || "", lpReturnedString, nSize);
-});
-
 // Store values in localStorage
-
 void TabbozAddKey(char *KeyName, char *KeyValue)
 {
-    WriteProfileString("Tabboz", KeyName, KeyValue);
+    EM_ASM({
+        localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
+    }, KeyName, KeyValue);
 };
 
 // Get values from localStorage
-
-extern char *TabbozReadKey(char *key, char *buf)
+char *TabbozReadKey(char *KeyName, char *buf)
 {
-    GetProfileString("Tabboz", key, NULL, buf, 32);
+    EM_ASM({
+        const value = localStorage.getItem(UTF8ToString($0));
+        stringToUTF8(value || "", $1, $2);
+    }, KeyName, buf, 32);
     if (buf[0] == '\0')
         return NULL;
     return buf;
 };
 
 // Inizia la riproduzione di un suono
-void TabbozPlaySound(int number){
-    /* TODO */
-    /* char filename[20]; */
-    /* sprintf(filename,"Tabs%04.Wav",number); */
-    /* sndPlaySound(filename, SND_ASYNC | SND_NODEFAULT | SND_FILENAME); */
+void TabbozPlaySound(int number)
+{
+    EM_ASM({
+        new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play();
+    }, number);
 };
 
 // Legge una stringa dal profilo memorizzandola in un buffer locale.

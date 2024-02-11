@@ -1720,10 +1720,11 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  
+  30426: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1));},  
+ 30488: function($0, $1, $2) {const value = localStorage.getItem(UTF8ToString($0)); stringToUTF8(value || "", $1, $2);},  
+ 30581: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play();}
 };
 function GetDlgItemTextEM(windowId,nIDDlgItem,lpString,nMaxCount){ let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem); if (control != null) { stringToUTF8(control.value, lpString, nMaxCount); return control.value.length; } control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { stringToUTF8(control.innerText, lpString, nMaxCount); return control.innerText.length; } else { return 0; } }
-function GetProfileString(lpAppName,lpKeyName,lpDefault,lpReturnedString,nSize){ const value = localStorage.getItem(UTF8ToString(lpKeyName)); stringToUTF8(value || "", lpReturnedString, nSize); }
 function GetSystemMetricsEM(nIndex){ switch (nIndex) { case 0: return parseInt(getComputedStyle(document.getElementById('screen')).width); case 1: return parseInt(getComputedStyle(document.getElementById('screen')).height); default: return 0; } return 0; }
 function GetWindowRectEm(windowId,dimension){ const win = document.querySelector('#win' + windowId); if (win == null) { return 0; } const style = getComputedStyle(win); switch (dimension) { case 0: return parseInt(style.left); case 1: return parseInt(style.top); case 2: return parseInt(style.left) + parseInt(style.width); case 3: return parseInt(style.top) + parseInt(style.height); default: return 0; } }
 function LoadStringEm(hInstance,uID,lpBuffer,cchBufferMax){ const value = window.strings[uID] || ""; stringToUTF8(value, lpBuffer, cchBufferMax); return value.length; }
@@ -1732,7 +1733,6 @@ function RemoveDialogBoxEm(windowId){ const destination = document.getElementByI
 function SetCheckEM(windowId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
 function SetDlgItemTextEm(windowId,nIDDlgItem,lpString){ let control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control == null) { return false; } else if (control.tagName == "INPUT") { if (control.type == "radio") { const label = control.parentNode.querySelector("label"); if (label != null) { label.innerText = UTF8ToString(lpString); } } else { control.value = UTF8ToString(lpString); } } else { control.innerText = UTF8ToString(lpString); } return true; }
 function ShowWindowEm(windowId,show){ const win = document.querySelector('#win' + windowId); if (win != null) { win.style.display = show ? 'block' : 'none'; return true; } else { return false; } }
-function WriteProfileString(lpAppName,lpKeyName,lpString){ localStorage.setItem(UTF8ToString(lpKeyName), UTF8ToString(lpString)); }
 function __asyncjs__DialogBoxEm(windowId,dialog,parentWindowId){ return Asyncify.handleAsync(async () => { const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html"); const html = await response.text(); const wall = document.getElementById('wall').cloneNode(true); const c = createElementFromHTML(html); wall.id = 'wall' + windowId; c.id = 'win' + windowId; if (parentWindowId >= 0) { const parent = document.getElementById('win' + parentWindowId); if (parent != null) { const style = getComputedStyle(parent); c.style.left = (parseInt(style.left) + 40) + 'px'; c.style.top = (parseInt(style.top) + 40) + 'px'; } } const destination = document.getElementById('screen'); destination.appendChild(wall); destination.appendChild(c); setActiveWindow(windowId); addMainMenu(c); makeDraggable(c); }); }
 function __asyncjs__DrawTransparentBitmapEM(windowId,lpszClassName,imageId,x,y){ return Asyncify.handleAsync(async () => { drawImage(windowId, UTF8ToString(lpszClassName), imageId, x, y); }); }
 function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
@@ -4346,6 +4346,35 @@ function __asyncjs__MessageBoxEm(windowId,lpText,lpCaption,uType,parentWindowId)
       _tzset_impl(timezone, daylight, tzname);
     }
 
+  var readAsmConstArgsArray = [];
+  function readAsmConstArgs(sigPtr, buf) {
+      ;
+      // Nobody should have mutated _readAsmConstArgsArray underneath us to be something else than an array.
+      assert(Array.isArray(readAsmConstArgsArray));
+      // The input buffer is allocated on the stack, so it must be stack-aligned.
+      assert(buf % 16 == 0);
+      readAsmConstArgsArray.length = 0;
+      var ch;
+      // Most arguments are i32s, so shift the buffer pointer so it is a plain
+      // index into HEAP32.
+      buf >>= 2;
+      while (ch = HEAPU8[sigPtr++]) {
+        assert(ch === 100/*'d'*/ || ch === 102/*'f'*/ || ch === 105 /*'i'*/, 'Invalid character ' + ch + '("' + String.fromCharCode(ch) + '") in readAsmConstArgs! Use only "d", "f" or "i", and do not specify "v" for void return argument.');
+        // A double takes two 32-bit slots, and must also be aligned - the backend
+        // will emit padding to avoid that.
+        var readAsmConstArgsDouble = ch < 105;
+        if (readAsmConstArgsDouble && (buf & 1)) buf++;
+        readAsmConstArgsArray.push(readAsmConstArgsDouble ? HEAPF64[buf++ >> 1] : HEAP32[buf]);
+        ++buf;
+      }
+      return readAsmConstArgsArray;
+    }
+  function _emscripten_asm_const_int(code, sigPtr, argbuf) {
+      var args = readAsmConstArgs(sigPtr, argbuf);
+      if (!ASM_CONSTS.hasOwnProperty(code)) abort('No EM_ASM constant found at address ' + code);
+      return ASM_CONSTS[code].apply(null, args);
+    }
+
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.copyWithin(dest, src, src + num);
     }
@@ -5070,7 +5099,6 @@ function checkIncomingModuleAPI() {
 }
 var asmLibraryArg = {
   "GetDlgItemTextEM": GetDlgItemTextEM,
-  "GetProfileString": GetProfileString,
   "GetSystemMetricsEM": GetSystemMetricsEM,
   "GetWindowRectEm": GetWindowRectEm,
   "LoadStringEm": LoadStringEm,
@@ -5079,7 +5107,6 @@ var asmLibraryArg = {
   "SetCheckEM": SetCheckEM,
   "SetDlgItemTextEm": SetDlgItemTextEm,
   "ShowWindowEm": ShowWindowEm,
-  "WriteProfileString": WriteProfileString,
   "__asyncjs__DialogBoxEm": __asyncjs__DialogBoxEm,
   "__asyncjs__DrawTransparentBitmapEM": __asyncjs__DrawTransparentBitmapEM,
   "__asyncjs__GetMessageEM": __asyncjs__GetMessageEM,
@@ -5090,6 +5117,7 @@ var asmLibraryArg = {
   "__syscall_open": ___syscall_open,
   "_localtime_js": __localtime_js,
   "_tzset_js": __tzset_js,
+  "emscripten_asm_const_int": _emscripten_asm_const_int,
   "emscripten_memcpy_big": _emscripten_memcpy_big,
   "emscripten_resize_heap": _emscripten_resize_heap,
   "emscripten_set_click_callback_on_thread": _emscripten_set_click_callback_on_thread,
