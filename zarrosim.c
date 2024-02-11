@@ -2306,16 +2306,12 @@ int vvc(int i) /* 15 Giugno 1998 - v0.7.1 - Verifica Valori Chiave */
 #ifdef TABBOZ_DEBUG
 void openlog()
 {
-#ifndef TABBOZ_EM
-    debugfile = fopen("\\ZARROSIM.LOG", "w");
-#endif
+    debugfile = fopen(LOGFILE, "w");
 }
 
 void closelog()
 {
-#ifndef TABBOZ_EM
     fclose(debugfile);
-#endif
 }
 
 void writelog(char *s)
@@ -2324,12 +2320,8 @@ void writelog(char *s)
     if (debug_active)
     {
         time(&t);
-#ifdef TABBOZ_EM
-        printf("%24.24s %s\n", ctime(&t), s);
-#else
         fprintf(debugfile, "%24.24s %s\n", ctime(&t), s);
         fflush(debugfile); // Esegue il flush del file, cosi' anche se il Tabboz craschia si ha il file di log...
-#endif
     }
 }
 #endif

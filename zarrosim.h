@@ -272,6 +272,11 @@ extern char   un_una[];
 extern char  *n_attivita[]; //  7 Maggio 1998
 
 #ifdef TABBOZ_DEBUG // Sistema di Debug... [12 Giugno 1998]
+#ifdef TABBOZ_EM
+#define LOGFILE "/dev/stdout"
+#else
+#define LOGFILE "\\ZARROSIM.LOG"
+#endif
 extern void  writelog(char *s); // 22 Giugno 1998
 #endif
 
