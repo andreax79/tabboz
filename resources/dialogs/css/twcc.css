@@ -272,3 +272,31 @@ input[type="radio"].bwcc:checked + label::before
     display: block;
     text-align: center;
 }
+
+/* Shutdown */
+.shutdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: block;
+    background-color: #000;
+    cursor: default;
+    display: none;
+}
+
+.shutdown span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #ffa500;
+    text-align: center;
+    font-family: "Pixelated MS Sans Serif", Arial;
+    font-weight: 800;
+    -webkit-font-smoothing: none;
+}

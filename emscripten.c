@@ -47,15 +47,13 @@ void LoadStringResources(void)
 // Load a string resource into a buffer
 //*******************************************************************
 
-EM_JS(int, LoadStringEm, (HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax), {
-    const value = window.strings[uID] || "";
-    stringToUTF8(value, lpBuffer, cchBufferMax);
-    return value.length;
-});
-
 int LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax)
 {
-    return LoadStringEm(hInstance, uID, lpBuffer, cchBufferMax);
+    return EM_ASM_INT({
+        const value = window.strings[$0] || "";
+        stringToUTF8(value, $1, $2);
+        return value.length;
+    }, uID, lpBuffer, cchBufferMax);
 }
 
 //*******************************************************************
@@ -696,6 +694,13 @@ LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 
 //*******************************************************************
+// Show shutdown screen
+//*******************************************************************
+
+void ExitWindows(int dwReserved, int code)
+{
+    EM_ASM(shutdown());
+}
 
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {
@@ -707,10 +712,6 @@ HWND SetFocus(HWND hWnd)
     return NULL; // TODO
 }
 
-void ExitWindows(int dwReserved, int code)
-{
-    // TODO
-}
 
 static BOOL is_open = FALSE;
 

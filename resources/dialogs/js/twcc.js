@@ -185,6 +185,10 @@ async function loadStringResources() {
     window.strings = await response.json();
 };
 
+function shutdown() {
+    document.querySelector("#shutdown").style.display = "block";
+}
+
 exports.addMainMenu = addMainMenu;
 exports.makeDraggable = makeDraggable;
 exports.waitListener = waitListener;
@@ -192,5 +196,6 @@ exports.createElementFromHTML = createElementFromHTML;
 exports.setActiveWindow = setActiveWindow;
 exports.drawImage = drawImage;
 exports.loadStringResources = loadStringResources;
+exports.shutdown = shutdown;
 
 })(window);
