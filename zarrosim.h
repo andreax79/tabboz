@@ -272,7 +272,6 @@ extern char   un_una[];
 extern char  *n_attivita[]; //  7 Maggio 1998
 
 #ifdef TABBOZ_DEBUG // Sistema di Debug... [12 Giugno 1998]
-extern FILE *debugfile;
 extern void  writelog(char *s); // 22 Giugno 1998
 #endif
 
