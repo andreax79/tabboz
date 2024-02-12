@@ -29,19 +29,6 @@
 #ifdef TABBOZ_EM
 
 #include <emscripten/html5.h>
-//*******************************************************************
-// Load string resources
-//*******************************************************************
-
-EM_ASYNC_JS(void, LoadStringResourcesEm, (), {
-    const response = await fetch("resources/strings/strings.json");
-    window.strings = await response.json();
-});
-
-void LoadStringResources(void)
-{
-    LoadStringResourcesEm();
-}
 
 //*******************************************************************
 // Load a string resource into a buffer
@@ -741,7 +728,11 @@ int zarrosim_icon_cb(int eventType, const struct EmscriptenMouseEvent *someEvent
 
 int main()
 {
-    LoadStringResources();
+    // Load string resources
+    EM_ASM(loadStringResources());
+    // Preload images
+    EM_ASM(preload());
+    // Register icon handler
     emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &zarrosim_icon_cb);
     return 0;
     /* return start_zarrosim(); */

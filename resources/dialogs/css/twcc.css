@@ -175,6 +175,7 @@ ul.main-menu > li
     border-style: solid;
     border-width: 1px;
     border-color: transparent;
+    user-select: none;
 }
 ul.main-menu li:hover
 {
@@ -228,6 +229,20 @@ ul.main-menu li ul li:hover
     border: 0px solid #0a246a;
     background-color: #0a246a;
     color: #fff;
+}
+
+ul.main-menu > li ul li.disabled
+{
+    color: #666;
+    cursor: default;
+}
+
+ul.main-menu > li ul li.disabled:hover
+{
+    border: 0px solid #d4d0c8;
+    background-color: #d4d0c8;
+    color: #666;
+    cursor: default;
 }
 
 ul.main-menu li.separator

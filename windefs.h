@@ -17,6 +17,7 @@
 #define near
 #define pascal
 #define cdecl
+#define _export
 
 #define FAR
 #define NEAR

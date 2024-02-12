@@ -1820,13 +1820,8 @@ void AggiornaPrincipale(HWND parent)
 //
 //*******************************************************************
 
-#ifdef WIN32
 #pragma argsused
 BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-#else
-#pragma argsused
-BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
-#endif
 {
     static HICON hIcon;
     FARPROC      lpproc;
@@ -1938,6 +1933,9 @@ BOOL FAR PASCAL TabbozWndProc(HWND hWnd, WORD message, WORD wParam, LONG lParam)
         fase_di_avvio = 0; /* 11 Giugno 1998 */
 #ifdef TABBOZ_EM
         BMPViewWndProc(hWnd, WM_CREATE, 0, 0);
+        /* Disabilita i menu Apri e Salva con nome */
+        EM_ASM(document.querySelector(".menu106").classList.add("disabled"));
+        EM_ASM(document.querySelector(".menu107").classList.add("disabled"));
         TabbozRedraw = 1;
 #endif
         return TRUE;

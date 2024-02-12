@@ -185,6 +185,13 @@ async function loadStringResources() {
     window.strings = await response.json();
 };
 
+async function preload() {
+    const response = await fetch("resources/bitmaps/list.json");
+    (await response.json()).data.forEach(element => {
+        (new Image()).src=`resources/bitmaps/${element}`;
+    });
+}
+
 function shutdown() {
     document.querySelector("#shutdown").style.display = "block";
 }
@@ -196,6 +203,7 @@ exports.createElementFromHTML = createElementFromHTML;
 exports.setActiveWindow = setActiveWindow;
 exports.drawImage = drawImage;
 exports.loadStringResources = loadStringResources;
+exports.preload = preload;
 exports.shutdown = shutdown;
 
 })(window);

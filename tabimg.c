@@ -41,10 +41,6 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 
 #ifdef TABBOZ_EM
 
-EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, LPSTR lpszClassName, int imageId, int x, int y), {
-    drawImage(windowId, UTF8ToString(lpszClassName), imageId, x, y);
-});
-
 #pragma argsused
 static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
                                   HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
@@ -52,7 +48,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hdc;
     if (handle != NULL)
     {
-        DrawTransparentBitmapEM(handle->id, "BMPView", (int)hbmpSrc, x, y);
+        EM_ASM(drawImage($0, UTF8ToString($1), $2, $3, $4), handle->id, "BMPView", (int)hbmpSrc, x, y);
     }
 }
 
@@ -462,7 +458,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
         HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hwnd;
         if (handle != NULL)
         {
-            DrawTransparentBitmapEM(handle->id, "BMPTipa", (int)hbmp, 0, 0);
+            EM_ASM(drawImage($0, UTF8ToString($1), $2, 0, 0), handle->id, "BMPTipa", (int)hbmp);
         }
 #else
         BITMAP bm;
@@ -528,9 +524,11 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
             else
             {
                 MessageBox(hWnd, "Mmhhhhhhhh.........", "Palpatina...", MB_OK | MB_ICONINFORMATION);
-                Rapporti += 3;
-                if (Rapporti > 100)
+#ifdef WONTFIX
+                Rapporti + 3;
+                if (Rapporti < 100)
                     Rapporti = 100;
+#endif
                 Giorno(hWnd);
                 AggiornaTipa(tipahDlg);
             }
