@@ -49,7 +49,7 @@ EM_ASYNC_JS(void, DrawTransparentBitmapEM, (int windowId, LPSTR lpszClassName, i
 static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
                                   HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
 {
-    struct handle_entry *handle = (struct handle_entry *)hdc;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hdc;
     if (handle != NULL)
     {
         DrawTransparentBitmapEM(handle->id, "BMPView", (int)hbmpSrc, x, y);
@@ -459,7 +459,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
     if (hbmp)
     {
 #ifdef TABBOZ_EM
-        struct handle_entry *handle = (struct handle_entry *)hwnd;
+        HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hwnd;
         if (handle != NULL)
         {
             DrawTransparentBitmapEM(handle->id, "BMPTipa", (int)hbmp, 0, 0);

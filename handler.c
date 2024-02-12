@@ -31,13 +31,13 @@
 #define MIN_HANDLE_ENTRIES 32
 #define PROPERTIES_DEFAULT_ENTRIES 8
 
-static struct handle_table *global_table;
+static HANDLE_TABLE *global_table;
 
 //*******************************************************************
 // Find property index
 //*******************************************************************
 
-int properties_find_index(struct properties *props, LPCSTR key)
+int FindPropertyIndex(PROPERTIES *props, LPCSTR key)
 {
     for (int i = 0; i < props->len; i++)
     {
@@ -53,9 +53,9 @@ int properties_find_index(struct properties *props, LPCSTR key)
 // Get an entry from the property list
 //*******************************************************************
 
-HANDLE properties_get(struct properties *props, LPCSTR key)
+HANDLE GetProperty(PROPERTIES *props, LPCSTR key)
 {
-    int idx = properties_find_index(props, key);
+    int idx = FindPropertyIndex(props, key);
     if (idx == -1)
     {
         return NULL;
@@ -70,9 +70,9 @@ HANDLE properties_get(struct properties *props, LPCSTR key)
 // Remove an entry from the property list
 //*******************************************************************
 
-HANDLE properties_remove(struct properties *props, LPCSTR key)
+HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
 {
-    int idx = properties_find_index(props, key);
+    int idx = FindPropertyIndex(props, key);
     if (idx == -1)
     {
         return NULL;
@@ -91,9 +91,9 @@ HANDLE properties_remove(struct properties *props, LPCSTR key)
 // Set an entry in the property list
 //*******************************************************************
 
-HANDLE properties_set(struct properties *props, LPCSTR key, HANDLE hData)
+HANDLE SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData)
 {
-    int idx = properties_find_index(props, key);
+    int idx = FindPropertyIndex(props, key);
     if (idx != -1)
     {
         HANDLE prev = props->entry[idx].hData;
@@ -103,7 +103,7 @@ HANDLE properties_set(struct properties *props, LPCSTR key, HANDLE hData)
     if (props->len == props->capacity)
     {
         props->capacity *= 2;
-        props->entry = realloc(props->entry, props->capacity * sizeof(struct property));
+        props->entry = realloc(props->entry, props->capacity * sizeof(PROPERTY));
     }
     props->entry[props->len].key = strdup(key);
     props->entry[props->len].hData = hData;
@@ -115,10 +115,10 @@ HANDLE properties_set(struct properties *props, LPCSTR key, HANDLE hData)
 // Allocate a new properties table
 //*******************************************************************
 
-struct properties *alloc_properties(void)
+PROPERTIES *AllocateProperties(void)
 {
-    struct properties  proto = {0, PROPERTIES_DEFAULT_ENTRIES, malloc(PROPERTIES_DEFAULT_ENTRIES * sizeof(struct property))};
-    struct properties *d = malloc(sizeof(struct properties));
+    PROPERTIES  proto = {0, PROPERTIES_DEFAULT_ENTRIES, malloc(PROPERTIES_DEFAULT_ENTRIES * sizeof(PROPERTY))};
+    PROPERTIES *d = malloc(sizeof(PROPERTIES));
     *d = proto;
     return d;
 }
@@ -127,7 +127,7 @@ struct properties *alloc_properties(void)
 // Free properties table
 //*******************************************************************
 
-void properties_free(struct properties *props)
+void FreeProperties(PROPERTIES *props)
 {
     for (int i = 0; i < props->len; i++)
     {
@@ -144,15 +144,15 @@ void properties_free(struct properties *props)
 // Allocate a new handle table
 //*******************************************************************
 
-struct handle_table *alloc_handle_table(int count)
+HANDLE_TABLE *AllocateHandleTable(int count)
 {
-    struct handle_table *table;
+    HANDLE_TABLE *table;
 
     if (count < MIN_HANDLE_ENTRIES)
     {
         count = MIN_HANDLE_ENTRIES;
     }
-    if (!(table = malloc(sizeof(struct handle_table))))
+    if (!(table = malloc(sizeof(HANDLE_TABLE))))
     {
         return NULL;
     }
@@ -173,23 +173,23 @@ struct handle_table *alloc_handle_table(int count)
 // Allocate an handle
 //*******************************************************************
 
-struct handle_entry *alloc_handle()
+HANDLE_ENTRY *AllocateHandle()
 {
     int i;
     if (!global_table)
     {
-        if (!(global_table = alloc_handle_table(0)))
+        if (!(global_table = AllocateHandleTable(0)))
             return NULL;
     }
     for (i = 0; i < global_table->count; i++)
     {
-        struct handle_entry *h = &global_table->entries[i];
+        HANDLE_ENTRY *h = &global_table->entries[i];
         if (h->refcount == 0)
         {
             h->refcount++;
             h->id = i + 1;
             h->end = FALSE;
-            h->props = alloc_properties();
+            h->props = AllocateProperties();
             return (HANDLE)h;
         }
     }
@@ -200,9 +200,9 @@ struct handle_entry *alloc_handle()
 // Release an handle
 //*******************************************************************
 
-void release_handle(HANDLE p)
+void ReleaseHandle(HANDLE p)
 {
-    struct handle_entry *h = (struct handle_entry *)p;
+    HANDLE_ENTRY *h = (HANDLE_ENTRY *)p;
     if (h != NULL)
     {
         if (h->refcount > 0)
@@ -211,7 +211,7 @@ void release_handle(HANDLE p)
             if (h->refcount == 0)
             {
                 h->id = 0;
-                properties_free(h->props);
+                FreeProperties(h->props);
             }
         }
     }
@@ -221,9 +221,9 @@ void release_handle(HANDLE p)
 // Get an handle by index
 //*******************************************************************
 
-struct handle_entry *get_handle(int index)
+HANDLE_ENTRY *GetHandle(int index)
 {
-    struct handle_entry *h;
+    HANDLE_ENTRY *h;
     if (!global_table || index < 1 || index > global_table->count)
     {
         return NULL;

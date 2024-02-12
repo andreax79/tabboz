@@ -75,7 +75,7 @@ EM_JS(BOOL, ShowWindowEm, (int windowId, BOOL show), {
 
 BOOL ShowWindow(HWND hWnd, int nCmdShow)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -188,18 +188,18 @@ EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption,
 
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
-    int                  result;
-    int                  parentWindowId = -1;
-    struct handle_entry *handle = alloc_handle();
+    int           result;
+    int           parentWindowId = -1;
+    HANDLE_ENTRY *handle = AllocateHandle();
 
     // Get parent window number
     if (hWnd != NULL)
     {
-        parentWindowId = ((struct handle_entry *)hWnd)->id;
+        parentWindowId = ((HANDLE_ENTRY *)hWnd)->id;
     }
 
     result = MessageBoxEm(handle->id, lpText, lpCaption, uType, parentWindowId);
-    release_handle(handle);
+    ReleaseHandle(handle);
     return result;
 }
 
@@ -247,12 +247,12 @@ EM_JS(void, RemoveDialogBoxEm, (int windowId), {
 
 INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc)
 {
-    INT_PTR              retval;
-    int                  controlId;
-    int                  dialog = (int)lpTemplateName;
-    int                  parentWindowId = -1;
-    struct handle_entry *handle = alloc_handle();
-    MSG                  msg = {.hwnd = (HWND)handle};
+    INT_PTR       retval;
+    int           controlId;
+    int           dialog = (int)lpTemplateName;
+    int           parentWindowId = -1;
+    HANDLE_ENTRY *handle = AllocateHandle();
+    MSG           msg = {.hwnd = (HWND)handle};
 
     if (lpDialogFunc == NULL)
     {
@@ -262,7 +262,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     // Get parent window number
     if (hWndParent != NULL)
     {
-        parentWindowId = ((struct handle_entry *)hWndParent)->id;
+        parentWindowId = ((HANDLE_ENTRY *)hWndParent)->id;
     }
     // Show dialog
     DialogBoxEm(handle->id, dialog, parentWindowId);
@@ -278,7 +278,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     }
     retval = handle->retval;
     RemoveDialogBoxEm(handle->id);
-    release_handle(handle);
+    ReleaseHandle(handle);
     return retval;
 }
 
@@ -288,7 +288,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
 
 BOOL EndDialog(HWND hWnd, INT_PTR retval)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -335,7 +335,7 @@ EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
 
 BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
 {
-    struct handle_entry *handle = (struct handle_entry *)hDlg;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -359,7 +359,7 @@ EM_JS(BOOL, SetCheckEM, (int windowId, int nIDDlgItem, WPARAM wParam), {
 
 LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
 {
-    struct handle_entry *handle = (struct handle_entry *)hDlg;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -418,7 +418,7 @@ EM_JS(BOOL, GetWindowRectEm, (int windowId, int dimension), {
 
 BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -456,7 +456,7 @@ EM_JS(BOOL, MoveWindowEM, (int windowId, int X, int Y, int nWidth, int nHeight),
 
 BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -490,7 +490,7 @@ EM_JS(BOOL, GetDlgItemTextEM, (int windowId, int nIDDlgItem, LPCSTR lpString, in
 
 UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 {
-    struct handle_entry *handle = (struct handle_entry *)hDlg;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
     if (handle == NULL)
     {
         // Invalid window handle
@@ -505,13 +505,13 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 
 HANDLE GetProp(HWND hWnd, LPCSTR lpString)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
-    return properties_get(handle->props, lpString);
+    return GetProperty(handle->props, lpString);
 }
 
 //*******************************************************************
@@ -520,13 +520,13 @@ HANDLE GetProp(HWND hWnd, LPCSTR lpString)
 
 BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
-    properties_set(handle->props, lpString, hData);
+    SetProperty(handle->props, lpString, hData);
     return TRUE;
 }
 
@@ -536,13 +536,13 @@ BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
 
 HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
 {
-    struct handle_entry *handle = (struct handle_entry *)hWnd;
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
     if (handle == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
-    return properties_remove(handle->props, lpString);
+    return DelProperty(handle->props, lpString);
 }
 
 //*******************************************************************
@@ -577,11 +577,11 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
     {
         lpMsg->hwnd = hWnd;
     }
-    if (((struct handle_entry *)lpMsg->hwnd)->end)
+    if (((HANDLE_ENTRY *)lpMsg->hwnd)->end)
     {
         return FALSE;
     }
-    lpMsg->wParam = GetMessageEM(((struct handle_entry *)lpMsg->hwnd)->id, &x, &y);
+    lpMsg->wParam = GetMessageEM(((HANDLE_ENTRY *)lpMsg->hwnd)->id, &x, &y);
     // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
     lpMsg->lParam = ((y & 0xffff) << 16) + (x & 0xffff);
     return TRUE;
@@ -593,7 +593,7 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 
 LRESULT DispatchMessage(const MSG *lpMsg)
 {
-    DLGPROC lpDialogFunc = ((struct handle_entry *)lpMsg->hwnd)->lpDialogFunc;
+    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpDialogFunc;
     if (lpMsg->wParam == SC_CLOSE)
     {
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
@@ -719,9 +719,9 @@ static BOOL is_open = FALSE;
 int start_zarrosim()
 {
     is_open = TRUE;
-    struct handle_entry *handle = alloc_handle();
+    HANDLE_ENTRY *handle = AllocateHandle();
     WinMain((HANDLE)handle, NULL, "", 0);
-    release_handle(handle);
+    ReleaseHandle(handle);
     is_open = FALSE;
     return 0;
 }
