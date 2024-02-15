@@ -180,18 +180,13 @@ char *RRKey(char *xKey)
 // Store values in localStorage
 void TabbozAddKey(char *KeyName, char *KeyValue)
 {
-    EM_ASM({
-        localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
-    }, KeyName, KeyValue);
+    EM_ASM(localStorage.setItem(UTF8ToString($0), UTF8ToString($1)), KeyName, KeyValue);
 };
 
 // Get values from localStorage
 char *TabbozReadKey(char *KeyName, char *buf)
 {
-    EM_ASM({
-        const value = localStorage.getItem(UTF8ToString($0));
-        stringToUTF8(value || "", $1, $2);
-    }, KeyName, buf, 32);
+    EM_ASM(stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32), KeyName, buf);
     if (buf[0] == '\0')
         return NULL;
     return buf;
@@ -200,9 +195,7 @@ char *TabbozReadKey(char *KeyName, char *buf)
 // Inizia la riproduzione di un suono
 void TabbozPlaySound(int number)
 {
-    EM_ASM({
-        new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play();
-    }, number);
+    EM_ASM(new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play(), number);
 };
 
 // Legge una stringa dal profilo memorizzandola in un buffer locale.

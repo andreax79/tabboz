@@ -2,7 +2,6 @@
 /* (C) Copyright 1998 by Andrea Bonomi  */
 /* Definizione per il modulo di rete    */
 
-
 /*
      This file is part of Tabboz Simulator.
 

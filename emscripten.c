@@ -40,25 +40,13 @@ int LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax)
         const value = window.strings[$0] || "";
         stringToUTF8(value, $1, $2);
         return value.length;
-    }, uID, lpBuffer, cchBufferMax);
+    },
+                      uID, lpBuffer, cchBufferMax);
 }
 
 //*******************************************************************
 // Show/hide a window
 //*******************************************************************
-
-EM_JS(BOOL, ShowWindowEm, (int windowId, BOOL show), {
-    const win = document.querySelector('#win' + windowId);
-    if (win != null)
-    {
-        win.style.display = show ? 'block' : 'none';
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-});
 
 BOOL ShowWindow(HWND hWnd, int nCmdShow)
 {
@@ -68,7 +56,7 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
         // Invalid window handle
         return FALSE;
     }
-    return ShowWindowEm(handle->id, nCmdShow && SW_SHOWNORMAL);
+    return EM_ASM_INT({return showWindow($0, $1)}, handle->id, nCmdShow && SW_SHOWNORMAL);
 }
 
 //*******************************************************************
@@ -290,36 +278,6 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
 // Set the title or text of a control in a dialog box
 //*******************************************************************
 
-EM_JS(BOOL, SetDlgItemTextEm, (int windowId, int nIDDlgItem, LPCSTR lpString), {
-    let control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
-    if (control == null)
-    {
-        return false;
-    }
-    else if (control.tagName == "INPUT")
-    {
-        if (control.type == "radio")
-        {
-            // Set radio label
-            const label = control.parentNode.querySelector("label");
-            if (label != null)
-            {
-                label.innerText = UTF8ToString(lpString);
-            }
-        }
-        else
-        {
-            // Set text
-            control.value = UTF8ToString(lpString);
-        }
-    }
-    else
-    {
-        control.innerText = UTF8ToString(lpString);
-    }
-    return true;
-});
-
 BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
 {
     HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
@@ -328,7 +286,7 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
         // Invalid window handle
         return FALSE;
     }
-    return SetDlgItemTextEm(handle->id, nIDDlgItem, lpString);
+    return EM_ASM_INT({return setDlgItemText($0, $1, $2)}, handle->id, nIDDlgItem, lpString);
 }
 
 //*******************************************************************
@@ -359,49 +317,14 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
 // Retrieve the specified system metric
 //*******************************************************************
 
-EM_JS(int, GetSystemMetricsEM, (int nIndex), {
-    switch (nIndex)
-    {
-    case 0: // SM_CXSCREEN
-        return parseInt(getComputedStyle(document.getElementById('screen')).width);
-    case 1: // SM_CYSCREEN
-        return parseInt(getComputedStyle(document.getElementById('screen')).height);
-    default:
-        return 0;
-    }
-    return 0;
-});
-
 int GetSystemMetrics(int nIndex)
 {
-    return GetSystemMetricsEM(nIndex);
+    return EM_ASM_INT({return getSystemMetrics($0)}, nIndex);
 }
 
 //*******************************************************************
 // Retrieve the dimensions of a specified window
 //*******************************************************************
-
-EM_JS(BOOL, GetWindowRectEm, (int windowId, int dimension), {
-    const win = document.querySelector('#win' + windowId);
-    if (win == null)
-    {
-        return 0;
-    }
-    const style = getComputedStyle(win);
-    switch (dimension)
-    {
-    case 0: // left
-        return parseInt(style.left);
-    case 1: // top
-        return parseInt(style.top);
-    case 2: // right
-        return parseInt(style.left) + parseInt(style.width);
-    case 3: // bottom
-        return parseInt(style.top) + parseInt(style.height);
-    default:
-        return 0;
-    }
-});
 
 BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
 {
@@ -413,10 +336,10 @@ BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
     }
     else
     {
-        lpRect->left = GetWindowRectEm(handle->id, 0);
-        lpRect->top = GetWindowRectEm(handle->id, 1);
-        lpRect->right = GetWindowRectEm(handle->id, 2);
-        lpRect->bottom = GetWindowRectEm(handle->id, 3);
+        lpRect->left = EM_ASM_INT({return getWindowRectDimension($0, 0)}, handle->id);
+        lpRect->top = EM_ASM_INT({return getWindowRectDimension($0, 1)}, handle->id);
+        lpRect->right = EM_ASM_INT({return getWindowRectDimension($0, 2)}, handle->id);
+        lpRect->bottom = EM_ASM_INT({return getWindowRectDimension($0, 3)}, handle->id);
         return TRUE;
     }
 }
@@ -424,22 +347,6 @@ BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
 //*******************************************************************
 // Change the position and dimensions of the specified window
 //*******************************************************************
-
-EM_JS(BOOL, MoveWindowEM, (int windowId, int X, int Y, int nWidth, int nHeight), {
-    const win = document.querySelector('#win' + windowId);
-    if (win == null)
-    {
-        return false;
-    }
-    else
-    {
-        win.style.left = X + 'px';
-        win.style.top = Y + 'px';
-        win.style.width = nWidth + 'px';
-        win.style.height = nHeight + 'px';
-        return true;
-    }
-});
 
 BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 {
@@ -449,31 +356,12 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
         // Invalid window handle
         return FALSE;
     }
-    return MoveWindowEM(handle->id, X, Y, nWidth, nHeight);
+    return EM_ASM_INT({return moveWindow($0, $1, $2, $3, $4)}, handle->id, X, Y, nWidth, nHeight);
 }
 
 //*******************************************************************
 // Retrieve the title or text associated with a control in a dialog box
 //*******************************************************************
-
-EM_JS(BOOL, GetDlgItemTextEM, (int windowId, int nIDDlgItem, LPCSTR lpString, int nMaxCount), {
-    let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
-    if (control != null)
-    {
-        stringToUTF8(control.value, lpString, nMaxCount);
-        return control.value.length;
-    }
-    control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
-    if (control != null)
-    {
-        stringToUTF8(control.innerText, lpString, nMaxCount);
-        return control.innerText.length;
-    }
-    else
-    {
-        return 0;
-    }
-});
 
 UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 {
@@ -483,7 +371,7 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
         // Invalid window handle
         return 0;
     }
-    return GetDlgItemTextEM(handle->id, nIDDlgItem, lpString, nMaxCount);
+    return EM_ASM_INT({return getDlgItemText($0, $1, $2, $3, $4)}, handle->id, nIDDlgItem, lpString, nMaxCount);
 }
 
 //*******************************************************************
@@ -530,16 +418,6 @@ HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
         return FALSE;
     }
     return DelProperty(handle->props, lpString);
-}
-
-//*******************************************************************
-// Set the random number generator seed
-//*******************************************************************
-
-extern void randomize()
-{
-    time_t t;
-    srand((unsigned)time(&t));
 }
 
 //*******************************************************************
@@ -699,6 +577,15 @@ HWND SetFocus(HWND hWnd)
     return NULL; // TODO
 }
 
+//*******************************************************************
+// Set the random number generator seed
+//*******************************************************************
+
+void randomize()
+{
+    time_t t;
+    srand((unsigned)time(&t));
+}
 
 static BOOL is_open = FALSE;
 

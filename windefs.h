@@ -166,13 +166,13 @@ typedef struct
 
 typedef struct
 {
-    LPCSTR key; // key
-    HANDLE hData;  // value
+    LPCSTR key;   // key
+    HANDLE hData; // value
 } PROPERTY;
 
 typedef struct
 {
-    int       len; // current length
+    int       len;      // current length
     int       capacity; // capacity
     PROPERTY *entry;
 } PROPERTIES;
@@ -242,7 +242,7 @@ typedef struct
 #define MakeProcInstance(p, i) (p)
 #define FreeProcInstance(p) (void)(p)
 #define MAKEINTRESOURCE(i) ((LPSTR)(ULONG_PTR)LOWORD(i))
-#define RGB(r,g,b) ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
+#define RGB(r, g, b) ((COLORREF)(((BYTE)(r) | ((WORD)((BYTE)(g)) << 8)) | (((DWORD)(BYTE)(b)) << 16)))
 
 extern HWND          GetDlgItem(HWND DhDlg, int nIDDlgItem);
 extern HWND          SetFocus(HWND hWnd);
@@ -264,7 +264,7 @@ extern BOOL          SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
 extern HANDLE        RemoveProp(HWND hWnd, LPCSTR lpString);
 extern void          ExitWindows(int dwReserved, int code);
 extern int           WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
-extern BOOL          GetMessage(LPMSG lpMsg, HWND  hWnd, UINT  wMsgFilterMin, UINT  wMsgFilterMax);
+extern BOOL          GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
 extern LRESULT       DispatchMessage(const MSG *lpMsg);
 extern HICON         LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
 extern HBITMAP       LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);

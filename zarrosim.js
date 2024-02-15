@@ -1721,25 +1721,28 @@ var tempI64;
 
 var ASM_CONSTS = {
   23976: function($0, $1, $2) {const value = window.strings[$0] || ""; stringToUTF8(value, $1, $2); return value.length;},  
- 24070: function() {shutdown()},  
- 24081: function() {loadStringResources()},  
- 24103: function() {preload()},  
- 24113: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1));},  
- 24175: function($0, $1, $2) {const value = localStorage.getItem(UTF8ToString($0)); stringToUTF8(value || "", $1, $2);},  
- 24268: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play();},  
- 24352: function($0, $1, $2, $3, $4) {drawImage($0, UTF8ToString($1), $2, $3, $4)},  
- 24396: function($0, $1, $2) {drawImage($0, UTF8ToString($1), $2, 0, 0)},  
- 24438: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 24499: function() {document.querySelector(".menu107").classList.add("disabled")}
+ 24070: function($0, $1) {return showWindow($0, $1)},  
+ 24098: function($0, $1, $2) {return setDlgItemText($0, $1, $2)},  
+ 24134: function($0) {return getSystemMetrics($0)},  
+ 24164: function($0) {return getWindowRectDimension($0, 0)},  
+ 24203: function($0) {return getWindowRectDimension($0, 1)},  
+ 24242: function($0) {return getWindowRectDimension($0, 2)},  
+ 24281: function($0) {return getWindowRectDimension($0, 3)},  
+ 24320: function($0, $1, $2, $3, $4) {return moveWindow($0, $1, $2, $3, $4)},  
+ 24360: function($0, $1, $2, $3, $4) {return getDlgItemText($0, $1, $2, $3, $4)},  
+ 24404: function() {shutdown()},  
+ 24415: function() {loadStringResources()},  
+ 24437: function() {preload()},  
+ 24447: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24504: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24571: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 24650: function($0, $1, $2, $3, $4) {drawImage($0, UTF8ToString($1), $2, $3, $4)},  
+ 24694: function($0, $1, $2) {drawImage($0, UTF8ToString($1), $2, 0, 0)},  
+ 24736: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 24797: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
-function GetDlgItemTextEM(windowId,nIDDlgItem,lpString,nMaxCount){ let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem); if (control != null) { stringToUTF8(control.value, lpString, nMaxCount); return control.value.length; } control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { stringToUTF8(control.innerText, lpString, nMaxCount); return control.innerText.length; } else { return 0; } }
-function GetSystemMetricsEM(nIndex){ switch (nIndex) { case 0: return parseInt(getComputedStyle(document.getElementById('screen')).width); case 1: return parseInt(getComputedStyle(document.getElementById('screen')).height); default: return 0; } return 0; }
-function GetWindowRectEm(windowId,dimension){ const win = document.querySelector('#win' + windowId); if (win == null) { return 0; } const style = getComputedStyle(win); switch (dimension) { case 0: return parseInt(style.left); case 1: return parseInt(style.top); case 2: return parseInt(style.left) + parseInt(style.width); case 3: return parseInt(style.top) + parseInt(style.height); default: return 0; } }
-function MoveWindowEM(windowId,X,Y,nWidth,nHeight){ const win = document.querySelector('#win' + windowId); if (win == null) { return false; } else { win.style.left = X + 'px'; win.style.top = Y + 'px'; win.style.width = nWidth + 'px'; win.style.height = nHeight + 'px'; return true; } }
 function RemoveDialogBoxEm(windowId){ const destination = document.getElementById('screen'); destination.removeChild(document.getElementById('wall' + windowId)); destination.removeChild(document.getElementById('win' + windowId)); }
 function SetCheckEM(windowId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
-function SetDlgItemTextEm(windowId,nIDDlgItem,lpString){ let control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control == null) { return false; } else if (control.tagName == "INPUT") { if (control.type == "radio") { const label = control.parentNode.querySelector("label"); if (label != null) { label.innerText = UTF8ToString(lpString); } } else { control.value = UTF8ToString(lpString); } } else { control.innerText = UTF8ToString(lpString); } return true; }
-function ShowWindowEm(windowId,show){ const win = document.querySelector('#win' + windowId); if (win != null) { win.style.display = show ? 'block' : 'none'; return true; } else { return false; } }
 function __asyncjs__DialogBoxEm(windowId,dialog,parentWindowId){ return Asyncify.handleAsync(async () => { const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html"); const html = await response.text(); const wall = document.getElementById('wall').cloneNode(true); const c = createElementFromHTML(html); wall.id = 'wall' + windowId; c.id = 'win' + windowId; if (parentWindowId >= 0) { const parent = document.getElementById('win' + parentWindowId); if (parent != null) { const style = getComputedStyle(parent); c.style.left = (parseInt(style.left) + 40) + 'px'; c.style.top = (parseInt(style.top) + 40) + 'px'; } } const destination = document.getElementById('screen'); destination.appendChild(wall); destination.appendChild(c); setActiveWindow(windowId); addMainMenu(c); makeDraggable(c); }); }
 function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
 function __asyncjs__MessageBoxEm(windowId,lpText,lpCaption,uType,parentWindowId){ return Asyncify.handleAsync(async () => { const element = document.getElementById('messagebox'); const wall = document.getElementById('wall').cloneNode(true); const c = element.cloneNode(true); wall.id = 'wall' + windowId; c.id = 'win' + windowId; if (parentWindowId >= 0) { const parent = document.getElementById('win' + parentWindowId); if (parent != null) { const style = getComputedStyle(parent); c.style.left = (parseInt(style.left) + 40) + 'px'; c.style.top = (parseInt(style.top) + 40) + 'px'; } } if (uType & 0x00000030) { c.querySelector('img').src = "resources/icons/101.png"; } else if (uType & 0x00000020) { c.querySelector('img').src = "resources/icons/102.png"; } else if (uType & 0x00000010) { c.querySelector('img').src = "resources/icons/103.png"; } else if (uType & 0x00000040) { c.querySelector('img').src = "resources/icons/104.png"; } if (uType & 0x00000001) { c.querySelector('.control1').innerText = 'OK'; c.querySelector('.control2').innerText = 'Cancel'; c.querySelector('.control2').style.display = 'inline'; } else if (uType & 0x00000004) { c.querySelector('.control1').innerText = 'Yes'; c.querySelector('.control2').innerText = 'No'; c.querySelector('.control2').style.display = 'inline'; } else { c.querySelector('.control1').innerText = 'OK'; c.querySelector('.control2').style.display = 'none'; } wall.style.zIndex = windowId; c.style.zIndex = windowId; c.style.position = 'absolute'; c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption); c.querySelector('.content').innerText = UTF8ToString(lpText); const destination = document.getElementById('screen'); destination.appendChild(wall); destination.appendChild(c); let x = parseInt(getComputedStyle(document.getElementById('screen')).width); let y = parseInt(getComputedStyle(document.getElementById('screen')).height); let w = parseInt(getComputedStyle(c).width); let h = parseInt(getComputedStyle(c).height); x = (x - w) / 2; y = (y - h) / 2; c.style.left = x + 'px'; c.style.top = y + 'px'; setActiveWindow(windowId); makeDraggable(c); let result = (await waitListener(windowId)).controlId; console.log(result); if (uType & 0x00000004) { switch (result) { case 1: result = 6; break; case 2: result = 7; break; } } destination.removeChild(wall); destination.removeChild(c); return result; }); }
@@ -5103,14 +5106,8 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var asmLibraryArg = {
-  "GetDlgItemTextEM": GetDlgItemTextEM,
-  "GetSystemMetricsEM": GetSystemMetricsEM,
-  "GetWindowRectEm": GetWindowRectEm,
-  "MoveWindowEM": MoveWindowEM,
   "RemoveDialogBoxEm": RemoveDialogBoxEm,
   "SetCheckEM": SetCheckEM,
-  "SetDlgItemTextEm": SetDlgItemTextEm,
-  "ShowWindowEm": ShowWindowEm,
   "__asyncjs__DialogBoxEm": __asyncjs__DialogBoxEm,
   "__asyncjs__GetMessageEM": __asyncjs__GetMessageEM,
   "__asyncjs__MessageBoxEm": __asyncjs__MessageBoxEm,

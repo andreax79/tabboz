@@ -354,13 +354,13 @@ void Evento(HANDLE hInstance)
 
         case 21:       // + gravi
         case 22:       //  |
-        case 23:
+        case 23:       //  |
             Fama -= 5; //  |
         case 24:       //  |
-        case 25:
+        case 25:       //  |
             Fama -= 1; //  |
         case 26:       //  |
-        case 27:
+        case 27:       //  |
             Fama -= 1; //  |
         case 28:       // \|/
         case 29:       // - gravi

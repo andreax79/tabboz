@@ -3,3 +3,4 @@ AlignConsecutiveDeclarations: true
 BasedOnStyle: Microsoft
 ColumnLimit: 0
 IndentWidth: 4
+SortIncludes: false
