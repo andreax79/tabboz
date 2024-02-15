@@ -38,6 +38,11 @@ ul.tree-view {
     font-size: 12px;
 }
 
+/* hide img if src is empty */
+img[src=""] {
+    display: none;
+}
+
 /* dlgframe - window without title bar */
 .window.dlgframe {
     background-color: transparent;
@@ -51,6 +56,10 @@ ul.tree-view {
 
 .title-bar {
     font-size: 11px;
+}
+
+.title-bar-text {
+    cursor: default;
 }
 
 .hotkey {
@@ -132,7 +141,6 @@ button.default {
 /* Message box */
 .messagebox {
     max-width: 60%;
-    padding: 5px;
 }
 
 .messagebox .window-body .field-row {

@@ -1722,30 +1722,30 @@ var tempI64;
 var ASM_CONSTS = {
   23976: function($0, $1, $2) {const value = window.strings[$0] || ""; stringToUTF8(value, $1, $2); return value.length;},  
  24070: function($0, $1) {return showWindow($0, $1)},  
- 24098: function($0, $1, $2) {return setDlgItemText($0, $1, $2)},  
- 24134: function($0) {return getSystemMetrics($0)},  
- 24164: function($0) {return getWindowRectDimension($0, 0)},  
- 24203: function($0) {return getWindowRectDimension($0, 1)},  
- 24242: function($0) {return getWindowRectDimension($0, 2)},  
- 24281: function($0) {return getWindowRectDimension($0, 3)},  
- 24320: function($0, $1, $2, $3, $4) {return moveWindow($0, $1, $2, $3, $4)},  
- 24360: function($0, $1, $2, $3, $4) {return getDlgItemText($0, $1, $2, $3, $4)},  
- 24404: function() {shutdown()},  
- 24415: function() {loadStringResources()},  
- 24437: function() {preload()},  
- 24447: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
- 24504: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
- 24571: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
- 24650: function($0, $1, $2, $3, $4) {drawImage($0, UTF8ToString($1), $2, $3, $4)},  
- 24694: function($0, $1, $2) {drawImage($0, UTF8ToString($1), $2, 0, 0)},  
- 24736: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 24797: function() {document.querySelector(".menu107").classList.add("disabled")}
+ 24098: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){return messageBox($0, $1, $2, $3, $4)})},  
+ 24179: function($0, $1, $2) {Asyncify.handleAsync(function(){return dialogBox($0, $1, $2)})},  
+ 24242: function($0, $1, $2) {return setDlgItemText($0, $1, $2)},  
+ 24278: function($0) {return getSystemMetrics($0)},  
+ 24308: function($0) {return getWindowRectDimension($0, 0)},  
+ 24347: function($0) {return getWindowRectDimension($0, 1)},  
+ 24386: function($0) {return getWindowRectDimension($0, 2)},  
+ 24425: function($0) {return getWindowRectDimension($0, 3)},  
+ 24464: function($0, $1, $2, $3, $4) {return moveWindow($0, $1, $2, $3, $4)},  
+ 24504: function($0, $1, $2, $3, $4) {return getDlgItemText($0, $1, $2, $3, $4)},  
+ 24548: function() {shutdown()},  
+ 24559: function() {loadStringResources()},  
+ 24581: function() {preload()},  
+ 24591: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24648: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24715: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 24794: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){return drawImage($0, UTF8ToString($1), $2, $3, $4)})},  
+ 24888: function($0, $1, $2) {drawImage($0, UTF8ToString($1), $2, 0, 0)},  
+ 24930: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 24991: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
 function RemoveDialogBoxEm(windowId){ const destination = document.getElementById('screen'); destination.removeChild(document.getElementById('wall' + windowId)); destination.removeChild(document.getElementById('win' + windowId)); }
 function SetCheckEM(windowId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
-function __asyncjs__DialogBoxEm(windowId,dialog,parentWindowId){ return Asyncify.handleAsync(async () => { const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html"); const html = await response.text(); const wall = document.getElementById('wall').cloneNode(true); const c = createElementFromHTML(html); wall.id = 'wall' + windowId; c.id = 'win' + windowId; if (parentWindowId >= 0) { const parent = document.getElementById('win' + parentWindowId); if (parent != null) { const style = getComputedStyle(parent); c.style.left = (parseInt(style.left) + 40) + 'px'; c.style.top = (parseInt(style.top) + 40) + 'px'; } } const destination = document.getElementById('screen'); destination.appendChild(wall); destination.appendChild(c); setActiveWindow(windowId); addMainMenu(c); makeDraggable(c); }); }
 function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
-function __asyncjs__MessageBoxEm(windowId,lpText,lpCaption,uType,parentWindowId){ return Asyncify.handleAsync(async () => { const element = document.getElementById('messagebox'); const wall = document.getElementById('wall').cloneNode(true); const c = element.cloneNode(true); wall.id = 'wall' + windowId; c.id = 'win' + windowId; if (parentWindowId >= 0) { const parent = document.getElementById('win' + parentWindowId); if (parent != null) { const style = getComputedStyle(parent); c.style.left = (parseInt(style.left) + 40) + 'px'; c.style.top = (parseInt(style.top) + 40) + 'px'; } } if (uType & 0x00000030) { c.querySelector('img').src = "resources/icons/101.png"; } else if (uType & 0x00000020) { c.querySelector('img').src = "resources/icons/102.png"; } else if (uType & 0x00000010) { c.querySelector('img').src = "resources/icons/103.png"; } else if (uType & 0x00000040) { c.querySelector('img').src = "resources/icons/104.png"; } if (uType & 0x00000001) { c.querySelector('.control1').innerText = 'OK'; c.querySelector('.control2').innerText = 'Cancel'; c.querySelector('.control2').style.display = 'inline'; } else if (uType & 0x00000004) { c.querySelector('.control1').innerText = 'Yes'; c.querySelector('.control2').innerText = 'No'; c.querySelector('.control2').style.display = 'inline'; } else { c.querySelector('.control1').innerText = 'OK'; c.querySelector('.control2').style.display = 'none'; } wall.style.zIndex = windowId; c.style.zIndex = windowId; c.style.position = 'absolute'; c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption); c.querySelector('.content').innerText = UTF8ToString(lpText); const destination = document.getElementById('screen'); destination.appendChild(wall); destination.appendChild(c); let x = parseInt(getComputedStyle(document.getElementById('screen')).width); let y = parseInt(getComputedStyle(document.getElementById('screen')).height); let w = parseInt(getComputedStyle(c).width); let h = parseInt(getComputedStyle(c).height); x = (x - w) / 2; y = (y - h) / 2; c.style.left = x + 'px'; c.style.top = y + 'px'; setActiveWindow(windowId); makeDraggable(c); let result = (await waitListener(windowId)).controlId; console.log(result); if (uType & 0x00000004) { switch (result) { case 1: result = 6; break; case 2: result = 7; break; } } destination.removeChild(wall); destination.removeChild(c); return result; }); }
 
 
 
@@ -4696,7 +4696,7 @@ function __asyncjs__MessageBoxEm(windowId,lpText,lpCaption,uType,parentWindowId)
         }
         return id;
       },instrumentWasmImports:function(imports) {
-        var ASYNCIFY_IMPORTS = ["env.invoke_*","env.emscripten_sleep","env.emscripten_wget","env.emscripten_wget_data","env.emscripten_idb_load","env.emscripten_idb_store","env.emscripten_idb_delete","env.emscripten_idb_exists","env.emscripten_idb_load_blob","env.emscripten_idb_store_blob","env.SDL_Delay","env.emscripten_scan_registers","env.emscripten_lazy_load_code","env.emscripten_fiber_swap","wasi_snapshot_preview1.fd_sync","env.__wasi_fd_sync","env._emval_await","env._dlopen_js","env.__asyncjs__*"].map((x) => x.split('.')[1]);
+        var ASYNCIFY_IMPORTS = ["env.emscripten_asm_const_int","env.invoke_*","env.emscripten_sleep","env.emscripten_wget","env.emscripten_wget_data","env.emscripten_idb_load","env.emscripten_idb_store","env.emscripten_idb_delete","env.emscripten_idb_exists","env.emscripten_idb_load_blob","env.emscripten_idb_store_blob","env.SDL_Delay","env.emscripten_scan_registers","env.emscripten_lazy_load_code","env.emscripten_fiber_swap","wasi_snapshot_preview1.fd_sync","env.__wasi_fd_sync","env._emval_await","env._dlopen_js","env.__asyncjs__*"].map((x) => x.split('.')[1]);
         for (var x in imports) {
           (function(x) {
             var original = imports[x];
@@ -5108,9 +5108,7 @@ function checkIncomingModuleAPI() {
 var asmLibraryArg = {
   "RemoveDialogBoxEm": RemoveDialogBoxEm,
   "SetCheckEM": SetCheckEM,
-  "__asyncjs__DialogBoxEm": __asyncjs__DialogBoxEm,
   "__asyncjs__GetMessageEM": __asyncjs__GetMessageEM,
-  "__asyncjs__MessageBoxEm": __asyncjs__MessageBoxEm,
   "__syscall_fcntl64": ___syscall_fcntl64,
   "__syscall_ioctl": ___syscall_ioctl,
   "__syscall_open": ___syscall_open,

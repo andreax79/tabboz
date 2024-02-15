@@ -48,7 +48,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hdc;
     if (handle != NULL)
     {
-        EM_ASM(drawImage($0, UTF8ToString($1), $2, $3, $4), handle->id, "BMPView", (int)hbmpSrc, x, y);
+        EM_ASM({return Asyncify.handleAsync(function(){return drawImage($0, UTF8ToString($1), $2, $3, $4)})}, handle->id, "BMPView", (int)hbmpSrc, x, y);
     }
 }
 

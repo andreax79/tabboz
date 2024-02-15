@@ -100,7 +100,7 @@
     // Make a window draggrable
     function makeDraggable(element) {
         element.addEventListener('mousedown', function(e) {
-            if (e.target.classList.contains('title-bar')) {
+            if (e.target.classList.contains('title-bar') || e.target.classList.contains('title-bar-text')) {
                 var offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
                 var offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
 
@@ -285,6 +285,115 @@
         return 0;
     }
 
+    async function messageBox(windowId, lpText, lpCaption, uType, parentWindowId) {
+        const element = document.getElementById('messagebox');
+        const wall = document.getElementById('wall').cloneNode(true);
+        const c = element.cloneNode(true);
+        // Set window id
+        wall.id = 'wall' + windowId;
+        c.id = 'win' + windowId;
+        // Set window position
+        setWindowInitialPosition(c, parentWindowId);
+        // Icon
+        if (uType & 0x00000020) { // MB_ICONQUESTION
+            c.querySelector('img').src = "resources/icons/102.png";
+        } else if (uType & 0x00000010) { // MB_ICONSTOP
+            c.querySelector('img').src = "resources/icons/103.png";
+        } else if (uType & 0x00000030) { // MB_ICONEXCLAMATION
+            c.querySelector('img').src = "resources/icons/101.png";
+        } else if (uType & 0x00000040) { // MB_ICONINFORMATION
+            c.querySelector('img').src = "resources/icons/104.png";
+        }
+        // Buttons
+        if (uType & 0x00000001) { // MB_OKCANCEL
+            c.querySelector('.control1').innerText = 'OK';
+            c.querySelector('.control2').innerText = 'Cancel';
+            c.querySelector('.control2').style.display = 'inline';
+        } else if (uType & 0x00000004) { // MB_YESNO
+            c.querySelector('.control1').innerText = 'Yes';
+            c.querySelector('.control2').innerText = 'No';
+            c.querySelector('.control2').style.display = 'inline';
+        } else { // MB_OK
+            c.querySelector('.control1').innerText = 'OK';
+            c.querySelector('.control2').style.display = 'none';
+        }
+        wall.style.zIndex = windowId;
+        c.style.zIndex = windowId;
+        c.style.position = 'absolute';
+        // Set title and message
+        c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
+        c.querySelector('.content').innerText = UTF8ToString(lpText);
+        // Add window to screen
+        const destination = document.getElementById('screen');
+        destination.appendChild(wall);
+        destination.appendChild(c);
+        // Center the dialog
+        let x = parseInt(getComputedStyle(document.getElementById('screen')).width);
+        let y = parseInt(getComputedStyle(document.getElementById('screen')).height);
+        let w = parseInt(getComputedStyle(c).width);
+        let h = parseInt(getComputedStyle(c).height);
+        x = (x - w) / 2;
+        y = (y - h) / 2;
+        c.style.left = x + 'px';
+        c.style.top = y + 'px';
+        // Activate the window
+        setActiveWindow(windowId);
+        // Make the window draggrable
+        makeDraggable(c);
+        // Wait for events
+        let result = (await waitListener(windowId)).controlId;
+        // Convert the result
+        if (uType & 0x00000004) { // MB_YESNO
+            switch (result) {
+                case 1:
+                    result = 6; // IDYES
+                    break;
+                case 2:
+                    result = 7; // IDNO
+                    break;
+            }
+        }
+        // Remove the window
+        destination.removeChild(wall);
+        destination.removeChild(c);
+        return result;
+    };
+
+    async function dialogBox(windowId, dialog, parentWindowId) {
+        // Load html
+        const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
+        const html = await response.text();
+        const wall = document.getElementById('wall').cloneNode(true);
+        const c = createElementFromHTML(html);
+        // Set window id
+        wall.id = 'wall' + windowId;
+        c.id = 'win' + windowId;
+        // Set window position
+        setWindowInitialPosition(c, parentWindowId);
+        // Add window to screen
+        const destination = document.getElementById('screen');
+        destination.appendChild(wall);
+        destination.appendChild(c);
+        // Activate the window
+        setActiveWindow(windowId);
+        // Add menu
+        addMainMenu(c);
+        // Make the window draggrable
+        makeDraggable(c);
+    }
+
+    // Set window position
+    function setWindowInitialPosition(c, parentWindowId) {
+        if (parentWindowId >= 0) {
+            const parent = document.getElementById('win' + parentWindowId);
+            if (parent != null) {
+                const style = getComputedStyle(parent);
+                c.style.left = (parseInt(style.left) + 40) + 'px';
+                c.style.top = (parseInt(style.top) + 40) + 'px';
+            }
+        }
+    }
+
     // Load strings
     async function loadStringResources() {
         const response = await fetch("resources/strings/strings.json");
@@ -316,6 +425,8 @@
     exports.getDlgItemText = getDlgItemText;
     exports.getSystemMetrics = getSystemMetrics;
     exports.loadStringResources = loadStringResources;
+    exports.messageBox = messageBox;
+    exports.dialogBox = dialogBox;
     exports.preload = preload;
     exports.shutdown = shutdown;
 

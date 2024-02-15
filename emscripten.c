@@ -63,104 +63,6 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 // Display a modal dialog box
 //*******************************************************************
 
-EM_ASYNC_JS(int, MessageBoxEm, (int windowId, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, int parentWindowId), {
-    const element = document.getElementById('messagebox');
-    const wall = document.getElementById('wall').cloneNode(true);
-    const c = element.cloneNode(true);
-    // Set window id
-    wall.id = 'wall' + windowId;
-    c.id = 'win' + windowId;
-    // Set window position
-    if (parentWindowId >= 0)
-    {
-        const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null)
-        {
-            const style = getComputedStyle(parent);
-            c.style.left = (parseInt(style.left) + 40) + 'px';
-            c.style.top = (parseInt(style.top) + 40) + 'px';
-        }
-    }
-    // Icon
-    if (uType & 0x00000030)
-    { // MB_ICONEXCLAMATION
-        c.querySelector('img').src = "resources/icons/101.png";
-    }
-    else if (uType & 0x00000020)
-    { // MB_ICONQUESTION
-        c.querySelector('img').src = "resources/icons/102.png";
-    }
-    else if (uType & 0x00000010)
-    { // MB_ICONSTOP
-        c.querySelector('img').src = "resources/icons/103.png";
-    }
-    else if (uType & 0x00000040)
-    { // MB_ICONINFORMATION
-        c.querySelector('img').src = "resources/icons/104.png";
-    }
-    // Buttons
-    if (uType & 0x00000001)
-    { // MB_OKCANCEL
-        c.querySelector('.control1').innerText = 'OK';
-        c.querySelector('.control2').innerText = 'Cancel';
-        c.querySelector('.control2').style.display = 'inline';
-    }
-    else if (uType & 0x00000004)
-    { // MB_YESNO
-        c.querySelector('.control1').innerText = 'Yes';
-        c.querySelector('.control2').innerText = 'No';
-        c.querySelector('.control2').style.display = 'inline';
-    }
-    else
-    { // MB_OK
-        c.querySelector('.control1').innerText = 'OK';
-        c.querySelector('.control2').style.display = 'none';
-    }
-    wall.style.zIndex = windowId;
-    c.style.zIndex = windowId;
-    c.style.position = 'absolute';
-    // Set title and message
-    c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
-    c.querySelector('.content').innerText = UTF8ToString(lpText);
-    // Add window to screen
-    const destination = document.getElementById('screen');
-    destination.appendChild(wall);
-    destination.appendChild(c);
-    // Center the dialog
-    let x = parseInt(getComputedStyle(document.getElementById('screen')).width);
-    let y = parseInt(getComputedStyle(document.getElementById('screen')).height);
-    let w = parseInt(getComputedStyle(c).width);
-    let h = parseInt(getComputedStyle(c).height);
-    x = (x - w) / 2;
-    y = (y - h) / 2;
-    c.style.left = x + 'px';
-    c.style.top = y + 'px';
-    // Activate the window
-    setActiveWindow(windowId);
-    // Make the window draggrable
-    makeDraggable(c);
-    // Wait for events
-    let result = (await waitListener(windowId)).controlId;
-    console.log(result);
-    // Convert the result
-    if (uType & 0x00000004)
-    { // MB_YESNO
-        switch (result)
-        {
-        case 1:
-            result = 6; // IDYES
-            break;
-        case 2:
-            result = 7; // IDNO
-            break;
-        }
-    }
-    // Remove the window
-    destination.removeChild(wall);
-    destination.removeChild(c);
-    return result;
-});
-
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
     int           result;
@@ -173,7 +75,7 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
         parentWindowId = ((HANDLE_ENTRY *)hWnd)->id;
     }
 
-    result = MessageBoxEm(handle->id, lpText, lpCaption, uType, parentWindowId);
+    result = EM_ASM_INT({return Asyncify.handleAsync(function(){return messageBox($0, $1, $2, $3, $4)})}, handle->id, lpText, lpCaption, uType, parentWindowId);
     ReleaseHandle(handle);
     return result;
 }
@@ -181,38 +83,6 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 //*******************************************************************
 // Create a modal dialog box from a dialog box template resource
 //*******************************************************************
-
-EM_ASYNC_JS(void, DialogBoxEm, (int windowId, int dialog, int parentWindowId), {
-    // Load html
-    const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
-    const html = await     response.text();
-    const wall = document.getElementById('wall').cloneNode(true);
-    const c = createElementFromHTML(html);
-    // Set window id
-    wall.id = 'wall' + windowId;
-    c.id = 'win' + windowId;
-    // Set window position
-    if (parentWindowId >= 0)
-    {
-        const parent = document.getElementById('win' + parentWindowId);
-        if (parent != null)
-        {
-            const style = getComputedStyle(parent);
-            c.style.left = (parseInt(style.left) + 40) + 'px';
-            c.style.top = (parseInt(style.top) + 40) + 'px';
-        }
-    }
-    // Add window to screen
-    const destination = document.getElementById('screen');
-    destination.appendChild(wall);
-    destination.appendChild(c);
-    // Activate the window
-    setActiveWindow(windowId);
-    // Add menu
-    addMainMenu(c);
-    // Make the window draggrable
-    makeDraggable(c);
-});
 
 EM_JS(void, RemoveDialogBoxEm, (int windowId), {
     const destination = document.getElementById('screen');
@@ -240,7 +110,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
         parentWindowId = ((HANDLE_ENTRY *)hWndParent)->id;
     }
     // Show dialog
-    DialogBoxEm(handle->id, dialog, parentWindowId);
+    EM_ASM(Asyncify.handleAsync(function(){return dialogBox($0, $1, $2)}), handle->id, dialog, parentWindowId);
     // Dispatch Init
     lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
