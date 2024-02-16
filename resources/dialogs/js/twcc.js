@@ -201,7 +201,8 @@
     };
 
     // Draw an image on a canvas
-    async function drawImage(windowId, canvasClass, imageId, x, y) {
+    async function drawImage(windowId, lpCanvasClass, imageId, x, y) {
+        const canvasClass = UTF8ToString(lpCanvasClass);
         const canvas = document.querySelector(`#win${windowId} .${canvasClass}`);
         if (canvas) {
             // Load image
@@ -270,6 +271,15 @@
         } else {
             return 0;
         }
+    }
+
+    // Set the check state of a radio button or check box
+    function setCheck(windowId, nIDDlgItem, wParam) {
+        const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+        if (control != null) {
+            control.checked = (wParam != 0);
+        }
+        return 0;
     }
 
     // Retrieve the specified system metric
@@ -359,6 +369,7 @@
         return result;
     };
 
+    // Show dialog box
     async function dialogBox(windowId, dialog, parentWindowId) {
         // Load html
         const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
@@ -382,6 +393,13 @@
         makeDraggable(c);
     }
 
+    // Destroy a dialog box
+    function destroyDialogBox(windowId) {
+        const destination = document.getElementById('screen');
+        destination.removeChild(document.getElementById('wall' + windowId));
+        destination.removeChild(document.getElementById('win' + windowId));
+    }
+
     // Set window position
     function setWindowInitialPosition(c, parentWindowId) {
         if (parentWindowId >= 0) {
@@ -394,12 +412,21 @@
         }
     }
 
+    // Load a string resource into a buffer
+    function loadString(uID, lpBuffer, cchBufferMax) {
+        const value = window.strings[uID] || "";
+        stringToUTF8(value, lpBuffer, cchBufferMax);
+        console.log(value);
+        return value.length;
+    };
+
     // Load strings
     async function loadStringResources() {
         const response = await fetch("resources/strings/strings.json");
         window.strings = await response.json();
     };
 
+    // Preload
     async function preload() {
         const response = await fetch("resources/bitmaps/list.json");
         (await response.json()).data.forEach(element => {
@@ -423,10 +450,13 @@
     exports.drawImage = drawImage;
     exports.setDlgItemText = setDlgItemText;
     exports.getDlgItemText = getDlgItemText;
+    exports.setCheck = setCheck;
     exports.getSystemMetrics = getSystemMetrics;
+    exports.loadString = loadString;
     exports.loadStringResources = loadStringResources;
     exports.messageBox = messageBox;
     exports.dialogBox = dialogBox;
+    exports.destroyDialogBox = destroyDialogBox;
     exports.preload = preload;
     exports.shutdown = shutdown;
 

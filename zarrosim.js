@@ -1720,31 +1720,31 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  23976: function($0, $1, $2) {const value = window.strings[$0] || ""; stringToUTF8(value, $1, $2); return value.length;},  
- 24070: function($0, $1) {return showWindow($0, $1)},  
- 24098: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){return messageBox($0, $1, $2, $3, $4)})},  
- 24179: function($0, $1, $2) {Asyncify.handleAsync(function(){return dialogBox($0, $1, $2)})},  
- 24242: function($0, $1, $2) {return setDlgItemText($0, $1, $2)},  
- 24278: function($0) {return getSystemMetrics($0)},  
- 24308: function($0) {return getWindowRectDimension($0, 0)},  
- 24347: function($0) {return getWindowRectDimension($0, 1)},  
- 24386: function($0) {return getWindowRectDimension($0, 2)},  
- 24425: function($0) {return getWindowRectDimension($0, 3)},  
- 24464: function($0, $1, $2, $3, $4) {return moveWindow($0, $1, $2, $3, $4)},  
- 24504: function($0, $1, $2, $3, $4) {return getDlgItemText($0, $1, $2, $3, $4)},  
- 24548: function() {shutdown()},  
- 24559: function() {loadStringResources()},  
- 24581: function() {preload()},  
- 24591: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
- 24648: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
- 24715: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
- 24794: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){return drawImage($0, UTF8ToString($1), $2, $3, $4)})},  
- 24888: function($0, $1, $2) {drawImage($0, UTF8ToString($1), $2, 0, 0)},  
- 24930: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 24991: function() {document.querySelector(".menu107").classList.add("disabled")}
+  23976: function($0, $1, $2) {return loadString($0,$1,$2)},  
+ 24004: function($0, $1) {return showWindow($0,$1)},  
+ 24029: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return messageBox($0,$1,$2,$3,$4)})},  
+ 24107: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return dialogBox($0,$1,$2)})},  
+ 24178: function($0) {return destroyDialogBox($0)},  
+ 24206: function($0, $1, $2) {return setDlgItemText($0,$1,$2)},  
+ 24238: function($0, $1, $2) {return setCheck($0,$1,$2)},  
+ 24264: function($0) {return getSystemMetrics($0)},  
+ 24292: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24329: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24366: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24403: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24440: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
+ 24474: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
+ 24509: function() {return shutdown()},  
+ 24527: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
+ 24600: function() {return Asyncify.handleAsync(function(){ return preload()})},  
+ 24661: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24718: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24785: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 24864: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 24941: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 25018: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 25079: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
-function RemoveDialogBoxEm(windowId){ const destination = document.getElementById('screen'); destination.removeChild(document.getElementById('wall' + windowId)); destination.removeChild(document.getElementById('win' + windowId)); }
-function SetCheckEM(windowId,nIDDlgItem,wParam){ const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem); if (control != null) { control.checked = (wParam != 0); } return 0; }
 function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
 
 
@@ -5106,8 +5106,6 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var asmLibraryArg = {
-  "RemoveDialogBoxEm": RemoveDialogBoxEm,
-  "SetCheckEM": SetCheckEM,
   "__asyncjs__GetMessageEM": __asyncjs__GetMessageEM,
   "__syscall_fcntl64": ___syscall_fcntl64,
   "__syscall_ioctl": ___syscall_ioctl,

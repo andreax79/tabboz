@@ -48,7 +48,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hdc;
     if (handle != NULL)
     {
-        EM_ASM({return Asyncify.handleAsync(function(){return drawImage($0, UTF8ToString($1), $2, $3, $4)})}, handle->id, "BMPView", (int)hbmpSrc, x, y);
+        JS_ASYNC_CALL("drawImage", handle->id, "BMPView", (int)hbmpSrc, x, y);
     }
 }
 
@@ -458,7 +458,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
         HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hwnd;
         if (handle != NULL)
         {
-            EM_ASM(drawImage($0, UTF8ToString($1), $2, 0, 0), handle->id, "BMPTipa", (int)hbmp);
+            JS_ASYNC_CALL("drawImage", handle->id, "BMPTipa", (int)hbmp, 0, 0);
         }
 #else
         BITMAP bm;

@@ -36,12 +36,7 @@
 
 int LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax)
 {
-    return EM_ASM_INT({
-        const value = window.strings[$0] || "";
-        stringToUTF8(value, $1, $2);
-        return value.length;
-    },
-                      uID, lpBuffer, cchBufferMax);
+    return JS_CALL_INT("loadString", uID, lpBuffer, cchBufferMax);
 }
 
 //*******************************************************************
@@ -56,7 +51,7 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
         // Invalid window handle
         return FALSE;
     }
-    return EM_ASM_INT({return showWindow($0, $1)}, handle->id, nCmdShow && SW_SHOWNORMAL);
+    return JS_CALL_INT("showWindow", handle->id, nCmdShow && SW_SHOWNORMAL);
 }
 
 //*******************************************************************
@@ -75,7 +70,7 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
         parentWindowId = ((HANDLE_ENTRY *)hWnd)->id;
     }
 
-    result = EM_ASM_INT({return Asyncify.handleAsync(function(){return messageBox($0, $1, $2, $3, $4)})}, handle->id, lpText, lpCaption, uType, parentWindowId);
+    result = JS_ASYNC_CALL_INT("messageBox", handle->id, lpText, lpCaption, uType, parentWindowId);
     ReleaseHandle(handle);
     return result;
 }
@@ -83,12 +78,6 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 //*******************************************************************
 // Create a modal dialog box from a dialog box template resource
 //*******************************************************************
-
-EM_JS(void, RemoveDialogBoxEm, (int windowId), {
-    const destination = document.getElementById('screen');
-    destination.removeChild(document.getElementById('wall' + windowId));
-    destination.removeChild(document.getElementById('win' + windowId));
-});
 
 INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc)
 {
@@ -110,7 +99,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
         parentWindowId = ((HANDLE_ENTRY *)hWndParent)->id;
     }
     // Show dialog
-    EM_ASM(Asyncify.handleAsync(function(){return dialogBox($0, $1, $2)}), handle->id, dialog, parentWindowId);
+    JS_ASYNC_CALL("dialogBox", handle->id, dialog, parentWindowId);
     // Dispatch Init
     lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
@@ -122,7 +111,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
         DispatchMessage(&msg);
     }
     retval = handle->retval;
-    RemoveDialogBoxEm(handle->id);
+    JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
     return retval;
 }
@@ -156,21 +145,12 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
         // Invalid window handle
         return FALSE;
     }
-    return EM_ASM_INT({return setDlgItemText($0, $1, $2)}, handle->id, nIDDlgItem, lpString);
+    return JS_CALL_INT("setDlgItemText", handle->id, nIDDlgItem, lpString);
 }
 
 //*******************************************************************
 // Set the check state of a radio button or check box
 //*******************************************************************
-
-EM_JS(BOOL, SetCheckEM, (int windowId, int nIDDlgItem, WPARAM wParam), {
-    const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
-    if (control != null)
-    {
-        control.checked = (wParam != 0);
-    }
-    return 0;
-});
 
 LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
 {
@@ -180,7 +160,7 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
         // Invalid window handle
         return 0;
     }
-    return SetCheckEM(handle->id, nIDDlgItem, wParam);
+    return JS_CALL_INT("setCheck", handle->id, nIDDlgItem, wParam);
 }
 
 //*******************************************************************
@@ -189,7 +169,7 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
 
 int GetSystemMetrics(int nIndex)
 {
-    return EM_ASM_INT({return getSystemMetrics($0)}, nIndex);
+    return JS_CALL_INT("getSystemMetrics", nIndex);
 }
 
 //*******************************************************************
@@ -206,10 +186,10 @@ BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
     }
     else
     {
-        lpRect->left = EM_ASM_INT({return getWindowRectDimension($0, 0)}, handle->id);
-        lpRect->top = EM_ASM_INT({return getWindowRectDimension($0, 1)}, handle->id);
-        lpRect->right = EM_ASM_INT({return getWindowRectDimension($0, 2)}, handle->id);
-        lpRect->bottom = EM_ASM_INT({return getWindowRectDimension($0, 3)}, handle->id);
+        lpRect->left = JS_CALL_INT("getWindowRectDimension", handle->id, 0);
+        lpRect->top = JS_CALL_INT("getWindowRectDimension", handle->id, 1);
+        lpRect->right = JS_CALL_INT("getWindowRectDimension", handle->id, 2);
+        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", handle->id, 3);
         return TRUE;
     }
 }
@@ -226,7 +206,7 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
         // Invalid window handle
         return FALSE;
     }
-    return EM_ASM_INT({return moveWindow($0, $1, $2, $3, $4)}, handle->id, X, Y, nWidth, nHeight);
+    return JS_CALL_INT("moveWindow", handle->id, X, Y, nWidth, nHeight);
 }
 
 //*******************************************************************
@@ -241,7 +221,7 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
         // Invalid window handle
         return 0;
     }
-    return EM_ASM_INT({return getDlgItemText($0, $1, $2, $3, $4)}, handle->id, nIDDlgItem, lpString, nMaxCount);
+    return JS_CALL_INT("getDlgItemText", handle->id, nIDDlgItem, lpString, nMaxCount);
 }
 
 //*******************************************************************
@@ -434,13 +414,21 @@ LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 void ExitWindows(int dwReserved, int code)
 {
-    EM_ASM(shutdown());
+    JS_CALL("shutdown");
 }
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
 
 HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
 {
     return NULL; // TODO
 }
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
 
 HWND SetFocus(HWND hWnd)
 {
@@ -457,42 +445,49 @@ void randomize()
     srand((unsigned)time(&t));
 }
 
-static BOOL is_open = FALSE;
+//*******************************************************************
+// Start the application
+//*******************************************************************
 
-// Start Tabboz Simulator
-int start_zarrosim()
+int WinMainStartup()
 {
-    is_open = TRUE;
     HANDLE_ENTRY *handle = AllocateHandle();
     WinMain((HANDLE)handle, NULL, "", 0);
     ReleaseHandle(handle);
-    is_open = FALSE;
     return 0;
 }
 
+//*******************************************************************
 // Icon click callback
-int zarrosim_icon_cb(int eventType, const struct EmscriptenMouseEvent *someEvent, void *userData)
+//*******************************************************************
+
+static BOOL bIsOpen = FALSE;
+
+int IconClickCb(int eventType, const struct EmscriptenMouseEvent *someEvent, void *userData)
 {
-    if (is_open)
+    int ret = 0;
+    if (!bIsOpen)
     {
-        return 0;
+        bIsOpen = TRUE;
+        ret = WinMainStartup();
+        bIsOpen = FALSE;
     }
-    else
-    {
-        return start_zarrosim();
-    }
+    return ret;
 }
+
+//*******************************************************************
+// Main
+//*******************************************************************
 
 int main()
 {
     // Load string resources
-    EM_ASM(loadStringResources());
+    JS_ASYNC_CALL("loadStringResources");
     // Preload images
-    EM_ASM(preload());
+    JS_ASYNC_CALL("preload");
     // Register icon handler
-    emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &zarrosim_icon_cb);
+    emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &IconClickCb);
     return 0;
-    /* return start_zarrosim(); */
 }
 
 #endif
