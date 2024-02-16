@@ -27,9 +27,6 @@ PRE = """
 <body>
 """
 
-TITLE_BAR_CLOSE = """
-"""
-
 PRE_WIN = """
   <div class="{classes}" style="position: absolute; margin: 32px; width: {width}px; height: {height}px">
     <div class="title-bar">
@@ -126,8 +123,8 @@ class Dialog:
             controls += '<button class="control61488" disabled="" aria-label="Maximize"></button>'
         if "WS_SYSMENU" in self.style:
             controls += '<button class="control61536" aria-label="Close"></button>'
-        else:
-            controls += '<button class="control61536" disabled="" aria-label="Close"></button>'
+        # else:
+        #     controls += '<button class="control61536" disabled="" aria-label="Close"></button>'
         return controls
 
     def write(self) -> None:
