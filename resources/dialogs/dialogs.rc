@@ -2025,10 +2025,10 @@ FONT 10, "MS Sans Serif"
 {
    CONTROL "", 290, "BorBtn", WS_CHILD | WS_VISIBLE | WS_BORDER | 0x8000, 7, 4, 108, 64
    CONTROL "Si desidera incontrare giovani, eta' massima 30 anni, con una precedente esperienza nel settore, conoscenza della lingua inglese e dimestichezza nell' uso del PC. Trattamenti economici commisurati alle effettive capacita'.", -1, STATIC, SS_CENTER | WS_CHILD | WS_VISIBLE | WS_GROUP, 4, 73, 117, 57
-   CONTROL "", -1, "BorShade", WS_CHILD | WS_VISIBLE | 0x8001, 0, 0, 124, 171
    CONTROL "Sede: Sesto San Giovanni", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 3, 161, 117, 8
    CONTROL "Mi presento !", 1, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 4, 131, 117, 12
    CONTROL "Lascio perdere...", 2, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 4, 144, 117, 11
+   CONTROL "", -1, "BorShade", WS_CHILD | WS_VISIBLE | 0x8001, 0, 0, 124, 171
    CONTROL "", -1, "BorShade", WS_CHILD | WS_VISIBLE | 0x4, 0, 70, 125, 2
 }
 
