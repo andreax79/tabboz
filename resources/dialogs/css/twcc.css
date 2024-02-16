@@ -61,6 +61,7 @@ img[src=""] {
 
 .title-bar-text {
     cursor: default;
+    user-select: none;
 }
 
 .title-bar-text img {
