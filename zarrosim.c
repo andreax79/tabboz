@@ -45,11 +45,9 @@ extern u_long          new_counter;
 extern ATOM            RegisterBMPTipaClass(HANDLE hInst);
 extern long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg, WORD wParam, LONG lParam);
 extern char            nome_del_file_su_cui_salvare[];
-#ifdef TABBOZ_WIN
-extern void OpenFileDlg(HWND hwnd);
-extern void SaveFileDlg(HWND hwnd);
-#endif
-static void CaricaTutto(void);
+extern void            OpenFileDlg(HWND hwnd);
+extern void            SaveFileDlg(HWND hwnd);
+static void            CaricaTutto(void);
 
 NEWSTSCOOTER ScooterData;
 
@@ -2008,7 +2006,6 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
-#ifdef TABBOZ_WIN
         case QX_LOAD:
             OpenFileDlg(hWnd);
             AggiornaPrincipale(hWnd);
@@ -2018,7 +2015,6 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             SaveFileDlg(hWnd);
             AggiornaPrincipale(hWnd);
             break;
-#endif
 
         case QX_CLOSE:
             lpproc = MakeProcInstance(Spegnimi, hInst);
@@ -2422,11 +2418,8 @@ int main(int argc, char **argv)
 // Dialog x la scelta del file da aprire...
 //*******************************************************************
 
-#ifdef TABBOZ_WIN
 void OpenFileDlg(HWND hwnd)
 {
-#define OFN_LONGNAMES 0x00200000L
-
     static char         szFileName[MAX_PATH];
     static OPENFILENAME ofn;
     memset(&(ofn), 0, sizeof(OPENFILENAME));
@@ -2447,16 +2440,13 @@ void OpenFileDlg(HWND hwnd)
         nome_del_file_su_cui_salvare[0] = '\0';
     }
 }
-#endif
 
 //*******************************************************************
 // Dialog x la scelta del file da salvare...
 //*******************************************************************
 
-#ifdef TABBOZ_WIN
 void SaveFileDlg(HWND hwnd)
 {
-#define OFN_LONGNAMES 0x00200000L
     static char         szFileName[256];
     static OPENFILENAME ofn;
     memset(&(ofn), 0, sizeof(OPENFILENAME));
@@ -2477,7 +2467,6 @@ void SaveFileDlg(HWND hwnd)
         nome_del_file_su_cui_salvare[0] = '\0';
     }
 }
-#endif
 
 //*******************************************************************
 // Copyright (c) 1997-2000 Andrea Bonomi

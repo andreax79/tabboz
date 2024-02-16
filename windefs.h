@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdint.h>
+#include <math.h>
 
 #define WINVER 0x0502
 #define MAX_PATH 260
@@ -98,6 +99,7 @@ typedef HKEY     *PHKEY;
 typedef HINSTANCE HMODULE;
 typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*WNDPROC)(HWND, UINT, WPARAM, LPARAM);
+typedef INT_PTR (*LPOFNHOOKPROC)(HWND, UINT, WPARAM, LPARAM);
 
 typedef struct
 {
@@ -163,6 +165,33 @@ typedef struct
     BOOL fIncUpdate;
     BYTE rgbReserved[32];
 } PAINTSTRUCT, *PPAINTSTRUCT, *NPPAINTSTRUCT, *LPPAINTSTRUCT;
+
+typedef struct
+{
+    DWORD         lStructSize;
+    HWND          hwndOwner;
+    HINSTANCE     hInstance;
+    LPCSTR        lpstrFilter;
+    LPSTR         lpstrCustomFilter;
+    DWORD         nMaxCustFilter;
+    DWORD         nFilterIndex;
+    LPSTR         lpstrFile;
+    DWORD         nMaxFile;
+    LPSTR         lpstrFileTitle;
+    DWORD         nMaxFileTitle;
+    LPCSTR        lpstrInitialDir;
+    LPCSTR        lpstrTitle;
+    DWORD         Flags;
+    WORD          nFileOffset;
+    WORD          nFileExtension;
+    LPCSTR        lpstrDefExt;
+    LPARAM        lCustData;
+    LPOFNHOOKPROC lpfnHook;
+    LPCSTR        lpTemplateName;
+    void         *pvReserved;
+    DWORD         dwReserved;
+    DWORD         FlagsEx;
+} OPENFILENAME, *LPOPENFILENAME;
 
 typedef struct
 {
@@ -245,7 +274,13 @@ typedef struct
 #define ICON_SMALL 0
 #define ICON_BIG 1
 
-#define random(x) (random() % x)
+#define OFN_HIDEREADONLY 0x00000004
+#define OFN_LONGNAMES 0x00200000
+#define OFN_OVERWRITEPROMPT 0x00000002
+#define OFN_NOTESTFILECREATE 0x00010000
+#define OFN_FILEMUSTEXIST 0x00001000
+
+#define random(x) ((int)(floor(emscripten_random() * x)))
 
 #define MakeProcInstance(p, i) (p)
 #define FreeProcInstance(p) (void)(p)
@@ -283,6 +318,8 @@ extern HDC           BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
 extern BOOL          EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
 extern BOOL          SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
 extern LRESULT       DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+extern BOOL          GetOpenFileName(LPOPENFILENAME unnamedParam1);
+extern BOOL          GetSaveFileName(LPOPENFILENAME unnamedParam1);
 extern void          randomize();
 extern HANDLE        GetProperty(PROPERTIES *props, LPCSTR key);
 extern HANDLE        SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData);

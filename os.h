@@ -47,6 +47,10 @@ etc...
 #include <windows.h>
 
 #define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+
+#ifndef OFN_LONGNAMES
+#define OFN_LONGNAMES 0x00200000L
+#endif
 #endif
 
 // Windows 32bit -----------------------------------------------------
@@ -56,6 +60,10 @@ etc...
 #include <windows.h>
 
 #define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+
+#ifndef OFN_LONGNAMES
+#define OFN_LONGNAMES 0x00200000L
+#endif
 #endif
 
 // Emscripten --------------------------------------------------------
