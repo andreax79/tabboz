@@ -38,7 +38,6 @@ PRE_WIN = """
       </div>
       <div class="title-bar-controls">
         {controls}
-        <button class="control61536" aria-label="Close"></button>
       </div>
     </div>
     <div id="menubar">{menu}</div>
@@ -119,8 +118,19 @@ class Dialog:
             classes += " dlgframe"
         return classes
 
-    def write(self) -> None:
+    @property
+    def controls(self) -> str:
         controls = ""
+        if "WS_MINIMIZEBOX" in self.style:
+            controls += '<button class="control61472" aria-label="Minimize"></button>'
+            controls += '<button class="control61488" disabled="" aria-label="Maximize"></button>'
+        if "WS_SYSMENU" in self.style:
+            controls += '<button class="control61536" aria-label="Close"></button>'
+        else:
+            controls += '<button class="control61536" disabled="" aria-label="Close"></button>'
+        return controls
+
+    def write(self) -> None:
         with (html_dir / f"{self.dialog_id}.html").open("w") as out:
             out.write(PRE.format(title=self.title))
             out.write(
@@ -128,7 +138,7 @@ class Dialog:
                     title=self.title,
                     width=self.width,
                     height=self.height,
-                    controls=controls,
+                    controls=self.controls,
                     menu=self.menu,
                     classes=self.classes,
                 )
@@ -143,7 +153,7 @@ class Dialog:
                     title=self.title,
                     width=self.width,
                     height=self.height,
-                    controls=controls,
+                    controls=self.controls,
                     menu=self.menu,
                     classes=self.classes,
                 )

@@ -229,7 +229,11 @@ typedef struct
 #define SW_HIDE 0
 #define SW_SHOWNORMAL 1
 
+#define SC_MINIMIZE 0xf020
+#define SC_MAXIMIZE 0xf030
 #define SC_CLOSE 0xf060
+#define SC_KEYMENU 0xf100
+#define SC_CONTEXTHELP 0xf180
 
 #define SM_CXSCREEN 0
 #define SM_CYSCREEN 1

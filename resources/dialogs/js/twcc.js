@@ -186,6 +186,11 @@
         }
     };
 
+    // Show/hide all the windows
+    function showApp(show) {
+        document.querySelectorAll('.window,.wall').forEach((item) => item.style.display = show ? 'block' : 'none');
+    };
+
     // Change the position and dimensions of the specified window
     function moveWindow(windowId, X, Y, nWidth, nHeight) {
         const win = document.querySelector('#win' + windowId);
@@ -445,6 +450,7 @@
     exports.createElementFromHTML = createElementFromHTML;
     exports.setActiveWindow = setActiveWindow;
     exports.showWindow = showWindow;
+    exports.showApp = showApp;
     exports.moveWindow = moveWindow;
     exports.getWindowRectDimension = getWindowRectDimension;
     exports.drawImage = drawImage;

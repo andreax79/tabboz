@@ -1734,16 +1734,18 @@ var ASM_CONSTS = {
  24403: function($0, $1) {return getWindowRectDimension($0,$1)},  
  24440: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
  24474: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
- 24509: function() {return shutdown()},  
- 24527: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
- 24600: function() {return Asyncify.handleAsync(function(){ return preload()})},  
- 24661: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
- 24718: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
- 24785: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
- 24864: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 24941: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 25018: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 25079: function() {document.querySelector(".menu107").classList.add("disabled")}
+ 24509: function($0) {return showApp($0)},  
+ 24528: function() {return shutdown()},  
+ 24546: function($0) {return showApp($0)},  
+ 24565: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
+ 24638: function() {return Asyncify.handleAsync(function(){ return preload()})},  
+ 24699: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24756: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24823: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 24902: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 24979: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 25056: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 25117: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
 function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
 

@@ -318,6 +318,11 @@ LRESULT DispatchMessage(const MSG *lpMsg)
             lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
     }
+    else if (lpMsg->wParam == SC_MINIMIZE)
+    {
+        // Minimize the app (hide all the windows)
+        JS_CALL_INT("showApp", 0);
+    }
     else
     {
         // Dispatch Commmand
@@ -471,6 +476,10 @@ int IconClickCb(int eventType, const struct EmscriptenMouseEvent *someEvent, voi
         bIsOpen = TRUE;
         ret = WinMainStartup();
         bIsOpen = FALSE;
+    }
+    else
+    {
+        JS_CALL("showApp", 1);
     }
     return ret;
 }
