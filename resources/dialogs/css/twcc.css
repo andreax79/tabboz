@@ -270,6 +270,7 @@ ul.main-menu li.separator
     margin: 5px;
 }
 
+
 /* Radio */
 input[type="radio"].bwcc + label::before
 {
@@ -280,6 +281,21 @@ input[type="radio"].bwcc + label::before
 input[type="radio"].bwcc:checked + label::before
 {
     background: url("../../bitmaps/131.png") !important;
+}
+
+
+/* Checkbox */
+input[type="checkbox"].bwcc + label::before
+{
+    background: url("../../bitmaps/110.png") !important;
+    box-shadow: none;
+}
+
+
+input[type="checkbox"].bwcc:checked + label::before
+{
+    background: url("../../bitmaps/111.png") !important;
+    box-shadow: none;
 }
 
 /* Desktop */

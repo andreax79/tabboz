@@ -307,7 +307,7 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
+<input class="{css_class} bwcc" {extra} type="checkbox" id="{combined_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
                     **control
