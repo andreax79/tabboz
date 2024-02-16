@@ -411,6 +411,8 @@ class Dialog:
             menu_json = json.load(f)
             self.menu += '<ul class="main-menu">\n'
             for item in menu_json:
+                if "help" in item.get("flags", []):
+                    self.menu += '<span style="flex-grow: 1"></span>'
                 self.menu += "<li>"
                 self.menu += prepare_text(item["label"], alt=False)
                 self.menu += "\n"

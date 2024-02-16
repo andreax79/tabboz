@@ -169,13 +169,14 @@ ul.main-menu
     background-color: #d4d0c8;
     font-size: 11px;
     letter-spacing: 0.4px;
+    display: flex;
 }
 ul.main-menu > li
 {
     margin: 0;
     display: inline;
     list-style-type: none;
-    padding: 2px 4px 2px 6px;
+    padding: 0px 4px 0px 6px;
     line-height: 18px;
     vertical-align: middle;
     cursor: default;

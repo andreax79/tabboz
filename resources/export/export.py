@@ -169,7 +169,7 @@ def export_menu(
                     menu_stack[-1].append(menu)
                     rc_flags = ""
                     if flags & HELP:
-                        menu["flags"] = ["menu"]
+                        menu["flags"] = ["help"]
                         rc_flags = ", HELP"
                     menu_stack.append(menu_stack[-1][-1]["items"])
                     menu_rc.write(f"  POPUP \"{menu['label']}\"\n")
