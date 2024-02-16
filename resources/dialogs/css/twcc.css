@@ -275,6 +275,12 @@ ul.main-menu li.separator
 }
 
 
+/* Edit */
+input[type="text"] {
+    box-shadow: none
+}
+
+
 /* Radio */
 input[type="radio"].bwcc + label::before
 {
