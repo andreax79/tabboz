@@ -63,6 +63,10 @@ img[src=""] {
     cursor: default;
 }
 
+.title-bar-text img {
+    margin: -4px 0 -4px 0;
+}
+
 .hotkey {
     text-decoration: underline;
 }

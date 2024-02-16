@@ -101,16 +101,16 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     // Show dialog
     JS_ASYNC_CALL("dialogBox", handle->id, dialog, parentWindowId);
     // Dispatch Init
-    lpDialogFunc((HWND)handle, WM_INITDIALOG, 0, 0);
+    SendMessage((HWND)handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
-    lpDialogFunc((HWND)handle, WM_PAINT, 0, 0);
+    SendMessage((HWND)handle, WM_PAINT, 0, 0);
     // Message loop
     while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
-        printf("%d\n", msg.wParam);
         DispatchMessage(&msg);
     }
     retval = handle->retval;
+    // Destroy the dialog box
     JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
     return retval;
@@ -274,17 +274,6 @@ HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
 // Retrieve a message
 //*******************************************************************
 
-EM_ASYNC_JS(int, GetMessageEM, (int windowId, int32_t *x, int32_t *y), {
-    // Activate the window
-    setActiveWindow(windowId);
-    // Wait for message
-    let msg = await waitListener(windowId);
-    // Set return values
-    setValue(x, msg.x, "i32");
-    setValue(y, msg.y, "i32");
-    return msg.controlId;
-});
-
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
     int32_t x, y;
@@ -296,9 +285,13 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
     {
         return FALSE;
     }
-    lpMsg->wParam = GetMessageEM(((HANDLE_ENTRY *)lpMsg->hwnd)->id, &x, &y);
+    // Activate the window
+    JS_CALL("setActiveWindow", ((HANDLE_ENTRY *)lpMsg->hwnd)->id);
+    // Wait for a message
+    lpMsg->wParam = JS_ASYNC_CALL_INT("waitListener", ((HANDLE_ENTRY *)lpMsg->hwnd)->id, &x, &y);
     // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
     lpMsg->lParam = ((y & 0xffff) << 16) + (x & 0xffff);
+    lpMsg->message = WM_COMMAND;
     return TRUE;
 }
 
@@ -309,8 +302,18 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 LRESULT DispatchMessage(const MSG *lpMsg)
 {
     DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpDialogFunc;
-    if (lpMsg->wParam == SC_CLOSE)
+    if (lpMsg->message == WM_SETICON)
     {
+        // Set window icon
+        HANDLE_ENTRY *handle = (HANDLE_ENTRY *)lpMsg->hwnd;
+        if (handle != NULL)
+        {
+            JS_CALL("setIcon", handle->id, (int)lpMsg->lParam);
+        }
+    }
+    else if (lpMsg->wParam == SC_CLOSE)
+    {
+        // Close window
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
@@ -326,11 +329,26 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     else
     {
         // Dispatch Commmand
-        lpDialogFunc(lpMsg->hwnd, WM_COMMAND, lpMsg->wParam, lpMsg->lParam);
+        lpDialogFunc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
         // Dispatch Repaint
         lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
     }
     return 0;
+}
+
+//*******************************************************************
+// Sends a message to the current window
+//*******************************************************************
+
+LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    MSG msg = {
+        .hwnd = hWnd,
+        .message = Msg,
+        .wParam = wParam,
+        .lParam = lParam,
+    };
+    return DispatchMessage(&msg);
 }
 
 //*******************************************************************

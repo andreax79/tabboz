@@ -218,6 +218,7 @@ typedef struct
 #define WM_PAINT 0x000f
 #define WM_ENDSESSION 0x0016
 #define WM_QUERYDRAGICON 0x0037
+#define WM_SETICON 0x0080
 #define WM_INITDIALOG 0x0110
 #define WM_COMMAND 0x0111
 #define WM_SYSCOMMAND 0x0112
@@ -240,6 +241,9 @@ typedef struct
 
 #define SWP_NOMOVE 0x0002
 #define SWP_NOZORDER 0x0004
+
+#define ICON_SMALL 0
+#define ICON_BIG 1
 
 #define random(x) (random() % x)
 
@@ -270,6 +274,7 @@ extern void          ExitWindows(int dwReserved, int code);
 extern int           WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
 extern BOOL          GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
 extern LRESULT       DispatchMessage(const MSG *lpMsg);
+extern LRESULT       SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern HICON         LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
 extern HBITMAP       LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
 extern BOOL          DestroyIcon(HICON hIcon);

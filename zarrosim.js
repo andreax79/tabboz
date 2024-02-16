@@ -1720,34 +1720,37 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  23976: function($0, $1, $2) {return loadString($0,$1,$2)},  
- 24004: function($0, $1) {return showWindow($0,$1)},  
- 24029: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return messageBox($0,$1,$2,$3,$4)})},  
- 24107: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return dialogBox($0,$1,$2)})},  
- 24178: function($0) {return destroyDialogBox($0)},  
- 24206: function($0, $1, $2) {return setDlgItemText($0,$1,$2)},  
- 24238: function($0, $1, $2) {return setCheck($0,$1,$2)},  
- 24264: function($0) {return getSystemMetrics($0)},  
- 24292: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24329: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24366: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24403: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24440: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
- 24474: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
- 24509: function($0) {return showApp($0)},  
- 24528: function() {return shutdown()},  
- 24546: function($0) {return showApp($0)},  
- 24565: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
- 24638: function() {return Asyncify.handleAsync(function(){ return preload()})},  
- 24699: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
- 24756: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
- 24823: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
- 24902: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 24979: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 25056: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 25117: function() {document.querySelector(".menu107").classList.add("disabled")}
+  23796: function($0, $1, $2) {return loadString($0,$1,$2)},  
+ 23824: function($0, $1) {return showWindow($0,$1)},  
+ 23849: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return messageBox($0,$1,$2,$3,$4)})},  
+ 23927: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return dialogBox($0,$1,$2)})},  
+ 23998: function($0) {return destroyDialogBox($0)},  
+ 24026: function($0, $1, $2) {return setDlgItemText($0,$1,$2)},  
+ 24058: function($0, $1, $2) {return setCheck($0,$1,$2)},  
+ 24084: function($0) {return getSystemMetrics($0)},  
+ 24112: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24149: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24186: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24223: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24260: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
+ 24294: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
+ 24329: function($0) {return setActiveWindow($0)},  
+ 24356: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return waitListener($0,$1,$2)})},  
+ 24430: function($0, $1) {return setIcon($0,$1)},  
+ 24452: function($0) {return showApp($0)},  
+ 24471: function() {return shutdown()},  
+ 24489: function($0) {return showApp($0)},  
+ 24508: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
+ 24581: function() {return Asyncify.handleAsync(function(){ return preload()})},  
+ 24642: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24699: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24766: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 24845: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 24922: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 24999: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 25060: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
-function __asyncjs__GetMessageEM(windowId,x,y){ return Asyncify.handleAsync(async () => { setActiveWindow(windowId); let msg = await waitListener(windowId); setValue(x, msg.x, "i32"); setValue(y, msg.y, "i32"); return msg.controlId; }); }
+
 
 
 
@@ -5108,7 +5111,6 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var asmLibraryArg = {
-  "__asyncjs__GetMessageEM": __asyncjs__GetMessageEM,
   "__syscall_fcntl64": ___syscall_fcntl64,
   "__syscall_ioctl": ___syscall_ioctl,
   "__syscall_open": ___syscall_open,

@@ -120,9 +120,16 @@
         });
     }
 
-    async function waitListener(windowId) {
-        // return await waitListenerS(`#win${windowId}, #win${windowId} input`);
-        return await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`);
+    async function waitListener(windowId, x, y) {
+        // const msg = await waitListenerS(`#win${windowId}, #win${windowId} input`);
+        const msg = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`);
+        if (x != null) {
+            setValue(x, msg.x, "i32");
+        }
+        if (y != null) {
+            setValue(y, msg.y, "i32");
+        }
+        return msg.controlId;
     }
 
     function waitListenerS(selector) {
@@ -189,6 +196,14 @@
     // Show/hide all the windows
     function showApp(show) {
         document.querySelectorAll('.window,.wall').forEach((item) => item.style.display = show ? 'block' : 'none');
+    };
+
+    // Associate a icon with a window
+    function setIcon(windowId, icon) {
+        const element = document.querySelector(`#win${windowId} .title-bar-text`);
+        if (element != null) {
+            element.innerHTML = `<img src="resources/icons/${icon}.gif" height="16" />` + element.innerText
+        }
     };
 
     // Change the position and dimensions of the specified window
@@ -356,7 +371,7 @@
         // Make the window draggrable
         makeDraggable(c);
         // Wait for events
-        let result = (await waitListener(windowId)).controlId;
+        let result = await waitListener(windowId, null, null);
         // Convert the result
         if (uType & 0x00000004) { // MB_YESNO
             switch (result) {
@@ -421,7 +436,6 @@
     function loadString(uID, lpBuffer, cchBufferMax) {
         const value = window.strings[uID] || "";
         stringToUTF8(value, lpBuffer, cchBufferMax);
-        console.log(value);
         return value.length;
     };
 
@@ -451,6 +465,7 @@
     exports.setActiveWindow = setActiveWindow;
     exports.showWindow = showWindow;
     exports.showApp = showApp;
+    exports.setIcon = setIcon;
     exports.moveWindow = moveWindow;
     exports.getWindowRectDimension = getWindowRectDimension;
     exports.drawImage = drawImage;

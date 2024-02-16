@@ -628,11 +628,9 @@ static void CaricaTutto(void)
 
     // ven 10 marzo 2000
     // Guarda se qualche "bastardino" ha modificato dei valori nel registro...
-    printf("SoftCheck check\n");
     if (new_counter - atoi(RRKey("SoftCheck")))
     {
-        printf("SoftCheck failed\n");
-        /* ResetMe(0); */ // TODO
+        ResetMe(0);
     }
 }
 
@@ -681,7 +679,10 @@ void SalvaTutto(void)
 {
     char tmp[128];
     int  i;
-    printf("SalvaTutto\n"); // TODO
+
+#ifdef TABBOZ_DEBUG
+    writelog("SalvaTutto");
+#endif
 
     new_reset_check();
 
@@ -1890,6 +1891,9 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     case WM_INITDIALOG:
         hIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
         hWndMain = hWnd;
+#ifdef TABBOZ_EM
+        SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+#endif
         // Scrive quanti soldi ci sono... ( ed ora scrive anche molta altra roba...)
         AggiornaPrincipale(hWnd);
 
