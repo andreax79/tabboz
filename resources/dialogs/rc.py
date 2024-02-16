@@ -182,6 +182,8 @@ class Dialog:
             control["style"] = [x for x in control["style"] if x != "WS_DISABLED"]
 
         if control["class"] != "BorCheck":
+            if "0x1" in control["style"]:
+                control["css_class"] += " ss_center"
             if "0x2" in control["style"]:  # horizontal bump ALT
                 control["css_class"] += " horizontal_bump_alt"
                 control["height"] = "auto"
@@ -225,7 +227,6 @@ class Dialog:
             "COMBOBOX",
             "EDIT",
             "BorShade",
-            "BorStatic",
             "BorCheck",
             "BorRadio",
             "BorBtn",

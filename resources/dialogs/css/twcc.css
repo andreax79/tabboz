@@ -1,10 +1,11 @@
 #screen {
     height: 100vh;
+    width: auto;
+    /* height: 600px; */
+    /* width: 800px; */
     background-color: #008080;
-
     padding: 0.5rem;
     flex-wrap: wrap;
-    width: auto;
     justify-content: flex-start;
     align-items: flex-start;
     box-sizing: border-box;
@@ -35,7 +36,7 @@ select,
 table,
 textarea,
 ul.tree-view {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* hide img if src is empty */
@@ -72,6 +73,14 @@ img[src=""] {
     border-left: 1px solid #808080;
     border-bottom: 1px solid #fff;
     border-right: 1px solid #fff;
+}
+
+.borstatic {
+    letter-spacing: 0.02rem;
+}
+
+.ss_left {
+    text-align: left;
 }
 
 .ss_center {
