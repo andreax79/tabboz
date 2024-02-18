@@ -58,21 +58,56 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 // Display a modal dialog box
 //*******************************************************************
 
+INT_PTR messageBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    if (uMsg == WM_COMMAND)
+    {
+        switch (LOWORD(wParam))
+        {
+        case IDOK:
+        case IDCANCEL:
+        case IDABORT:
+        case IDRETRY:
+        case IDIGNORE:
+        case IDYES:
+        case IDNO:
+        case IDTRYAGAIN:
+        case IDCONTINUE:
+            EndDialog(hWnd, wParam);
+            return TRUE;
+        }
+    }
+    else if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE)
+    {
+        EndDialog(hWnd, IDCANCEL);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
-    int           result;
     int           parentWindowId = -1;
     HANDLE_ENTRY *handle = AllocateHandle();
+    MSG           msg;
 
+    handle->lpDialogFunc = &messageBoxProc;
     // Get parent window number
     if (hWnd != NULL)
     {
         parentWindowId = ((HANDLE_ENTRY *)hWnd)->id;
     }
-
-    result = JS_ASYNC_CALL_INT("messageBox", handle->id, lpText, lpCaption, uType, parentWindowId);
+    JS_ASYNC_CALL_INT("messageBox", handle->id, lpText, lpCaption, uType, parentWindowId);
+    // Message loop
+    while (GetMessage(&msg, (HWND)handle, 0, 0) > 0)
+    {
+        printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
+        DispatchMessage(&msg);
+    }
+    // Destroy the dialog box
+    JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
-    return result;
+    return msg.wParam; // the value to be returned to the function that created the message box
 }
 
 //*******************************************************************
@@ -81,7 +116,6 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 
 INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc)
 {
-    INT_PTR       retval;
     int           controlId;
     int           dialog = (int)lpTemplateName;
     int           parentWindowId = -1;
@@ -110,11 +144,10 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
         printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
-    retval = msg.wParam; // the value to be returned from the function that created the dialog box
     // Destroy the dialog box
     JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
-    return retval;
+    return msg.wParam; // the value to be returned to the function that created the dialog box
 }
 
 //*******************************************************************
@@ -449,6 +482,7 @@ int main()
     JS_ASYNC_CALL("loadStringResources");
     // Preload images
     JS_ASYNC_CALL("preload");
+    /* printf("-->%d<--\n", MessageBox(0, "Test", "Test", MB_YESNO | MB_ICONINFORMATION)); */
     // Register icon handler
     emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &IconClickCb);
     return 0;

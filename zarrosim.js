@@ -1455,32 +1455,33 @@ var ASM_CONSTS = {
   23976: function($0, $1, $2) {return loadString($0,$1,$2)},  
  24004: function($0, $1) {return showWindow($0,$1)},  
  24029: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return messageBox($0,$1,$2,$3,$4)})},  
- 24107: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return dialogBox($0,$1,$2)})},  
- 24178: function($0) {return destroyDialogBox($0)},  
- 24206: function($0, $1, $2) {return setDlgItemText($0,$1,$2)},  
- 24238: function($0, $1, $2) {return setCheck($0,$1,$2)},  
- 24264: function($0) {return getSystemMetrics($0)},  
- 24292: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24329: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24366: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24403: function($0, $1) {return getWindowRectDimension($0,$1)},  
- 24440: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
- 24474: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
- 24509: function() {return shutdown()},  
- 24527: function($0) {return showApp($0)},  
- 24546: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
- 24619: function() {return Asyncify.handleAsync(function(){ return preload()})},  
- 24680: function($0) {return setActiveWindow($0)},  
- 24707: function($0, $1, $2, $3) {return Asyncify.handleAsync(function(){ return waitListener($0,$1,$2,$3)})},  
- 24784: function($0, $1) {return setIcon($0,$1)},  
- 24806: function($0) {return showApp($0)},  
- 24825: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
- 24882: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
- 24949: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
- 25028: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 25105: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
- 25182: function() {document.querySelector(".menu106").classList.add("disabled")},  
- 25243: function() {document.querySelector(".menu107").classList.add("disabled")}
+ 24107: function($0) {return destroyDialogBox($0)},  
+ 24135: function($0, $1, $2) {return Asyncify.handleAsync(function(){ return dialogBox($0,$1,$2)})},  
+ 24206: function($0) {return destroyDialogBox($0)},  
+ 24234: function($0, $1, $2) {return setDlgItemText($0,$1,$2)},  
+ 24266: function($0, $1, $2) {return setCheck($0,$1,$2)},  
+ 24292: function($0) {return getSystemMetrics($0)},  
+ 24320: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24357: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24394: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24431: function($0, $1) {return getWindowRectDimension($0,$1)},  
+ 24468: function($0, $1, $2, $3, $4) {return moveWindow($0,$1,$2,$3,$4)},  
+ 24502: function($0, $1, $2, $3) {return getDlgItemText($0,$1,$2,$3)},  
+ 24537: function() {return shutdown()},  
+ 24555: function($0) {return showApp($0)},  
+ 24574: function() {return Asyncify.handleAsync(function(){ return loadStringResources()})},  
+ 24647: function() {return Asyncify.handleAsync(function(){ return preload()})},  
+ 24708: function($0) {return setActiveWindow($0)},  
+ 24735: function($0, $1, $2, $3) {return Asyncify.handleAsync(function(){ return waitListener($0,$1,$2,$3)})},  
+ 24812: function($0, $1) {return setIcon($0,$1)},  
+ 24834: function($0) {return showApp($0)},  
+ 24853: function($0, $1) {localStorage.setItem(UTF8ToString($0), UTF8ToString($1))},  
+ 24910: function($0, $1) {stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32)},  
+ 24977: function($0) {new Audio('resources/wavs/tabs' + String($0).padStart(4, '0') + '.wav').play()},  
+ 25056: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 25133: function($0, $1, $2, $3, $4) {return Asyncify.handleAsync(function(){ return drawImage($0,$1,$2,$3,$4)})},  
+ 25210: function() {document.querySelector(".menu106").classList.add("disabled")},  
+ 25271: function() {document.querySelector(".menu107").classList.add("disabled")}
 };
 
 
@@ -4687,13 +4688,13 @@ var stackAlloc = Module["stackAlloc"] = function() {
 };
 
 /** @type {function(...*):?} */
-var dynCall_iiii = Module["dynCall_iiii"] = function() {
-  return (dynCall_iiii = Module["dynCall_iiii"] = Module["asm"]["dynCall_iiii"]).apply(null, arguments);
+var dynCall_iiiii = Module["dynCall_iiiii"] = function() {
+  return (dynCall_iiiii = Module["dynCall_iiiii"] = Module["asm"]["dynCall_iiiii"]).apply(null, arguments);
 };
 
 /** @type {function(...*):?} */
-var dynCall_iiiii = Module["dynCall_iiiii"] = function() {
-  return (dynCall_iiiii = Module["dynCall_iiiii"] = Module["asm"]["dynCall_iiiii"]).apply(null, arguments);
+var dynCall_iiii = Module["dynCall_iiii"] = function() {
+  return (dynCall_iiii = Module["dynCall_iiii"] = Module["asm"]["dynCall_iiii"]).apply(null, arguments);
 };
 
 /** @type {function(...*):?} */

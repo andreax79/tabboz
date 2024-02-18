@@ -235,8 +235,15 @@ typedef struct
 #define IDOK 1
 #define IDCANCEL 2
 #define IDABORT 3
+#define IDRETRY 4
+#define IDIGNORE 5
 #define IDYES 6
 #define IDNO 7
+#define IDCLOSE 8
+#define IDHELP 9
+#define IDTRYAGAIN 10
+#define IDCONTINUE 11
+#define IDTIMEOUT 32000
 
 #define MB_OK 0x00000000L
 #define MB_YESNO 0x00000004L
@@ -257,11 +264,14 @@ typedef struct
 #define WM_ENDSESSION 0x0016
 #define WM_QUERYDRAGICON 0x0037
 #define WM_SETICON 0x0080
+#define WM_KEYDOWN 0x0100
 #define WM_INITDIALOG 0x0110
 #define WM_COMMAND 0x0111
 #define WM_SYSCOMMAND 0x0112
 #define WM_TIMER 0x0113
 #define WM_LBUTTONDOWN 0x0201
+
+#define VK_ESCAPE 0x1b
 
 #define BM_SETCHECK 0xf0f1
 

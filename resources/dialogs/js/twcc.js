@@ -121,43 +121,63 @@
     }
 
     async function waitListener(windowId, message, wParam, lParam) {
-        // const msg = await waitListenerS(`#win${windowId}, #win${windowId} input`);
-        const msg = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`);
+        const msg = await waitListenerS(windowId);
         if (message != null) {
-            setValue(message, 0x0111, "i32"); // WM_COMMAND
+            setValue(message, msg.message, "i32");
         }
         if (wParam != null) {
-            setValue(wParam, msg.controlId, "i32");
+            setValue(wParam, msg.wParam, "i32");
         }
         if (lParam != null) {
-            // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
-            const value = ((msg.y & 0xffff) << 16) + (msg.x & 0xffff);
-            setValue(lParam, value, "i32");
+            setValue(lParam, msg.lParam, "i32");
         }
-        return msg.controlId;
+        return msg.wParam;
     }
 
-    function waitListenerS(selector) {
+    function waitListenerS(windowId) {
+        // const selector = `#win${windowId}, #win${windowId} input`;
+        const selector = `#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`;
         return new Promise(function(resolve, reject) {
             var listener = event => {
+                const match = event.target.className.match(/\d+/);
+                let wParam = match ? Number(match[0]) : 0;
+                let message = 0x0111; // WM_COMMAND
+                // Get click position
+                const rect = event.target.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
+                const lParam = ((y & 0xffff) << 16) + (x & 0xffff);
+                // Key press
+                if (event.keyCode !== undefined) {
+                    if (event.keyCode == 27) { // ESC
+                        message = 0x100; // WM_KEYDOWN
+                        wParam = 0x1B; // VK_ESCAPE
+                    } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13) { // Enter
+                        // continue (click on button)
+                    } else {
+                        // skip
+                        return false;
+                    }
+                }
+                // Remove event listener
                 document.querySelectorAll(selector).forEach(element => {
                     const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
                     element.removeEventListener(listenerName, listener)
+                    element.removeEventListener("keydown", listener)
                 });
-                const match = event.target.className.match(/\d+/);
-                const controlId = match ? Number(match[0]) : 0;
-                let rect = event.target.getBoundingClientRect();
-                let x = event.clientX - rect.left;
-                let y = event.clientY - rect.top;
                 resolve({
-                    controlId: controlId,
+                    message: message,
+                    wParam: wParam,
+                    lParam: lParam,
                     x: x,
                     y: y
                 });
             };
             document.querySelectorAll(selector).forEach(element => {
                 const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
-                element.addEventListener(listenerName, listener)
+                element.addEventListener(listenerName, listener);
+                element.addEventListener("keydown", listener);
             });
         });
     }
@@ -320,6 +340,7 @@
         return 0;
     }
 
+    // Show a message box
     async function messageBox(windowId, lpText, lpCaption, uType, parentWindowId) {
         const element = document.getElementById('messagebox');
         const wall = document.getElementById('wall').cloneNode(true);
@@ -327,8 +348,6 @@
         // Set window id
         wall.id = 'wall' + windowId;
         c.id = 'win' + windowId;
-        // Set window position
-        setWindowInitialPosition(c, parentWindowId);
         // Icon
         if (uType & 0x00000020) { // MB_ICONQUESTION
             c.querySelector('img').src = "resources/icons/102.png";
@@ -341,16 +360,30 @@
         }
         // Buttons
         if (uType & 0x00000001) { // MB_OKCANCEL
-            c.querySelector('.control1').innerText = 'OK';
-            c.querySelector('.control2').innerText = 'Cancel';
+            c.querySelector('.control1').style.display = 'inline';
             c.querySelector('.control2').style.display = 'inline';
+            c.querySelector('.control6').style.display = 'none';
+            c.querySelector('.control7').style.display = 'none';
+            c.querySelector('.control1').focus({
+                focusVisible: true
+            });
         } else if (uType & 0x00000004) { // MB_YESNO
-            c.querySelector('.control1').innerText = 'Yes';
-            c.querySelector('.control2').innerText = 'No';
-            c.querySelector('.control2').style.display = 'inline';
+            c.querySelector('.control1').style.display = 'none';
+            c.querySelector('.control2').style.display = 'none';
+            c.querySelector('.control6').style.display = 'inline';
+            c.querySelector('.control7').style.display = 'inline';
+            c.querySelector('.control6').focus({
+                focusVisible: true
+            });
         } else { // MB_OK
             c.querySelector('.control1').innerText = 'OK';
+            c.querySelector('.control1').style.display = 'inline';
             c.querySelector('.control2').style.display = 'none';
+            c.querySelector('.control6').style.display = 'none';
+            c.querySelector('.control7').style.display = 'none';
+            c.querySelector('.control1').focus({
+                focusVisible: true
+            });
         }
         wall.style.zIndex = windowId;
         c.style.zIndex = windowId;
@@ -362,37 +395,39 @@
         const destination = document.getElementById('screen');
         destination.appendChild(wall);
         destination.appendChild(c);
+        // Set focus
+        if (uType & 0x00000001) { // MB_OKCANCEL
+            c.querySelector('.control1').focus({
+                focusVisible: true
+            });
+        } else if (uType & 0x00000004) { // MB_YESNO
+            c.querySelector('.control6').focus({
+                focusVisible: true
+            });
+        } else { // MB_OK
+            c.querySelector('.control1').focus({
+                focusVisible: true
+            });
+        }
         // Center the dialog
-        let x = parseInt(getComputedStyle(document.getElementById('screen')).width);
-        let y = parseInt(getComputedStyle(document.getElementById('screen')).height);
-        let w = parseInt(getComputedStyle(c).width);
-        let h = parseInt(getComputedStyle(c).height);
-        x = (x - w) / 2;
-        y = (y - h) / 2;
-        c.style.left = x + 'px';
-        c.style.top = y + 'px';
+        centerDialog(c);
         // Activate the window
         setActiveWindow(windowId);
         // Make the window draggrable
         makeDraggable(c);
-        // Wait for events
-        let result = await waitListener(windowId, null, null, null);
-        // Convert the result
-        if (uType & 0x00000004) { // MB_YESNO
-            switch (result) {
-                case 1:
-                    result = 6; // IDYES
-                    break;
-                case 2:
-                    result = 7; // IDNO
-                    break;
-            }
-        }
-        // Remove the window
-        destination.removeChild(wall);
-        destination.removeChild(c);
-        return result;
     };
+
+    // Center the dialog
+    function centerDialog(element) {
+        let x = parseInt(getComputedStyle(document.getElementById('screen')).width);
+        let y = parseInt(getComputedStyle(document.getElementById('screen')).height);
+        let w = parseInt(getComputedStyle(element).width);
+        let h = parseInt(getComputedStyle(element).height);
+        x = (x - w) / 2;
+        y = (y - h) / 2;
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+    }
 
     // Show dialog box
     async function dialogBox(windowId, dialog, parentWindowId) {
