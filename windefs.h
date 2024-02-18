@@ -8,6 +8,7 @@
 
 #define WINVER 0x0502
 #define MAX_PATH 260
+#define MESSAGE_LIMIT 1000
 #define FALSE 0
 #define TRUE 1
 #define IN
@@ -211,9 +212,7 @@ typedef struct
     unsigned int refcount;
     unsigned int id;
     DLGPROC      lpDialogFunc;
-    BOOL         end;
-    INT_PTR      retval; // the value to be returned from the function that created the dialog box
-    PROPERTIES  *props;  // window properties
+    PROPERTIES  *props; // window properties
 } HANDLE_ENTRY;
 
 typedef struct
@@ -221,6 +220,15 @@ typedef struct
     int           count;
     HANDLE_ENTRY *entries;
 } HANDLE_TABLE;
+
+typedef struct
+{
+    int  count;
+    int  next;
+    int  free;
+    int  capacity;
+    MSG *messages;
+} MESAGES_QUEUE;
 
 #define NOMENU
 
@@ -245,6 +253,7 @@ typedef struct
 #define WM_CREATE 0x0001
 #define WM_DESTROY 0x0002
 #define WM_PAINT 0x000f
+#define WM_QUIT 0x0012
 #define WM_ENDSESSION 0x0016
 #define WM_QUERYDRAGICON 0x0037
 #define WM_SETICON 0x0080
@@ -273,6 +282,9 @@ typedef struct
 
 #define ICON_SMALL 0
 #define ICON_BIG 1
+
+#define PM_NOREMOVE 0
+#define PM_REMOVE 1
 
 #define OFN_HIDEREADONLY 0x00000004
 #define OFN_LONGNAMES 0x00200000
@@ -310,6 +322,7 @@ extern int           WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszC
 extern BOOL          GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
 extern LRESULT       DispatchMessage(const MSG *lpMsg);
 extern LRESULT       SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern BOOL          PostMessage(HWND hwnd, WORD message, WORD wParam, LONG lParam);
 extern HICON         LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
 extern HBITMAP       LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
 extern BOOL          DestroyIcon(HICON hIcon);
@@ -320,6 +333,7 @@ extern BOOL          SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y,
 extern LRESULT       DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 extern BOOL          GetOpenFileName(LPOPENFILENAME unnamedParam1);
 extern BOOL          GetSaveFileName(LPOPENFILENAME unnamedParam1);
+extern BOOL          SetMessageQueue(int size);
 extern void          randomize();
 extern HANDLE        GetProperty(PROPERTIES *props, LPCSTR key);
 extern HANDLE        SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData);

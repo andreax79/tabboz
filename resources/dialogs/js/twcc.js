@@ -120,14 +120,19 @@
         });
     }
 
-    async function waitListener(windowId, x, y) {
+    async function waitListener(windowId, message, wParam, lParam) {
         // const msg = await waitListenerS(`#win${windowId}, #win${windowId} input`);
         const msg = await waitListenerS(`#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`);
-        if (x != null) {
-            setValue(x, msg.x, "i32");
+        if (message != null) {
+            setValue(message, 0x0111, "i32"); // WM_COMMAND
         }
-        if (y != null) {
-            setValue(y, msg.y, "i32");
+        if (wParam != null) {
+            setValue(wParam, msg.controlId, "i32");
+        }
+        if (lParam != null) {
+            // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
+            const value = ((msg.y & 0xffff) << 16) + (msg.x & 0xffff);
+            setValue(lParam, value, "i32");
         }
         return msg.controlId;
     }
@@ -371,7 +376,7 @@
         // Make the window draggrable
         makeDraggable(c);
         // Wait for events
-        let result = await waitListener(windowId, null, null);
+        let result = await waitListener(windowId, null, null, null);
         // Convert the result
         if (uType & 0x00000004) { // MB_YESNO
             switch (result) {

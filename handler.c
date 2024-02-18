@@ -188,7 +188,6 @@ HANDLE_ENTRY *AllocateHandle()
         {
             h->refcount++;
             h->id = i + 1;
-            h->end = FALSE;
             h->props = AllocateProperties();
             return (HANDLE)h;
         }

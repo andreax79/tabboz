@@ -86,7 +86,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     int           dialog = (int)lpTemplateName;
     int           parentWindowId = -1;
     HANDLE_ENTRY *handle = AllocateHandle();
-    MSG           msg = {.hwnd = (HWND)handle};
+    MSG           msg;
 
     if (lpDialogFunc == NULL)
     {
@@ -101,15 +101,16 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     // Show dialog
     JS_ASYNC_CALL("dialogBox", handle->id, dialog, parentWindowId);
     // Dispatch Init
-    SendMessage((HWND)handle, WM_INITDIALOG, 0, 0);
+    PostMessage((HWND)handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
-    SendMessage((HWND)handle, WM_PAINT, 0, 0);
+    PostMessage((HWND)handle, WM_PAINT, 0, 0);
     // Message loop
-    while (GetMessage(&msg, NULL, 0, 0) > 0)
+    while (GetMessage(&msg, (HWND)handle, 0, 0) > 0)
     {
+        printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
-    retval = handle->retval;
+    retval = msg.wParam; // the value to be returned from the function that created the dialog box
     // Destroy the dialog box
     JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
@@ -128,8 +129,7 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
         // Invalid window handle
         return FALSE;
     }
-    handle->retval = retval;
-    handle->end = TRUE;
+    PostMessage(hWnd, WM_QUIT, retval, 0);
     return TRUE;
 }
 
@@ -268,87 +268,6 @@ HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
         return FALSE;
     }
     return DelProperty(handle->props, lpString);
-}
-
-//*******************************************************************
-// Retrieve a message
-//*******************************************************************
-
-BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
-{
-    int32_t x, y;
-    if (hWnd != NULL)
-    {
-        lpMsg->hwnd = hWnd;
-    }
-    if (((HANDLE_ENTRY *)lpMsg->hwnd)->end)
-    {
-        return FALSE;
-    }
-    // Activate the window
-    JS_CALL("setActiveWindow", ((HANDLE_ENTRY *)lpMsg->hwnd)->id);
-    // Wait for a message
-    lpMsg->wParam = JS_ASYNC_CALL_INT("waitListener", ((HANDLE_ENTRY *)lpMsg->hwnd)->id, &x, &y);
-    // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
-    lpMsg->lParam = ((y & 0xffff) << 16) + (x & 0xffff);
-    lpMsg->message = WM_COMMAND;
-    return TRUE;
-}
-
-//*******************************************************************
-// Dispatch a message to a window procedure
-//*******************************************************************
-
-LRESULT DispatchMessage(const MSG *lpMsg)
-{
-    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpDialogFunc;
-    if (lpMsg->message == WM_SETICON)
-    {
-        // Set window icon
-        HANDLE_ENTRY *handle = (HANDLE_ENTRY *)lpMsg->hwnd;
-        if (handle != NULL)
-        {
-            JS_CALL("setIcon", handle->id, (int)lpMsg->lParam);
-        }
-    }
-    else if (lpMsg->wParam == SC_CLOSE)
-    {
-        // Close window
-        if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
-        {
-            EndDialog(lpMsg->hwnd, TRUE);
-            // Dispatch Destroy
-            lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
-        }
-    }
-    else if (lpMsg->wParam == SC_MINIMIZE)
-    {
-        // Minimize the app (hide all the windows)
-        JS_CALL_INT("showApp", 0);
-    }
-    else
-    {
-        // Dispatch Commmand
-        lpDialogFunc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
-        // Dispatch Repaint
-        lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
-    }
-    return 0;
-}
-
-//*******************************************************************
-// Sends a message to the current window
-//*******************************************************************
-
-LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    MSG msg = {
-        .hwnd = hWnd,
-        .message = Msg,
-        .wParam = wParam,
-        .lParam = lParam,
-    };
-    return DispatchMessage(&msg);
 }
 
 //*******************************************************************
@@ -524,6 +443,8 @@ int IconClickCb(int eventType, const struct EmscriptenMouseEvent *someEvent, voi
 
 int main()
 {
+    // Message queue setup
+    SetMessageQueue(MESSAGE_LIMIT);
     // Load string resources
     JS_ASYNC_CALL("loadStringResources");
     // Preload images
