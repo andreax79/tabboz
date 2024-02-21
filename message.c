@@ -21,9 +21,18 @@
 #include "os.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #include "zarrosim.h"
 #ifdef TABBOZ_EM
+
+// clang-format off
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...) do {} while (0)
+#endif
+// clang-format on
 
 static MESAGES_QUEUE *queue = NULL;
 
@@ -67,6 +76,7 @@ int FindMessage(HWND hwnd)
 
 void DelMessage(int idx)
 {
+    DEBUG_PRINTF("DelMessage %d\n", idx);
     if (idx >= queue->next)
     {
         int count = idx - queue->next;
@@ -93,6 +103,7 @@ void DelMessage(int idx)
         } while (count >= 0);
     }
     queue->count--;
+    DEBUG_PRINTF("DelMessage done - count=%d free=%d\n", queue->count, queue->free);
 }
 
 //*******************************************************************
@@ -101,13 +112,16 @@ void DelMessage(int idx)
 
 BOOL PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, BOOL wRemoveMsg)
 {
+    DEBUG_PRINTF("PeekMessage hwnd=%ld\n", (long)hwnd);
     int idx = FindMessage(hwnd);
     if (idx == -1)
     {
+        DEBUG_PRINTF("PeekMessage not found\n");
         return FALSE;
     }
     else
     {
+        DEBUG_PRINTF("PeekMessage found - idx=%d\n", idx);
         memcpy(msg, &queue->messages[idx], sizeof(MSG));
         // If the PM_REMOVE flag is set, remove the message from the queue
         if (wRemoveMsg & PM_REMOVE)
@@ -125,23 +139,28 @@ BOOL PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, B
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
     int32_t message, wParam, lParam;
+    DEBUG_PRINTF("GetMessage\n");
 
     // Retrieve the message if any exist
     if (PeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, PM_REMOVE))
     {
         // Return FALSE is the message is WM_QUIT
+        DEBUG_PRINTF("GetMessage done (peek) - retval=%d\n", (lpMsg->message != WM_QUIT));
         return (lpMsg->message != WM_QUIT);
     }
 
     // Activate the window
+    DEBUG_PRINTF("setActiveWindow %d\n", ((HANDLE_ENTRY *)hWnd)->id);
     JS_CALL("setActiveWindow", ((HANDLE_ENTRY *)hWnd)->id);
 
     // Wait for a message
-    JS_ASYNC_CALL_INT("waitListener", ((HANDLE_ENTRY *)hWnd)->id, &message, &wParam, &lParam);
+    DEBUG_PRINTF("waitListener %d\n", ((HANDLE_ENTRY *)hWnd)->id);
+    JS_ASYNC_CALL("waitListener", ((HANDLE_ENTRY *)hWnd)->id, &message, &wParam, &lParam);
     lpMsg->hwnd = hWnd;
     lpMsg->message = message;
     lpMsg->wParam = wParam;
     lpMsg->lParam = lParam;
+    DEBUG_PRINTF("GetMessage done (wait)\n");
     return TRUE;
 }
 
@@ -154,6 +173,7 @@ BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
 
     if ((queue->next == queue->free) && (queue->count > 0))
     {
+        DEBUG_PRINTF("PostMessage failed - the queue is full\n");
         return FALSE; // the queue is full
     }
     else
@@ -167,9 +187,10 @@ BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
             .pt.y = 0,
         };
         int idx = queue->free;
-        queue->messages[idx] = msg;
+        memcpy(&queue->messages[idx], &msg, sizeof(MSG));
         queue->free = next_idx(idx);
         queue->count++;
+        DEBUG_PRINTF("PostMessage - count=%d free=%d\n", queue->count, queue->free);
         return TRUE;
     }
 }
@@ -185,6 +206,7 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     if (lpMsg->message == WM_SETICON)
     {
         // Set window icon
+        DEBUG_PRINTF("DispatchMessage - WM_SETICON\n");
         HANDLE_ENTRY *handle = (HANDLE_ENTRY *)lpMsg->hwnd;
         if (handle != NULL)
         {
@@ -194,6 +216,7 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     else if (lpMsg->wParam == SC_CLOSE)
     {
         // Close window
+        DEBUG_PRINTF("DispatchMessage - WM_CLOSE\n");
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
@@ -204,15 +227,19 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     else if (lpMsg->wParam == SC_MINIMIZE)
     {
         // Minimize the app (hide all the windows)
+        DEBUG_PRINTF("DispatchMessage - SC_MINIMIZE\n");
         JS_CALL_INT("showApp", 0);
     }
     else
     {
         // Dispatch Commmand
+        DEBUG_PRINTF("DispatchMessage - Dispatch command hwnd=%ld message=%d wParam=%d lParam=%ld\n", (long)lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
         retval = lpDialogFunc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
         // Dispatch Repaint
+        DEBUG_PRINTF("DispatchMessage - WM_PAINT\n");
         lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
     }
+    DEBUG_PRINTF("DispatchMessage - done retval=%ld\n", retval);
     return retval;
 }
 
@@ -220,11 +247,12 @@ LRESULT DispatchMessage(const MSG *lpMsg)
 // Call the window procedure and wait until the procedure has finished
 //*******************************************************************
 
-LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT SendMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    DEBUG_PRINTF("SendMessage hwnd=%ld message=%d wParam=%d lParam=%ld\n", (long)hWnd, uMsg, wParam, lParam);
     MSG msg = {
         .hwnd = hWnd,
-        .message = Msg,
+        .message = uMsg,
         .wParam = wParam,
         .lParam = lParam,
         .pt.x = 0,
@@ -239,12 +267,15 @@ LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 BOOL SetMessageQueue(int size)
 {
+    DEBUG_PRINTF("SetMessageQueue %d malloc=%ld\n", size, sizeof(MESAGES_QUEUE) + size * sizeof(MSG));
     if (queue)
     {
+        DEBUG_PRINTF("SetMessageQueue failed - already exists\n");
         return TRUE;
     }
     else if (!(queue = (MESAGES_QUEUE *)malloc(sizeof(MESAGES_QUEUE) + size * sizeof(MSG))))
     {
+        DEBUG_PRINTF("SetMessageQueue failed - malloc\n");
         return FALSE;
     }
     else

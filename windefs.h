@@ -223,11 +223,11 @@ typedef struct
 
 typedef struct
 {
-    int  count;
-    int  next;
-    int  free;
-    int  capacity;
-    MSG *messages;
+    int count;
+    int next;
+    int free;
+    int capacity;
+    MSG messages[1];
 } MESAGES_QUEUE;
 
 #define NOMENU

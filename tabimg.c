@@ -33,6 +33,14 @@
 #define IMG_X_INC 10
 #define IMG_Y_INC 0
 
+// clang-format off
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...) do {} while (0)
+#endif
+// clang-format on
+
 static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 
 /*********************************************************************/
@@ -141,6 +149,7 @@ int static NEAR PASCAL WMCreate(HWND hwnd, LPCREATESTRUCT lpCS)
     HBITMAP hbmp_scarpe;
     HBITMAP hbmp_sfondo;
 
+    DEBUG_PRINTF("WMCreate\n");
     TabbozRedraw = 0; // Visto che sta venendo caricato ora, non necessita di essere caricato ancora...
 
     switch (ImgSelector)
@@ -193,10 +202,10 @@ int static NEAR PASCAL WMCreate(HWND hwnd, LPCREATESTRUCT lpCS)
         SetProp(hwnd, "hbmp_sfondo", hbmp_sfondo);
 
         SetWindowPos(hwnd, NULL, 0, 0, IMG_SIZEX, IMG_SIZEY, SWP_NOMOVE | SWP_NOZORDER);
-        return 0;
     }
 
-    return 0; // report failure
+    DEBUG_PRINTF("WMCreate done\n");
+    return 0;
 }
 
 /*********************************************************************/
@@ -216,6 +225,7 @@ int static NEAR PASCAL WMDestroy(HWND hwnd)
     HBITMAP hmask_scarpe = GetProp(hwnd, "hmask_scarpe");
     HBITMAP hmask_sfondo = GetProp(hwnd, "hmask_sfondo");
 
+    DEBUG_PRINTF("WMDestroy\n");
     if (hbmp_testa)
     {
         DeleteObject(hbmp_testa);
@@ -268,6 +278,7 @@ int static NEAR PASCAL WMDestroy(HWND hwnd)
         RemoveProp(hwnd, "hmask_sfondo");
     }
 
+    DEBUG_PRINTF("WMDestroy done\n");
     return 0;
 }
 
@@ -289,6 +300,7 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
     HBITMAP     hmask_scarpe;
     HBITMAP     hmask_sfondo;
 
+    DEBUG_PRINTF("WMPaint TabbozRedraw=%d\n", TabbozRedraw);
     HDC hdc = BeginPaint(hwnd, &ps);
 
     if (TabbozRedraw)
@@ -343,6 +355,7 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
     }
 
     EndPaint(hwnd, &ps);
+    DEBUG_PRINTF("WMPaint done\n");
 
     return 0;
 }
@@ -412,6 +425,7 @@ ATOM RegisterBMPViewClass(HANDLE hInst)
 int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
 {
     HBITMAP hbmp = LoadBitmap(hInst, MAKEINTRESOURCE(current_tipa + 1204));
+    DEBUG_PRINTF("WMTipaCreate\n");
     if (hbmp)
     {
 #ifndef TABBOZ_EM
@@ -423,8 +437,10 @@ int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
         SetWindowPos(hwnd, NULL, 0, 0, bm.bmWidth, bm.bmHeight,
                      SWP_NOMOVE | SWP_NOZORDER);
 #endif
+        DEBUG_PRINTF("WMTipaCreate done\n");
         return 0;
     }
+    DEBUG_PRINTF("WMTipaCreate failure (error loading resource)\n");
     return -1; // report failure
 }
 
@@ -434,12 +450,14 @@ int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
 #pragma argsused
 int static NEAR PASCAL WMTipaDestroy(HWND hwnd)
 {
+    DEBUG_PRINTF("WMTipaDestroy\n");
     HBITMAP hbmp = GetProp(hwnd, "hTipa");
     if (hbmp)
     {
         DeleteObject(hbmp);
         RemoveProp(hwnd, "hTipa");
     }
+    DEBUG_PRINTF("WMTipaDestroy done\n");
     return 0;
 }
 
@@ -452,6 +470,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
     PAINTSTRUCT ps;
     HDC         hdc = BeginPaint(hwnd, &ps);
     HBITMAP     hbmp = GetProp(hwnd, "hTipa");
+    DEBUG_PRINTF("WMTipaPaint\n");
     if (hbmp)
     {
 #ifdef TABBOZ_EM
@@ -471,6 +490,7 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
 #endif
     }
     EndPaint(hwnd, &ps);
+    DEBUG_PRINTF("WMTipaPaint done\n");
     return 0;
 }
 

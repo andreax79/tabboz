@@ -1,6 +1,8 @@
 /* Tabboz Windows Custom Controls */
 ((exports) => {
 
+    _resolve = null;
+
     function addMainMenu(mainMenuEl) {
         let mainMenuElement = mainMenuEl;
         let activated = false;
@@ -101,8 +103,8 @@
     function makeDraggable(element) {
         element.addEventListener('mousedown', function(e) {
             if (e.target.classList.contains('title-bar') || e.target.classList.contains('title-bar-text')) {
-                var offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
-                var offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
+                const offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
+                const offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
 
                 function mouseMoveHandler(event) {
                     element.style.top = (event.clientY - offsetY) + 'px';
@@ -131,54 +133,19 @@
         if (lParam != null) {
             setValue(lParam, msg.lParam, "i32");
         }
-        return msg.wParam;
     }
 
     function waitListenerS(windowId) {
-        // const selector = `#win${windowId}, #win${windowId} input`;
-        const selector = `#win${windowId} button, #win${windowId} input, #win${windowId} .menu, #win${windowId} img, #win${windowId} canvas`;
-        return new Promise(function(resolve, reject) {
-            var listener = event => {
-                const match = event.target.className.match(/\d+/);
-                let wParam = match ? Number(match[0]) : 0;
-                let message = 0x0111; // WM_COMMAND
-                // Get click position
-                const rect = event.target.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
-                const lParam = ((y & 0xffff) << 16) + (x & 0xffff);
-                // Key press
-                if (event.keyCode !== undefined) {
-                    if (event.keyCode == 27) { // ESC
-                        message = 0x100; // WM_KEYDOWN
-                        wParam = 0x1B; // VK_ESCAPE
-                    } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13) { // Enter
-                        // continue (click on button)
-                    } else {
-                        // skip
-                        return false;
-                    }
-                }
-                // Remove event listener
-                document.querySelectorAll(selector).forEach(element => {
-                    const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
-                    element.removeEventListener(listenerName, listener)
-                    element.removeEventListener("keydown", listener)
+        return new Promise((resolve, reject) => {
+            if (_resolve) {
+                _resolve({
+                    message: 0,
+                    wParam: 0,
+                    lParam: 0
                 });
-                resolve({
-                    message: message,
-                    wParam: wParam,
-                    lParam: lParam,
-                    x: x,
-                    y: y
-                });
-            };
-            document.querySelectorAll(selector).forEach(element => {
-                const listenerName = (element.nodeName == "INPUT") ? "input" : "click";
-                element.addEventListener(listenerName, listener);
-                element.addEventListener("keydown", listener);
-            });
+                _resolve = null;
+            }
+            _resolve = resolve;
         });
     }
 
@@ -493,6 +460,73 @@
         });
     }
 
+    // Add event listener
+    function eventListenerSetup() {
+        document.querySelector('body').addEventListener('click', eventHandler);
+        document.querySelector('body').addEventListener('keydown', eventHandler);
+        document.querySelector('body').addEventListener('input', eventHandler);
+    }
+
+    function calculateClickPosition(event) {
+        // Get click position
+        const rect = event.target.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        // low-order word specifies the x-coordinate, high-order word specifies the y-coordinate
+        return ((y & 0xffff) << 16) + (x & 0xffff);
+    }
+
+    function eventHandler(event) {
+        if (_resolve) {
+            console.log(event);
+            const match = event.target.className.match(/\d+/);
+            let wParam = 0;
+            let message = 0;
+            let lParam = 0;
+            switch (event.type) {
+                case 'click':
+                    message = 0x0111; // WM_COMMAND
+                    wParam = match ? Number(match[0]) : 0;
+                    lParam = calculateClickPosition(event);
+                    if (wParam == 0) {
+                        return;
+                    }
+                    break;
+                case 'input':
+                    message = 0x0111; // WM_COMMAND
+                    wParam = match ? Number(match[0]) : 0;
+                    if (wParam == 0) {
+                        return;
+                    }
+                    if (event.target.nodeName == "INPUT") {
+                        return;
+                    }
+                    break;
+                case 'keydown':
+                    if (event.keyCode == 27) { // ESC
+                        message = 0x100; // WM_KEYDOWN
+                        wParam = 0x1B; // VK_ESCAPE
+                        lParam = 0;
+                    } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13) { // Enter
+                        message = 0x0111; // WM_COMMAND
+                        // continue (click on button)
+                    } else {
+                        // skip
+                        return;
+                    }
+                    break;
+                default: // skip
+                    return;
+            }
+            _resolve({
+                message: message,
+                wParam: wParam,
+                lParam: lParam
+            });
+            _resolve = null;
+        }
+    }
+
     // Display shutdown screen
     function shutdown() {
         document.querySelector("#shutdown").style.display = "block";
@@ -519,6 +553,7 @@
     exports.dialogBox = dialogBox;
     exports.destroyDialogBox = destroyDialogBox;
     exports.preload = preload;
+    exports.eventListenerSetup = eventListenerSetup;
     exports.shutdown = shutdown;
 
 })(window);

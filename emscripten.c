@@ -28,6 +28,14 @@
 #include "zarrosim.h"
 #ifdef TABBOZ_EM
 
+// clang-format off
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...) do {} while (0)
+#endif
+// clang-format on
+
 #include <emscripten/html5.h>
 
 //*******************************************************************
@@ -105,6 +113,7 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
         DispatchMessage(&msg);
     }
     // Destroy the dialog box
+    DEBUG_PRINTF("destroyDialogBox %d\n", handle->id);
     JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
     return msg.wParam; // the value to be returned to the function that created the message box
@@ -482,6 +491,8 @@ int main()
     JS_ASYNC_CALL("loadStringResources");
     // Preload images
     JS_ASYNC_CALL("preload");
+    // Add event listener
+    JS_CALL("eventListenerSetup");
     /* printf("-->%d<--\n", MessageBox(0, "Test", "Test", MB_YESNO | MB_ICONINFORMATION)); */
     // Register icon handler
     emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &IconClickCb);

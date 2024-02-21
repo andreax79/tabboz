@@ -31,6 +31,14 @@
 #define MIN_HANDLE_ENTRIES 32
 #define PROPERTIES_DEFAULT_ENTRIES 8
 
+// clang-format off
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
+#else
+#define DEBUG_PRINTF(...) do {} while (0)
+#endif
+// clang-format on
+
 static HANDLE_TABLE *global_table;
 
 //*******************************************************************
@@ -39,13 +47,33 @@ static HANDLE_TABLE *global_table;
 
 int FindPropertyIndex(PROPERTIES *props, LPCSTR key)
 {
-    for (int i = 0; i < props->len; i++)
+    for (int i = 0; i < props->capacity; i++)
     {
-        if (!strcmp(props->entry[i].key, key))
+        if ((props->entry[i].key != NULL) && (!strcmp(props->entry[i].key, key)))
         {
+            DEBUG_PRINTF("FindPropertyIndex %s idx=%d\n", key, i);
             return i;
         }
     }
+    DEBUG_PRINTF("FindPropertyIndex %s not found\n", key);
+    return -1;
+}
+
+//*******************************************************************
+// Find empty property index
+//*******************************************************************
+
+int FindEmptyPropertyIndex(PROPERTIES *props)
+{
+    for (int i = 0; i < props->capacity; i++)
+    {
+        if (props->entry[i].key == NULL)
+        {
+            DEBUG_PRINTF("FindEmptyPropertyIndex idx=%d\n", i);
+            return i;
+        }
+    }
+    DEBUG_PRINTF("FindEmptyPropertyIndex not found\n");
     return -1;
 }
 
@@ -55,6 +83,7 @@ int FindPropertyIndex(PROPERTIES *props, LPCSTR key)
 
 HANDLE GetProperty(PROPERTIES *props, LPCSTR key)
 {
+    DEBUG_PRINTF("GetProperty %s\n", key);
     int idx = FindPropertyIndex(props, key);
     if (idx == -1)
     {
@@ -72,6 +101,7 @@ HANDLE GetProperty(PROPERTIES *props, LPCSTR key)
 
 HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
 {
+    DEBUG_PRINTF("DelProperty %s\n", key);
     int idx = FindPropertyIndex(props, key);
     if (idx == -1)
     {
@@ -83,6 +113,7 @@ HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
         props->entry[idx].hData = NULL;
         free((void *)props->entry[idx].key);
         props->entry[idx].key = NULL;
+        props->len--;
         return prev;
     }
 }
@@ -93,20 +124,35 @@ HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
 
 HANDLE SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData)
 {
+    DEBUG_PRINTF("SetProperty %s\n", key);
     int idx = FindPropertyIndex(props, key);
-    if (idx != -1)
+    if (idx != -1) // Already exist
     {
+        DEBUG_PRINTF("SetProperty %s (set) idx=%d\n", key, idx);
         HANDLE prev = props->entry[idx].hData;
         props->entry[idx].hData = hData;
         return prev;
     }
-    if (props->len == props->capacity)
+    if (props->len == props->capacity) // Full
     {
+        DEBUG_PRINTF("SetProperty %s realloc capacity=%d\n", key, props->capacity * 2);
+        PROPERTY *prev = props->entry;
+        props->entry = calloc(props->capacity * 2, sizeof(PROPERTY));
+        if (props->entry == NULL)
+        {
+            DEBUG_PRINTF("SetProperty %s calloc failed\n", key);
+            props->entry = prev;
+            return NULL;
+        }
+        memcpy(props->entry, prev, props->capacity * sizeof(PROPERTY));
         props->capacity *= 2;
-        props->entry = realloc(props->entry, props->capacity * sizeof(PROPERTY));
+        free(prev);
     }
-    props->entry[props->len].key = strdup(key);
-    props->entry[props->len].hData = hData;
+    // Search for an unused entry
+    idx = FindEmptyPropertyIndex(props);
+    DEBUG_PRINTF("SetProperty %s (add) idx=%d\n", key, idx);
+    props->entry[idx].key = strdup(key);
+    props->entry[idx].hData = hData;
     props->len++;
     return NULL;
 }
@@ -117,10 +163,23 @@ HANDLE SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData)
 
 PROPERTIES *AllocateProperties(void)
 {
-    PROPERTIES  proto = {0, PROPERTIES_DEFAULT_ENTRIES, malloc(PROPERTIES_DEFAULT_ENTRIES * sizeof(PROPERTY))};
-    PROPERTIES *d = malloc(sizeof(PROPERTIES));
-    *d = proto;
-    return d;
+    DEBUG_PRINTF("AllocateProperties\n");
+    PROPERTIES *props = calloc(1, sizeof(PROPERTIES));
+    if (props == NULL)
+    {
+        DEBUG_PRINTF("AllocateProperties calloc failed\n");
+        return NULL;
+    }
+    props->capacity = PROPERTIES_DEFAULT_ENTRIES;
+    props->len = 0;
+    props->entry = calloc(props->capacity, sizeof(PROPERTY));
+    if (props->entry == NULL)
+    {
+        DEBUG_PRINTF("AllocateProperties entries calloc failed\n");
+        free(props);
+        return NULL;
+    }
+    return props;
 }
 
 //*******************************************************************
@@ -129,7 +188,8 @@ PROPERTIES *AllocateProperties(void)
 
 void FreeProperties(PROPERTIES *props)
 {
-    for (int i = 0; i < props->len; i++)
+    DEBUG_PRINTF("FreeProperties - capacity=%d len=%d\n", props->capacity, props->len);
+    for (int i = 0; i < props->capacity; i++)
     {
         if (props->entry[i].key != NULL)
         {
@@ -152,18 +212,19 @@ HANDLE_TABLE *AllocateHandleTable(int count)
     {
         count = MIN_HANDLE_ENTRIES;
     }
-    if (!(table = malloc(sizeof(HANDLE_TABLE))))
+    if (!(table = calloc(1, sizeof(HANDLE_TABLE))))
     {
+        DEBUG_PRINTF("AllocateHandleTable calloc failed\n");
         return NULL;
     }
     table->count = count;
-    if ((table->entries = malloc(count * sizeof(*table->entries))))
+    if ((table->entries = calloc(count, sizeof(*table->entries))))
     {
-        bzero(table->entries, count * sizeof(*table->entries));
         return table;
     }
     else
     {
+        DEBUG_PRINTF("AllocateHandleTable calloc failed\n");
         free(table);
         return NULL;
     }
@@ -178,20 +239,31 @@ HANDLE_ENTRY *AllocateHandle()
     int i;
     if (!global_table)
     {
+        DEBUG_PRINTF("AllocateHandle global_table is null\n");
         if (!(global_table = AllocateHandleTable(0)))
+        {
             return NULL;
+        }
     }
     for (i = 0; i < global_table->count; i++)
     {
         HANDLE_ENTRY *h = &global_table->entries[i];
         if (h->refcount == 0)
         {
+            h->props = AllocateProperties();
+            if (h->props == NULL)
+            {
+                DEBUG_PRINTF("AllocateHandle failed\n");
+                free(h);
+                return NULL;
+            }
             h->refcount++;
             h->id = i + 1;
-            h->props = AllocateProperties();
+            DEBUG_PRINTF("AllocateHandle id=%d\n", h->id);
             return (HANDLE)h;
         }
     }
+    DEBUG_PRINTF("AllocateHandle table full\n");
     return NULL;
 }
 
@@ -204,6 +276,7 @@ void ReleaseHandle(HANDLE p)
     HANDLE_ENTRY *h = (HANDLE_ENTRY *)p;
     if (h != NULL)
     {
+        DEBUG_PRINTF("ReleaseHandle refcount=%d\n", h->refcount);
         if (h->refcount > 0)
         {
             h->refcount--;

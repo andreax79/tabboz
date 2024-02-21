@@ -105,7 +105,7 @@ int sound_active; /* 1 Marzo 1999 */
 // Questo serve se e' attivo il debug...
 
 #ifdef TABBOZ_DEBUG // 12 Giugno 1998
-FILE *debugfile;
+FILE *debugfile = NULL;
 int   debug_active; // 22 Giugno 1998
 #endif
 
@@ -628,7 +628,7 @@ static void CaricaTutto(void)
     // Guarda se qualche "bastardino" ha modificato dei valori nel registro...
     if (new_counter - atoi(RRKey("SoftCheck")))
     {
-        ResetMe(0);
+        // ResetMe(0);  // TODO
     }
 }
 
@@ -2309,13 +2309,17 @@ void openlog()
 
 void closelog()
 {
-    fclose(debugfile);
+    if (debugfile != NULL)
+    {
+        fclose(debugfile);
+        debugfile = NULL;
+    }
 }
 
 void writelog(char *s)
 {
     time_t t;
-    if (debug_active)
+    if (debug_active && debugfile != NULL)
     {
         time(&t);
         fprintf(debugfile, "%24.24s %s\n", ctime(&t), s);
