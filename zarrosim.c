@@ -2316,7 +2316,7 @@ void closelog()
     }
 }
 
-void writelog(char *s)
+void writelog(const char *s)
 {
     time_t t;
     if (debug_active && debugfile != NULL)

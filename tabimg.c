@@ -37,7 +37,12 @@
 #ifdef DEBUG
 #define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
 #else
+#ifdef __BORLANDC__
+static void debug_printf(const char *format, ...) {}
+#define DEBUG_PRINTF debug_printf
+#else
 #define DEBUG_PRINTF(...) do {} while (0)
+#endif
 #endif
 // clang-format on
 
@@ -299,9 +304,10 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
     HBITMAP     hmask_pantaloni;
     HBITMAP     hmask_scarpe;
     HBITMAP     hmask_sfondo;
+    HDC         hdc;
 
     DEBUG_PRINTF("WMPaint TabbozRedraw=%d\n", TabbozRedraw);
-    HDC hdc = BeginPaint(hwnd, &ps);
+    hdc = BeginPaint(hwnd, &ps);
 
     if (TabbozRedraw)
     { // Ricarica le immagini...
@@ -450,8 +456,8 @@ int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
 #pragma argsused
 int static NEAR PASCAL WMTipaDestroy(HWND hwnd)
 {
-    DEBUG_PRINTF("WMTipaDestroy\n");
     HBITMAP hbmp = GetProp(hwnd, "hTipa");
+    DEBUG_PRINTF("WMTipaDestroy\n");
     if (hbmp)
     {
         DeleteObject(hbmp);

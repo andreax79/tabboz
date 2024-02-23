@@ -113,7 +113,6 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
         DispatchMessage(&msg);
     }
     // Destroy the dialog box
-    DEBUG_PRINTF("destroyDialogBox %d\n", handle->id);
     JS_CALL("destroyDialogBox", handle->id);
     ReleaseHandle(handle);
     return msg.wParam; // the value to be returned to the function that created the message box

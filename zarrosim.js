@@ -5045,6 +5045,8 @@ var asm = createWasm();
 
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
+var _PostMessage = Module["_PostMessage"] = createExportWrapper("PostMessage");
+
 var _main = Module["_main"] = createExportWrapper("main");
 
 var _free = Module["_free"] = createExportWrapper("free");

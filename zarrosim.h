@@ -277,7 +277,7 @@ extern char  *n_attivita[]; //  7 Maggio 1998
 #else
 #define LOGFILE "\\ZARROSIM.LOG"
 #endif
-extern void writelog(char *s); // 22 Giugno 1998
+extern void writelog(const char *s); // 22 Giugno 1998
 #endif
 
 #ifndef NONETWORK
