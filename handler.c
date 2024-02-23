@@ -49,7 +49,7 @@ int FindPropertyIndex(PROPERTIES *props, LPCSTR key)
 {
     for (int i = 0; i < props->capacity; i++)
     {
-        if ((props->entry[i].key != NULL) && (!strcmp(props->entry[i].key, key)))
+        if ((props->entries[i].key != NULL) && (!strcmp(props->entries[i].key, key)))
         {
             DEBUG_PRINTF("FindPropertyIndex %s idx=%d\n", key, i);
             return i;
@@ -67,7 +67,7 @@ int FindEmptyPropertyIndex(PROPERTIES *props)
 {
     for (int i = 0; i < props->capacity; i++)
     {
-        if (props->entry[i].key == NULL)
+        if (props->entries[i].key == NULL)
         {
             DEBUG_PRINTF("FindEmptyPropertyIndex idx=%d\n", i);
             return i;
@@ -91,7 +91,7 @@ HANDLE GetProperty(PROPERTIES *props, LPCSTR key)
     }
     else
     {
-        return props->entry[idx].hData;
+        return props->entries[idx].hData;
     }
 }
 
@@ -109,10 +109,10 @@ HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
     }
     else
     {
-        HANDLE prev = props->entry[idx].hData;
-        props->entry[idx].hData = NULL;
-        free((void *)props->entry[idx].key);
-        props->entry[idx].key = NULL;
+        HANDLE prev = props->entries[idx].hData;
+        props->entries[idx].hData = NULL;
+        free((void *)props->entries[idx].key);
+        props->entries[idx].key = NULL;
         props->len--;
         return prev;
     }
@@ -129,30 +129,30 @@ HANDLE SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData)
     if (idx != -1) // Already exist
     {
         DEBUG_PRINTF("SetProperty %s (set) idx=%d\n", key, idx);
-        HANDLE prev = props->entry[idx].hData;
-        props->entry[idx].hData = hData;
+        HANDLE prev = props->entries[idx].hData;
+        props->entries[idx].hData = hData;
         return prev;
     }
     if (props->len == props->capacity) // Full
     {
         DEBUG_PRINTF("SetProperty %s realloc capacity=%d\n", key, props->capacity * 2);
-        PROPERTY *prev = props->entry;
-        props->entry = calloc(props->capacity * 2, sizeof(PROPERTY));
-        if (props->entry == NULL)
+        PROPERTY *prev = props->entries;
+        props->entries = calloc(props->capacity * 2, sizeof(PROPERTY));
+        if (props->entries == NULL)
         {
             DEBUG_PRINTF("SetProperty %s calloc failed\n", key);
-            props->entry = prev;
+            props->entries = prev;
             return NULL;
         }
-        memcpy(props->entry, prev, props->capacity * sizeof(PROPERTY));
+        memcpy(props->entries, prev, props->capacity * sizeof(PROPERTY));
         props->capacity *= 2;
         free(prev);
     }
     // Search for an unused entry
     idx = FindEmptyPropertyIndex(props);
     DEBUG_PRINTF("SetProperty %s (add) idx=%d\n", key, idx);
-    props->entry[idx].key = strdup(key);
-    props->entry[idx].hData = hData;
+    props->entries[idx].key = strdup(key);
+    props->entries[idx].hData = hData;
     props->len++;
     return NULL;
 }
@@ -172,8 +172,8 @@ PROPERTIES *AllocateProperties(void)
     }
     props->capacity = PROPERTIES_DEFAULT_ENTRIES;
     props->len = 0;
-    props->entry = calloc(props->capacity, sizeof(PROPERTY));
-    if (props->entry == NULL)
+    props->entries = calloc(props->capacity, sizeof(PROPERTY));
+    if (props->entries == NULL)
     {
         DEBUG_PRINTF("AllocateProperties entries calloc failed\n");
         free(props);
@@ -191,12 +191,12 @@ void FreeProperties(PROPERTIES *props)
     DEBUG_PRINTF("FreeProperties - capacity=%d len=%d\n", props->capacity, props->len);
     for (int i = 0; i < props->capacity; i++)
     {
-        if (props->entry[i].key != NULL)
+        if (props->entries[i].key != NULL)
         {
-            free((void *)props->entry[i].key);
+            free((void *)props->entries[i].key);
         }
     }
-    free(props->entry);
+    free(props->entries);
     free(props);
 }
 

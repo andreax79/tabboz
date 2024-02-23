@@ -204,7 +204,7 @@ typedef struct
 {
     int       len;      // current length
     int       capacity; // capacity
-    PROPERTY *entry;
+    PROPERTY *entries;
 } PROPERTIES;
 
 typedef struct

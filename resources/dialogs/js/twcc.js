@@ -2,6 +2,8 @@
 ((exports) => {
 
     _resolve = null;
+    _activeWindowId = null;
+    _activeWindowHwnd = null;
 
     function addMainMenu(mainMenuEl) {
         let mainMenuElement = mainMenuEl;
@@ -122,29 +124,18 @@
         });
     }
 
-    async function waitListener(windowId, message, wParam, lParam) {
-        const msg = await waitListenerS(windowId);
-        if (message != null) {
-            setValue(message, msg.message, "i32");
-        }
-        if (wParam != null) {
-            setValue(wParam, msg.wParam, "i32");
-        }
-        if (lParam != null) {
-            setValue(lParam, msg.lParam, "i32");
+    // Stop waiting for an event
+    function stopWaiting() {
+        if (_resolve) {
+            _resolve();
+            _resolve = null;
         }
     }
 
-    function waitListenerS(windowId) {
+    // Wait for an event
+    function waitEvent() {
         return new Promise((resolve, reject) => {
-            if (_resolve) {
-                _resolve({
-                    message: 0,
-                    wParam: 0,
-                    lParam: 0
-                });
-                _resolve = null;
-            }
+            stopWaiting();
             _resolve = resolve;
         });
     }
@@ -163,11 +154,15 @@
 
     // Change the active window
     function setActiveWindow(windowId) {
+        _activeWindowId = windowId;
+        _activeWindowHwnd = _GetHandle(windowId);
+        // Add 'inactive' class to other windows
         document.querySelectorAll(".title-bar").forEach(element => {
             if (!element.classList.contains("inactive")) {
                 element.classList.add("inactive");
             }
         });
+        // Remove 'inactive' class from the active window
         const element = document.querySelector(`#win${windowId} .title-bar`);
         if (element != null) {
             element.classList.remove("inactive");
@@ -460,13 +455,7 @@
         });
     }
 
-    // Add event listener
-    function eventListenerSetup() {
-        document.querySelector('body').addEventListener('click', eventHandler);
-        document.querySelector('body').addEventListener('keydown', eventHandler);
-        document.querySelector('body').addEventListener('input', eventHandler);
-    }
-
+    // Calculate the position of an event
     function calculateClickPosition(event) {
         // Get click position
         const rect = event.target.getBoundingClientRect();
@@ -476,55 +465,53 @@
         return ((y & 0xffff) << 16) + (x & 0xffff);
     }
 
+    // Return true if element is a checkbox
+    function isCheckbox(element) {
+        return element.nodeName == "INPUT" && element.type == "checkbox";
+    }
+
+    // Add event listener
+    function eventListenerSetup() {
+        document.querySelector('body').addEventListener('click', eventHandler);
+        document.querySelector('body').addEventListener('keydown', eventHandler);
+        document.querySelector('body').addEventListener('input', eventHandler);
+    }
+
     function eventHandler(event) {
-        if (_resolve) {
-            console.log(event);
-            const match = event.target.className.match(/\d+/);
-            let wParam = 0;
-            let message = 0;
-            let lParam = 0;
-            switch (event.type) {
-                case 'click':
-                    message = 0x0111; // WM_COMMAND
-                    wParam = match ? Number(match[0]) : 0;
-                    lParam = calculateClickPosition(event);
-                    if (wParam == 0) {
-                        return;
-                    }
-                    break;
-                case 'input':
-                    message = 0x0111; // WM_COMMAND
-                    wParam = match ? Number(match[0]) : 0;
-                    if (wParam == 0) {
-                        return;
-                    }
-                    if (event.target.nodeName == "INPUT") {
-                        return;
-                    }
-                    break;
-                case 'keydown':
-                    if (event.keyCode == 27) { // ESC
-                        message = 0x100; // WM_KEYDOWN
-                        wParam = 0x1B; // VK_ESCAPE
-                        lParam = 0;
-                    } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13) { // Enter
-                        message = 0x0111; // WM_COMMAND
-                        // continue (click on button)
-                    } else {
-                        // skip
-                        return;
-                    }
-                    break;
-                default: // skip
-                    return;
-            }
-            _resolve({
-                message: message,
-                wParam: wParam,
-                lParam: lParam
-            });
-            _resolve = null;
+        console.log(event);
+        const match = event.target.className.match(/\d+/);
+        switch (event.type) {
+            case 'click':
+                if (match) {
+                    const message = 0x0111; // WM_COMMAND
+                    const wParam = Number(match[0]);
+                    const lParam = calculateClickPosition(event);
+                    _PostMessage(_activeWindowHwnd, message, wParam, lParam);
+                }
+                break;
+            case 'input':
+                if (match && !isCheckbox(event.target)) {
+                    const message = 0x0111; // WM_COMMAND
+                    const wParam = Number(match[0]);
+                    const lParam = 0;
+                    _PostMessage(_activeWindowHwnd, message, wParam, lParam);
+                }
+                break;
+            case 'keydown':
+                if (event.keyCode == 27) { // ESC
+                    const message = 0x100; // WM_KEYDOWN
+                    const wParam = 0x1B; // VK_ESCAPE
+                    const lParam = 0;
+                    _PostMessage(_activeWindowHwnd, message, wParam, lParam);
+                } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13 && match) { // Enter
+                    const message = 0x0111; // WM_COMMAND
+                    const wParam = Number(match[0]);
+                    const lParam = 0;
+                    _PostMessage(_activeWindowHwnd, message, wParam, lParam);
+                }
+                break;
         }
+        stopWaiting();
     }
 
     // Display shutdown screen
@@ -534,7 +521,8 @@
 
     exports.addMainMenu = addMainMenu;
     exports.makeDraggable = makeDraggable;
-    exports.waitListener = waitListener;
+    exports.waitEvent = waitEvent;
+    exports.stopWaiting = stopWaiting;
     exports.createElementFromHTML = createElementFromHTML;
     exports.setActiveWindow = setActiveWindow;
     exports.showWindow = showWindow;

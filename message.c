@@ -138,29 +138,26 @@ BOOL PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, B
 
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
-    int32_t message, wParam, lParam;
     DEBUG_PRINTF("GetMessage\n");
-
-    // Retrieve the message if any exist
-    if (PeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, PM_REMOVE))
-    {
-        // Return FALSE is the message is WM_QUIT
-        DEBUG_PRINTF("GetMessage done (peek) - retval=%d\n", (lpMsg->message != WM_QUIT));
-        return (lpMsg->message != WM_QUIT);
-    }
 
     // Activate the window
     DEBUG_PRINTF("setActiveWindow %d\n", ((HANDLE_ENTRY *)hWnd)->id);
     JS_CALL("setActiveWindow", ((HANDLE_ENTRY *)hWnd)->id);
 
-    // Wait for a message
-    DEBUG_PRINTF("waitListener %d\n", ((HANDLE_ENTRY *)hWnd)->id);
-    JS_ASYNC_CALL("waitListener", ((HANDLE_ENTRY *)hWnd)->id, &message, &wParam, &lParam);
-    lpMsg->hwnd = hWnd;
-    lpMsg->message = message;
-    lpMsg->wParam = wParam;
-    lpMsg->lParam = lParam;
-    DEBUG_PRINTF("GetMessage done (wait)\n");
+    while (TRUE)
+    {
+        // Retrieve the message if any exist
+        if (PeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, PM_REMOVE))
+        {
+            // Return FALSE is the message is WM_QUIT
+            DEBUG_PRINTF("GetMessage done (peek) - retval=%d\n", (lpMsg->message != WM_QUIT));
+            return (lpMsg->message != WM_QUIT);
+        }
+
+        // Wait for an event
+        DEBUG_PRINTF("waitEvent\n");
+        JS_ASYNC_CALL("waitEvent");
+    }
     return TRUE;
 }
 
@@ -171,6 +168,7 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
 {
 
+    DEBUG_PRINTF("PostMessage - hWnd: %ldn Msg: %d wParam: %d lParam: %ld", (long)hWnd, Msg, wParam, lParam);
     if ((queue->next == queue->free) && (queue->count > 0))
     {
         DEBUG_PRINTF("PostMessage failed - the queue is full\n");
@@ -285,6 +283,22 @@ BOOL SetMessageQueue(int size)
         queue->free = 0;
         queue->capacity = size;
         return TRUE;
+    }
+}
+
+//*******************************************************************
+// Print message queue
+//*******************************************************************
+
+void PrintMessages()
+{
+    DEBUG_PRINTF("PrintMessages");
+    printf("count: %d next: %d free: %d capacity: %d\n",
+           queue->count, queue->next, queue->free, queue->capacity);
+    for (int i = 0, idx = queue->next; i < queue->count; i++, idx = next_idx(idx))
+    {
+        LPMSG msg = &queue->messages[idx];
+        printf("> %d idx: %d hwnd: %ld message: %d\n", i, idx, (long)msg->hwnd, msg->message);
     }
 }
 
