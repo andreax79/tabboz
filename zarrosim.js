@@ -1395,111 +1395,114 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 34964: function($0, $1, $2) {
+ 35044: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 34992: function($0, $1) {
+ 35072: function($0, $1) {
   return showWindow($0, $1);
  },
- 35017: function($0, $1, $2, $3, $4) {
+ 35097: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 35095: function($0) {
+ 35175: function($0) {
   return destroyDialogBox($0);
  },
- 35123: function($0, $1, $2) {
+ 35203: function($0, $1, $2) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2);
   });
  },
- 35194: function($0) {
+ 35274: function($0) {
   return destroyDialogBox($0);
  },
- 35222: function($0, $1, $2) {
+ 35302: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35254: function($0, $1, $2) {
+ 35334: function($0, $1, $2) {
   return setCheck($0, $1, $2);
  },
- 35280: function($0) {
+ 35360: function($0) {
   return getSystemMetrics($0);
  },
- 35308: function($0, $1) {
+ 35388: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35345: function($0, $1) {
+ 35425: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35382: function($0, $1) {
+ 35462: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35419: function($0, $1) {
+ 35499: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35456: function($0, $1, $2, $3, $4) {
+ 35536: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 35490: function($0, $1, $2, $3) {
+ 35570: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35525: function() {
+ 35605: function() {
+  return stopWaiting();
+ },
+ 35626: function() {
   return shutdown();
  },
- 35543: function($0) {
+ 35644: function($0) {
   return showApp($0);
  },
- 35562: function() {
+ 35663: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 35635: function() {
+ 35736: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 35696: function() {
+ 35797: function() {
   return eventListenerSetup();
  },
- 35724: function($0) {
+ 35825: function($0) {
   return setActiveWindow($0);
  },
- 35751: function($0, $1, $2, $3) {
+ 35852: function() {
   return Asyncify.handleAsync(function() {
-   return waitListener($0, $1, $2, $3);
+   return waitEvent();
   });
  },
- 35828: function($0, $1) {
+ 35915: function($0, $1) {
   return setIcon($0, $1);
  },
- 35850: function($0) {
+ 35937: function($0) {
   return showApp($0);
  },
- 35869: function($0, $1) {
+ 35956: function($0, $1) {
   localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
  },
- 35926: function($0, $1) {
+ 36013: function($0, $1) {
   stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
  },
- 35993: function($0) {
+ 36080: function($0) {
   new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
  },
- 36072: function($0, $1, $2, $3, $4) {
+ 36159: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36149: function($0, $1, $2, $3, $4) {
+ 36236: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36226: function() {
+ 36313: function() {
   document.querySelector(".menu106").classList.add("disabled");
  },
- 36287: function() {
+ 36374: function() {
   document.querySelector(".menu107").classList.add("disabled");
  }
 };
@@ -4322,6 +4325,10 @@ function _emscripten_asm_const_int(code, sigPtr, argbuf) {
  return ASM_CONSTS[code].apply(null, args);
 }
 
+function _emscripten_clear_timeout(id) {
+ clearTimeout(id);
+}
+
 function _emscripten_memcpy_big(dest, src, num) {
  HEAPU8.copyWithin(dest, src, src + num);
 }
@@ -4526,6 +4533,41 @@ function _emscripten_set_click_callback_on_thread(target, userData, useCapture, 
  return 0;
 }
 
+function callUserCallback(func, synchronous) {
+ if (runtimeExited || ABORT) {
+  err("user callback triggered after runtime exited or application aborted.  Ignoring.");
+  return;
+ }
+ if (synchronous) {
+  func();
+  return;
+ }
+ try {
+  func();
+ } catch (e) {
+  handleException(e);
+ }
+}
+
+function runtimeKeepalivePush() {
+ runtimeKeepaliveCounter += 1;
+}
+
+function runtimeKeepalivePop() {
+ assert(runtimeKeepaliveCounter > 0);
+ runtimeKeepaliveCounter -= 1;
+}
+
+function _emscripten_set_timeout(cb, msecs, userData) {
+ return setTimeout(function() {
+  callUserCallback(function() {
+   (function(a1) {
+    dynCall_vi.apply(null, [ cb, a1 ]);
+   })(userData);
+  });
+ }, msecs);
+}
+
 function _fd_close(fd) {
  try {
   var stream = SYSCALLS.getStreamFromFD(fd);
@@ -4599,31 +4641,6 @@ function runAndAbortIfError(func) {
  } catch (e) {
   abort(e);
  }
-}
-
-function callUserCallback(func, synchronous) {
- if (runtimeExited || ABORT) {
-  err("user callback triggered after runtime exited or application aborted.  Ignoring.");
-  return;
- }
- if (synchronous) {
-  func();
-  return;
- }
- try {
-  func();
- } catch (e) {
-  handleException(e);
- }
-}
-
-function runtimeKeepalivePush() {
- runtimeKeepaliveCounter += 1;
-}
-
-function runtimeKeepalivePop() {
- assert(runtimeKeepaliveCounter > 0);
- runtimeKeepaliveCounter -= 1;
 }
 
 var Asyncify = {
@@ -5026,10 +5043,12 @@ var asmLibraryArg = {
  "abort": _abort,
  "alignfault": alignfault,
  "emscripten_asm_const_int": _emscripten_asm_const_int,
+ "emscripten_clear_timeout": _emscripten_clear_timeout,
  "emscripten_memcpy_big": _emscripten_memcpy_big,
  "emscripten_random": _emscripten_random,
  "emscripten_resize_heap": _emscripten_resize_heap,
  "emscripten_set_click_callback_on_thread": _emscripten_set_click_callback_on_thread,
+ "emscripten_set_timeout": _emscripten_set_timeout,
  "fd_close": _fd_close,
  "fd_read": _fd_read,
  "fd_seek": _fd_seek,
@@ -5047,11 +5066,15 @@ var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__w
 
 var _PostMessage = Module["_PostMessage"] = createExportWrapper("PostMessage");
 
-var _main = Module["_main"] = createExportWrapper("main");
+var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 var _free = Module["_free"] = createExportWrapper("free");
 
-var _malloc = Module["_malloc"] = createExportWrapper("malloc");
+var _main = Module["_main"] = createExportWrapper("main");
+
+var _GetHandle = Module["_GetHandle"] = createExportWrapper("GetHandle");
+
+var _PrintMessages = Module["_PrintMessages"] = createExportWrapper("PrintMessages");
 
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
 
@@ -5093,6 +5116,8 @@ var ___set_stack_limits = Module["___set_stack_limits"] = createExportWrapper("_
 
 var dynCall_iiiii = Module["dynCall_iiiii"] = createExportWrapper("dynCall_iiiii");
 
+var dynCall_vi = Module["dynCall_vi"] = createExportWrapper("dynCall_vi");
+
 var dynCall_iiii = Module["dynCall_iiii"] = createExportWrapper("dynCall_iiii");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
@@ -5104,8 +5129,6 @@ var dynCall_iidiiii = Module["dynCall_iidiiii"] = createExportWrapper("dynCall_i
 var dynCall_vii = Module["dynCall_vii"] = createExportWrapper("dynCall_vii");
 
 var dynCall_v = Module["dynCall_v"] = createExportWrapper("dynCall_v");
-
-var dynCall_vi = Module["dynCall_vi"] = createExportWrapper("dynCall_vi");
 
 var dynCall_viiiiii = Module["dynCall_viiiiii"] = createExportWrapper("dynCall_viiiiii");
 

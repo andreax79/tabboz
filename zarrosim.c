@@ -372,10 +372,11 @@ void InitTabboz(void)
 
     firsttime = 0;
     CaricaTutto();
-#ifdef TABBOZ_WIN
+
     // 15 Gen 1999 - Parametro 'config' sulla linea di comando
     // 12 Mar 1999 - A causa di un riordino generale, e' stata spostata qui...
 
+#ifdef TABBOZ_WIN
     if (_argc > 1)
         if (!strcmp(_argv[1], "config"))
         {
@@ -384,13 +385,14 @@ void InitTabboz(void)
             FineProgramma("config");
             exit(0);
         }
+#endif
 
     // 15 Mar 1998 - Ora mostra anche il logo iniziale
     // 12 Mar 1999 - A causa di un riordino generale, e' stata spostata qui...
-
     if (STARTcmdShow)
-        DialogBox(hInst, MAKEINTRESOURCE(LOGO), NULL, Logo);
+        DialogBox(hInst, MAKEINTRESOURCE(LOGO), NULL, (DLGPROC)Logo);
 
+#ifdef TABBOZ_WIN
     // 14 Gen 1999 - Formattazione iniziale Tabbozzo
     if (firsttime == 1)
     {
@@ -401,7 +403,6 @@ void InitTabboz(void)
                   lpproc);
         FreeProcInstance(lpproc);
     }
-
 #endif
 }
 
@@ -988,10 +989,8 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         MoveWindow(hDlg, x, y, w, h, 1);
 
-#ifndef TABBOZ_EM
         if (fase_di_avvio == 1)
             SetTimer(hDlg, WM_TIMER, 10000, NULL); /* 10 Secondi */
-#endif
 
         return (TRUE);
     }
@@ -1000,9 +999,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
     {
         if (fase_di_avvio == 1)
         {
-#ifndef TABBOZ_EM
             KillTimer(hDlg, WM_TIMER); /* Distrugge il timer... */
-#endif
             EndDialog(hDlg, TRUE);
         }
     }
@@ -1016,9 +1013,7 @@ BOOL FAR PASCAL Logo(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         case 203:
             if (fase_di_avvio == 1)
             {
-#ifndef TABBOZ_EM
                 KillTimer(hDlg, WM_TIMER);
-#endif
             }
             EndDialog(hDlg, TRUE);
             return (TRUE);
@@ -1843,9 +1838,8 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
             DestroyIcon(hIcon);
 #ifdef TABBOZ_EM
         BMPViewWndProc(hWnd, WM_DESTROY, 0, 0);
-#else
-        KillTimer(hWnd, WM_TIMER);
 #endif
+        KillTimer(hWnd, WM_TIMER);
         break;
 
 #ifdef TABBOZ_EM
@@ -1926,10 +1920,8 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
         /*        MessageBeep(0x0050); Crea un beep. Non e' necessario qui, ma e' solo x ricordarselo... */
 
         /* Inizio implementazione timer: 9 giugno 1998 */
-#ifndef TABBOZ_EM
         SetTimer(hWnd, WM_TIMER, 60000, NULL); /* 60 secondi.. (il massimo e' 65534, 65 secondi...) */
-#endif
-        t_random = 6 + random(20); /* 6 - 26 minuti tra un evento ed il seguente...*/
+        t_random = 6 + random(20);             /* 6 - 26 minuti tra un evento ed il seguente...*/
         t_random = 1;
 
         fase_di_avvio = 0; /* 11 Giugno 1998 */

@@ -101,6 +101,7 @@ typedef HINSTANCE HMODULE;
 typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*LPOFNHOOKPROC)(HWND, UINT, WPARAM, LPARAM);
+typedef INT_PTR (*TIMERPROC)(HWND, UINT, WPARAM, LPARAM);
 
 typedef struct
 {
@@ -230,6 +231,14 @@ typedef struct
     MSG messages[1];
 } MESAGES_QUEUE;
 
+typedef struct
+{
+    HWND      hwnd;
+    UINT_PTR  nIDEvent;
+    TIMERPROC lpTimerFunc;
+    long      timeoutId;
+} TIMER;
+
 #define NOMENU
 
 #define IDOK 1
@@ -343,6 +352,8 @@ extern BOOL          SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y,
 extern LRESULT       DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 extern BOOL          GetOpenFileName(LPOPENFILENAME unnamedParam1);
 extern BOOL          GetSaveFileName(LPOPENFILENAME unnamedParam1);
+extern UINT_PTR      SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
+extern BOOL          KillTimer(HWND hWnd, UINT_PTR uIDEvent);
 extern BOOL          SetMessageQueue(int size);
 extern void          randomize();
 extern HANDLE        GetProperty(PROPERTIES *props, LPCSTR key);
