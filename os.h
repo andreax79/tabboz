@@ -46,7 +46,7 @@ etc...
 #define TABBOZ_WIN
 #include <windows.h>
 
-#define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+#define SetCheck(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
 
 #ifndef OFN_LONGNAMES
 #define OFN_LONGNAMES 0x00200000L
@@ -59,7 +59,7 @@ etc...
 #define TABBOZ_WIN
 #include <windows.h>
 
-#define SetCheck(hDlg, nIDDlgItem, wParam) (GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+#define SetCheck(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
 
 #ifndef OFN_LONGNAMES
 #define OFN_LONGNAMES 0x00200000L
