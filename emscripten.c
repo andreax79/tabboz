@@ -59,7 +59,7 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
         // Invalid window handle
         return FALSE;
     }
-    return JS_CALL_INT("showWindow", handle->id, nCmdShow && SW_SHOWNORMAL);
+    return JS_CALL_INT("showWindow", handle, nCmdShow && SW_SHOWNORMAL);
 }
 
 //*******************************************************************
@@ -96,16 +96,16 @@ INT_PTR messageBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
     int           parentWindowId = -1;
-    HANDLE_ENTRY *handle = AllocateHandle();
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWnd);
     MSG           msg;
 
     handle->lpDialogFunc = &messageBoxProc;
     // Get parent window number
     if (hWnd != NULL)
     {
-        parentWindowId = ((HANDLE_ENTRY *)hWnd)->id;
+        parentWindowId = (int)hWnd;
     }
-    JS_ASYNC_CALL_INT("messageBox", handle->id, lpText, lpCaption, uType, parentWindowId);
+    JS_ASYNC_CALL_INT("messageBox", handle, lpText, lpCaption, uType, parentWindowId);
     // Message loop
     while (GetMessage(&msg, (HWND)handle, 0, 0) > 0)
     {
@@ -113,7 +113,7 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
         DispatchMessage(&msg);
     }
     // Destroy the dialog box
-    JS_CALL("destroyDialogBox", handle->id);
+    JS_CALL("destroyDialogBox", handle);
     ReleaseHandle(handle);
     return msg.wParam; // the value to be returned to the function that created the message box
 }
@@ -127,7 +127,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     int           controlId;
     int           dialog = (int)lpTemplateName;
     int           parentWindowId = -1;
-    HANDLE_ENTRY *handle = AllocateHandle();
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
     MSG           msg;
 
     if (lpDialogFunc == NULL)
@@ -138,10 +138,10 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     // Get parent window number
     if (hWndParent != NULL)
     {
-        parentWindowId = ((HANDLE_ENTRY *)hWndParent)->id;
+        parentWindowId = (int)hWndParent;
     }
     // Show dialog
-    JS_ASYNC_CALL("dialogBox", handle->id, dialog, parentWindowId);
+    JS_ASYNC_CALL("dialogBox", handle, dialog, parentWindowId);
     // Dispatch Init
     PostMessage((HWND)handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
@@ -153,7 +153,7 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
         DispatchMessage(&msg);
     }
     // Destroy the dialog box
-    JS_CALL("destroyDialogBox", handle->id);
+    JS_CALL("destroyDialogBox", handle);
     ReleaseHandle(handle);
     return msg.wParam; // the value to be returned to the function that created the dialog box
 }
@@ -186,52 +186,7 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
         // Invalid window handle
         return FALSE;
     }
-    return JS_CALL_INT("setDlgItemText", handle->id, nIDDlgItem, lpString);
-}
-
-//*******************************************************************
-// Set the check state of a radio button or check box
-//*******************************************************************
-
-LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return 0;
-    }
-    return JS_CALL_INT("setCheck", handle->id, nIDDlgItem, wParam);
-}
-
-//*******************************************************************
-// Add a string to the list box of a combo box
-//*******************************************************************
-
-LRESULT ComboBoxAddString(HWND hDlg, int nIDDlgItem, LPSTR lpString)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return 0;
-    }
-    return JS_CALL_INT("comboBoxAddString", handle->id, nIDDlgItem, lpString);
-}
-
-//*******************************************************************
-// Select a string in the list of a combo box
-//*******************************************************************
-
-LRESULT ComboBoxSelect(HWND hDlg, int nIDDlgItem, WPARAM wParam)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return 0;
-    }
-    return JS_CALL_INT("comboBoxSelect", handle->id, nIDDlgItem, wParam);
+    return JS_CALL_INT("setDlgItemText", handle, nIDDlgItem, lpString);
 }
 
 //*******************************************************************
@@ -257,10 +212,10 @@ BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
     }
     else
     {
-        lpRect->left = JS_CALL_INT("getWindowRectDimension", handle->id, 0);
-        lpRect->top = JS_CALL_INT("getWindowRectDimension", handle->id, 1);
-        lpRect->right = JS_CALL_INT("getWindowRectDimension", handle->id, 2);
-        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", handle->id, 3);
+        lpRect->left = JS_CALL_INT("getWindowRectDimension", handle, 0);
+        lpRect->top = JS_CALL_INT("getWindowRectDimension", handle, 1);
+        lpRect->right = JS_CALL_INT("getWindowRectDimension", handle, 2);
+        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", handle, 3);
         return TRUE;
     }
 }
@@ -277,7 +232,7 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
         // Invalid window handle
         return FALSE;
     }
-    return JS_CALL_INT("moveWindow", handle->id, X, Y, nWidth, nHeight);
+    return JS_CALL_INT("moveWindow", handle, X, Y, nWidth, nHeight);
 }
 
 //*******************************************************************
@@ -292,7 +247,7 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
         // Invalid window handle
         return 0;
     }
-    return JS_CALL_INT("getDlgItemText", handle->id, nIDDlgItem, lpString, nMaxCount);
+    return JS_CALL_INT("getDlgItemText", handle, nIDDlgItem, lpString, nMaxCount);
 }
 
 //*******************************************************************
@@ -307,7 +262,7 @@ HANDLE GetProp(HWND hWnd, LPCSTR lpString)
         // Invalid window handle
         return FALSE;
     }
-    return GetProperty(handle->props, lpString);
+    return GetProperty(handle->window.props, lpString);
 }
 
 //*******************************************************************
@@ -322,7 +277,7 @@ BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
         // Invalid window handle
         return FALSE;
     }
-    SetProperty(handle->props, lpString, hData);
+    SetProperty(handle->window.props, lpString, hData);
     return TRUE;
 }
 
@@ -338,7 +293,7 @@ HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
         // Invalid window handle
         return FALSE;
     }
-    return DelProperty(handle->props, lpString);
+    return DelProperty(handle->window.props, lpString);
 }
 
 //*******************************************************************
@@ -488,15 +443,6 @@ void ExitWindows(int dwReserved, int code)
 // No nothing
 //*******************************************************************
 
-HWND GetDlgItem(HWND DhDlg, int nIDDlgItem)
-{
-    return NULL; // TODO
-}
-
-//*******************************************************************
-// No nothing
-//*******************************************************************
-
 HWND SetFocus(HWND hWnd)
 {
     return NULL; // TODO
@@ -534,7 +480,7 @@ void randomize()
 
 int WinMainStartup()
 {
-    HANDLE_ENTRY *handle = AllocateHandle();
+    HANDLE_ENTRY *handle = AllocateHandle(Window, NULL);
     WinMain((HANDLE)handle, NULL, "", 0);
     ReleaseHandle(handle);
     return 0;

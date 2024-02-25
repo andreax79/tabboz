@@ -171,7 +171,7 @@ class Dialog:
             "y": int(x[5]) * SCALE + self.dy,
             "width": int(x[6]) * SCALE,
             "height": int(x[7]) * SCALE,
-            "css_class": f"control{int(x[1])}" if int(x[1]) != -1 else "",
+            "css_class": f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control",
             "extra": "",
         }
         if "WS_DISABLED" in control["style"]:

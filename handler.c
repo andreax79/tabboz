@@ -28,7 +28,7 @@
 #include "zarrosim.h"
 #ifdef TABBOZ_EM
 
-#define MIN_HANDLE_ENTRIES 32
+#define MIN_HANDLE_ENTRIES 100
 #define PROPERTIES_DEFAULT_ENTRIES 8
 
 // clang-format off
@@ -39,7 +39,8 @@
 #endif
 // clang-format on
 
-static HANDLE_TABLE *global_table;
+/* static HANDLE_TABLE *global_table; */
+HANDLE_TABLE *global_table;
 
 //*******************************************************************
 // Find property index
@@ -234,9 +235,8 @@ HANDLE_TABLE *AllocateHandleTable(int count)
 // Allocate an handle
 //*******************************************************************
 
-HANDLE_ENTRY *AllocateHandle()
+HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent)
 {
-    int i;
     if (!global_table)
     {
         DEBUG_PRINTF("AllocateHandle global_table is null\n");
@@ -245,17 +245,23 @@ HANDLE_ENTRY *AllocateHandle()
             return NULL;
         }
     }
-    for (i = 0; i < global_table->count; i++)
+    for (int i = 0; i < global_table->count; i++)
     {
         HANDLE_ENTRY *h = &global_table->entries[i];
         if (h->refcount == 0)
         {
-            h->props = AllocateProperties();
-            if (h->props == NULL)
+            h->type = type;
+            h->hwndParent = hwndParent;
+            h->window.props = NULL;
+            if (type == Window)
             {
-                DEBUG_PRINTF("AllocateHandle failed\n");
-                free(h);
-                return NULL;
+                h->window.props = AllocateProperties();
+                if (h->window.props == NULL)
+                {
+                    DEBUG_PRINTF("AllocateHandle failed\n");
+                    free(h);
+                    return NULL;
+                }
             }
             h->refcount++;
             h->id = i + 1;
@@ -265,6 +271,47 @@ HANDLE_ENTRY *AllocateHandle()
     }
     DEBUG_PRINTF("AllocateHandle table full\n");
     return NULL;
+}
+
+//*******************************************************************
+// Allocate a dialog control
+//*******************************************************************
+
+INT_PTR dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    HANDLE_ENTRY *h = (HANDLE_ENTRY *)hWnd;
+    switch (uMsg)
+    {
+    case BM_GETCHECK:
+        // Get the check state of a radio button or check box
+        return JS_CALL_INT("getCheck", h->hwndParent, h->dlgItem.nIDDlgItem);
+    case BM_SETCHECK:
+        // Set the check state of a radio button or check box
+        return JS_CALL_INT("setCheck", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
+    case CB_ADDSTRING:
+        // Add a string to the list box of a combo box
+        return JS_CALL_INT("comboBoxAddString", h->hwndParent, h->dlgItem.nIDDlgItem, lParam);
+    case CB_SETCURSEL:
+        // Select a string in the list of a combo box
+        return JS_CALL_INT("comboBoxSelect", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
+    case WM_PAINT:
+        return TRUE;
+    default:
+        DEBUG_PRINTF("dlgItemProc uMsg=%d wParam=%d lParam=%ld\n", uMsg, wParam, lParam);
+    }
+    return FALSE;
+}
+
+HANDLE_ENTRY *AllocateDlgItem(HWND hwndParent, HMENU hMenu)
+{
+    HANDLE_ENTRY *h = AllocateHandle(DlgItem, hwndParent);
+    if (h == NULL)
+    {
+        return NULL;
+    }
+    h->dlgItem.nIDDlgItem = (int)hMenu;
+    h->lpDialogFunc = &dlgItemProc;
+    return h;
 }
 
 //*******************************************************************
@@ -283,10 +330,42 @@ void ReleaseHandle(HANDLE p)
             if (h->refcount == 0)
             {
                 h->id = 0;
-                FreeProperties(h->props);
+                if (h->type == Window)
+                {
+                    FreeProperties(h->window.props);
+                    // Remove children
+                    for (int i = 0; i < global_table->count; i++)
+                    {
+                        HANDLE_ENTRY *child = &global_table->entries[i];
+                        if ((child->refcount > 0) && (h == child->hwndParent))
+                        {
+                            child->refcount = 0;
+                            child->hwndParent = NULL;
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+//*******************************************************************
+// Retrieve a control handle
+//*******************************************************************
+
+HWND GetDlgItem(HWND hDlg, int nIDDlgItem)
+{
+    HANDLE_ENTRY *h;
+    for (int i = 0; i < global_table->count; i++)
+    {
+        h = &global_table->entries[i];
+        if ((h->refcount > 0) && (hDlg == h->hwndParent) && (nIDDlgItem == h->dlgItem.nIDDlgItem))
+        {
+            return (HWND)h;
+        }
+    }
+    DEBUG_PRINTF("GetDlgItem %d - not found\n", nIDDlgItem);
+    return NULL;
 }
 
 //*******************************************************************

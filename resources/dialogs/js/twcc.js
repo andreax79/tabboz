@@ -2,7 +2,6 @@
 ((exports) => {
 
     _resolve = null;
-    _activeWindowId = null;
     _activeWindowHwnd = null;
 
     function addMainMenu(mainMenuEl) {
@@ -153,9 +152,8 @@
     }
 
     // Change the active window
-    function setActiveWindow(windowId) {
-        _activeWindowId = windowId;
-        _activeWindowHwnd = _GetHandle(windowId);
+    function setActiveWindow(hWnd) {
+        _activeWindowHwnd = hWnd;
         // Add 'inactive' class to other windows
         document.querySelectorAll(".title-bar").forEach(element => {
             if (!element.classList.contains("inactive")) {
@@ -163,15 +161,15 @@
             }
         });
         // Remove 'inactive' class from the active window
-        const element = document.querySelector(`#win${windowId} .title-bar`);
+        const element = document.querySelector(`#win${hWnd} .title-bar`);
         if (element != null) {
             element.classList.remove("inactive");
         }
     };
 
     // Show/hide a window
-    function showWindow(windowId, show) {
-        const win = document.querySelector('#win' + windowId);
+    function showWindow(hWnd, show) {
+        const win = document.querySelector('#win' + hWnd);
         if (win != null) {
             win.style.display = show ? 'block' : 'none';
             return true;
@@ -186,16 +184,16 @@
     };
 
     // Associate a icon with a window
-    function setIcon(windowId, icon) {
-        const element = document.querySelector(`#win${windowId} .title-bar-text`);
+    function setIcon(hWnd, icon) {
+        const element = document.querySelector(`#win${hWnd} .title-bar-text`);
         if (element != null) {
             element.innerHTML = `<img src="resources/icons/${icon}.gif" height="16" />` + element.innerText
         }
     };
 
     // Change the position and dimensions of the specified window
-    function moveWindow(windowId, X, Y, nWidth, nHeight) {
-        const win = document.querySelector(`#win${windowId}`);
+    function moveWindow(hWnd, X, Y, nWidth, nHeight) {
+        const win = document.querySelector(`#win${hWnd}`);
         if (win == null) {
             return false;
         } else {
@@ -208,9 +206,9 @@
     };
 
     // Draw an image on a canvas
-    async function drawImage(windowId, lpCanvasClass, imageId, x, y) {
+    async function drawImage(hWnd, lpCanvasClass, imageId, x, y) {
         const canvasClass = UTF8ToString(lpCanvasClass);
-        const canvas = document.querySelector(`#win${windowId} .${canvasClass}`);
+        const canvas = document.querySelector(`#win${hWnd} .${canvasClass}`);
         if (canvas) {
             // Load image
             const url = `resources/bitmaps/${imageId}.png`;
@@ -222,8 +220,8 @@
     }
 
     // Retrieve the dimensions of a specified window
-    function getWindowRectDimension(windowId, dimension) {
-        const win = document.querySelector(`#win${windowId}`);
+    function getWindowRectDimension(hWnd, dimension) {
+        const win = document.querySelector(`#win${hWnd}`);
         if (win == null) {
             return 0;
         }
@@ -243,8 +241,8 @@
     }
 
     // Set the title or text of a control in a dialog box
-    function setDlgItemText(windowId, nIDDlgItem, lpString) {
-        let control = document.querySelector(`#win${windowId} .control${nIDDlgItem}`);
+    function setDlgItemText(hWnd, nIDDlgItem, lpString) {
+        let control = document.querySelector(`#win${hWnd} .control${nIDDlgItem}`);
         if (control == null) {
             return false;
         } else if (control.tagName == "INPUT") {
@@ -265,13 +263,13 @@
     }
 
     // Retrieve the title or text associated with a control in a dialog box
-    function getDlgItemText(windowId, nIDDlgItem, lpString, nMaxCount) {
-        let control = document.querySelector(`#win${windowId} input.control${nIDDlgItem}`);
+    function getDlgItemText(hWnd, nIDDlgItem, lpString, nMaxCount) {
+        let control = document.querySelector(`#win${hWnd} input.control${nIDDlgItem}`);
         if (control != null) {
             stringToUTF8(control.value, lpString, nMaxCount);
             return control.value.length;
         }
-        control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+        control = document.querySelector(`#win${hWnd} .control${nIDDlgItem}`);
         if (control != null) {
             stringToUTF8(control.innerText, lpString, nMaxCount);
             return control.innerText.length;
@@ -281,17 +279,26 @@
     }
 
     // Set the check state of a radio button or check box
-    function setCheck(windowId, nIDDlgItem, wParam) {
-        const control = document.querySelector(`#win${windowId} .control${nIDDlgItem}`);
+    function setCheck(hWnd, nIDDlgItem, wParam) {
+        const control = document.querySelector(`#win${hWnd} .control${nIDDlgItem}`);
         if (control != null) {
             control.checked = (wParam != 0);
         }
         return 0;
     }
 
+    // Get the check state of a radio button or check box
+    function getCheck(hWnd, nIDDlgItem) {
+        const control = document.querySelector(`#win${hWnd} .control${nIDDlgItem}`);
+        if (control != null) {
+            return control.checked;
+        }
+        return 0;
+    }
+
     // Add a string to the list box of a combo box
-    function comboBoxAddString(windowId, nIDDlgItem, lpString) {
-        const control = document.querySelector(`#win${windowId} select.control${nIDDlgItem}`);
+    function comboBoxAddString(hWnd, nIDDlgItem, lpString) {
+        const control = document.querySelector(`#win${hWnd} select.control${nIDDlgItem}`);
         if (control != null) {
             const option = document.createElement('option');
             option.text = UTF8ToString(lpString);
@@ -301,8 +308,8 @@
     }
 
     // Select a string in the list of a combo box
-    function comboBoxSelect(windowId, nIDDlgItem, wParam) {
-        const control = document.querySelector(`#win${windowId} select.control${nIDDlgItem}`);
+    function comboBoxSelect(hWnd, nIDDlgItem, wParam) {
+        const control = document.querySelector(`#win${hWnd} select.control${nIDDlgItem}`);
         if (control != null) {
             control.selectedIndex = wParam;
         }
@@ -323,13 +330,13 @@
     }
 
     // Show a message box
-    async function messageBox(windowId, lpText, lpCaption, uType, parentWindowId) {
+    async function messageBox(hWnd, lpText, lpCaption, uType, parentWindowId) {
         const element = document.getElementById('messagebox');
         const wall = document.getElementById('wall').cloneNode(true);
         const c = element.cloneNode(true);
         // Set window id
-        wall.id = 'wall' + windowId;
-        c.id = 'win' + windowId;
+        wall.id = 'wall' + hWnd;
+        c.id = 'win' + hWnd;
         // Icon
         if (uType & 0x00000020) { // MB_ICONQUESTION
             c.querySelector('img').src = "resources/icons/102.png";
@@ -367,8 +374,6 @@
                 focusVisible: true
             });
         }
-        wall.style.zIndex = windowId;
-        c.style.zIndex = windowId;
         c.style.position = 'absolute';
         // Set title and message
         c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
@@ -394,7 +399,7 @@
         // Center the dialog
         centerDialog(c);
         // Activate the window
-        setActiveWindow(windowId);
+        setActiveWindow(hWnd);
         // Make the window draggrable
         makeDraggable(c);
     };
@@ -412,15 +417,15 @@
     }
 
     // Show dialog box
-    async function dialogBox(windowId, dialog, parentWindowId) {
+    async function dialogBox(hWnd, dialog, parentWindowId) {
         // Load html
         const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
         const html = await response.text();
         const wall = document.getElementById('wall').cloneNode(true);
         const c = createElementFromHTML(html);
         // Set window id
-        wall.id = 'wall' + windowId;
-        c.id = 'win' + windowId;
+        wall.id = 'wall' + hWnd;
+        c.id = 'win' + hWnd;
         // Set window position
         setWindowInitialPosition(c, parentWindowId);
         // Add window to screen
@@ -428,18 +433,23 @@
         destination.appendChild(wall);
         destination.appendChild(c);
         // Activate the window
-        setActiveWindow(windowId);
+        setActiveWindow(hWnd);
         // Add menu
         addMainMenu(c);
         // Make the window draggrable
         makeDraggable(c);
+        // Add DlgItems
+        c.querySelectorAll('.dlg_item').forEach(element => {
+            const hMenu = Number(element.className.match(/\d+/));
+            _AllocateDlgItem(hWnd, hMenu);
+        });
     }
 
     // Destroy a dialog box
-    function destroyDialogBox(windowId) {
+    function destroyDialogBox(hWnd) {
         const destination = document.getElementById('screen');
-        destination.removeChild(document.getElementById('wall' + windowId));
-        destination.removeChild(document.getElementById('win' + windowId));
+        destination.removeChild(document.getElementById('wall' + hWnd));
+        destination.removeChild(document.getElementById('win' + hWnd));
     }
 
     // Set window position

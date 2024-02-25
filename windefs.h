@@ -208,12 +208,31 @@ typedef struct
     PROPERTY *entries;
 } PROPERTIES;
 
+typedef enum HandleType
+{
+    Window = 1,
+    DlgItem = 2
+} HandleType;
+
 typedef struct
 {
     unsigned int refcount;
     unsigned int id;
-    DLGPROC      lpDialogFunc;
-    PROPERTIES  *props; // window properties
+    HandleType   type;
+    HWND         hwndParent;   // parent window
+    DLGPROC      lpDialogFunc; // window/dialog item procedure
+    union {
+        // if type == Window
+        struct
+        {
+            PROPERTIES *props; // window properties
+        } window;
+        // if type == DlgItem
+        struct
+        {
+            int nIDDlgItem; // control identifier
+        } dlgItem;
+    };
 } HANDLE_ENTRY;
 
 typedef struct
@@ -282,7 +301,11 @@ typedef struct
 
 #define VK_ESCAPE 0x1b
 
+#define BM_GETCHECK 0xf0f0
 #define BM_SETCHECK 0xf0f1
+
+#define CB_ADDSTRING 0x0143
+#define CB_SETCURSEL 0x014e
 
 #define SW_HIDE 0
 #define SW_SHOWNORMAL 1
@@ -329,9 +352,6 @@ extern BOOL          ShowWindow(HWND hWnd, int nCmdShow);
 extern int           LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
 extern void          LoadStringResources(void);
 extern void          InitTabboz(void);
-extern LRESULT       SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
-extern LRESULT       ComboBoxAddString(HWND hDlg, int nIDDlgItem, LPSTR lpString);
-extern LRESULT       ComboBoxSelect(HWND hDlg, int nIDDlgItem, WPARAM wParam);
 extern int           GetSystemMetrics(int nIndex);
 extern BOOL          GetWindowRect(HWND hWnd, LPRECT lpRect);
 extern BOOL          MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
@@ -361,5 +381,5 @@ extern void          randomize();
 extern HANDLE        GetProperty(PROPERTIES *props, LPCSTR key);
 extern HANDLE        SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData);
 extern HANDLE        DelProperty(PROPERTIES *props, LPCSTR key);
-extern HANDLE_ENTRY *AllocateHandle();
+extern HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent);
 extern void          ReleaseHandle(HANDLE p);

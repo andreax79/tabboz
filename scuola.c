@@ -63,7 +63,7 @@ BOOL FAR PASCAL Scuola(HWND hDlg, WORD message, WORD wParam, LONG lParam)
     if (message == WM_INITDIALOG)
     {
         scelta = 1;
-        SetCheck(hDlg, 110, TRUE); /* Seleziona agraria */
+        SendMessage(GetDlgItem(hDlg, 110), BM_SETCHECK, TRUE, 0L); /* Seleziona agraria */
 
         sprintf(tmp, "Corrompi il prof di %s", MaterieMem[1].nome);
         SetDlgItemText(hDlg, 101, tmp);

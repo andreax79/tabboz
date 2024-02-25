@@ -235,8 +235,6 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
     static char tmpsesso;
 
-    printf("FormatTabboz message=%d wParam=%d\n", WM_COMMAND, LOWORD(wParam));
-
     if (message == WM_INITDIALOG)
     {
 #ifndef TABBOZ_EM
@@ -245,14 +243,14 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             EnableWindow(GetDlgItem(hDlg, 2), 0);
         }
 #endif
-        SetCheck(hDlg, 102, TRUE);
+        SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, TRUE, 0L);
         if (random(2) == 1)
             tmpsesso = 'M';
         else
             tmpsesso = 'F';
 
-        ComboBoxAddString(hDlg, 110, "3.5\", 1.44MB, 512 bytes/sector");
-        ComboBoxSelect(hDlg, 110, 0);
+        SendMessage(GetDlgItem(hDlg, 110), CB_ADDSTRING, (WPARAM)0, (LPARAM) "3.5\", 1.44MB, 512 bytes/sector");
+        SendMessage(GetDlgItem(hDlg, 110), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
         return (TRUE);
     }
 
@@ -1062,8 +1060,8 @@ BOOL FAR PASCAL Spegnimi(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
         boolean_shutdown = 1; // Uscita normale...
 
-        SetCheck(hDlg, 102, FALSE);
-        SetCheck(hDlg, 101, TRUE);
+        SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, FALSE, 0L);
+        SendMessage(GetDlgItem(hDlg, 101), BM_SETCHECK, TRUE, 0L);
 
         return (TRUE);
     }
@@ -1125,30 +1123,28 @@ BOOL FAR PASCAL Configuration(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 #endif
 
         if (STARTcmdShow)
-            SetCheck(hDlg, 106, TRUE);
+            SendMessage(GetDlgItem(hDlg, 106), BM_SETCHECK, TRUE, 0L);
         if (euro)
-            SetCheck(hDlg, 107, TRUE);
+            SendMessage(GetDlgItem(hDlg, 107), BM_SETCHECK, TRUE, 0L);
         if (timer_active)
-            SetCheck(hDlg, 108, TRUE);
-
+            SendMessage(GetDlgItem(hDlg, 108), BM_SETCHECK, TRUE, 0L);
 #ifdef TABBOZ_DEBUG
         if (debug_active)
-            SetCheck(hDlg, 109, TRUE);
+            SendMessage(GetDlgItem(hDlg, 109), BM_SETCHECK, TRUE, 0L);
 #endif
-
         if (sound_active)
-            SetCheck(hDlg, 110, TRUE);
+            SendMessage(GetDlgItem(hDlg, 110), BM_SETCHECK, TRUE, 0L);
 
         if (Fortuna >= 20)
-            SetCheck(hDlg, 101, TRUE);
+            SendMessage(GetDlgItem(hDlg, 101), BM_SETCHECK, TRUE, 0L);
         else if (Fortuna >= 15)
-            SetCheck(hDlg, 102, TRUE);
+            SendMessage(GetDlgItem(hDlg, 102), BM_SETCHECK, TRUE, 0L);
         else if (Fortuna >= 10)
-            SetCheck(hDlg, 103, TRUE);
+            SendMessage(GetDlgItem(hDlg, 103), BM_SETCHECK, TRUE, 0L);
         else if (Fortuna >= 5)
-            SetCheck(hDlg, 104, TRUE);
+            SendMessage(GetDlgItem(hDlg, 104), BM_SETCHECK, TRUE, 0L);
         else
-            SetCheck(hDlg, 105, TRUE);
+            SendMessage(GetDlgItem(hDlg, 105), BM_SETCHECK, TRUE, 0L);
 
         return (TRUE);
     }

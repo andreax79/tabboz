@@ -141,8 +141,8 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
     DEBUG_PRINTF("GetMessage\n");
 
     // Activate the window
-    DEBUG_PRINTF("setActiveWindow %d\n", ((HANDLE_ENTRY *)hWnd)->id);
-    JS_CALL("setActiveWindow", ((HANDLE_ENTRY *)hWnd)->id);
+    DEBUG_PRINTF("setActiveWindow %d\n", hWnd);
+    JS_CALL("setActiveWindow", hWnd);
 
     while (TRUE)
     {
@@ -201,6 +201,11 @@ LRESULT DispatchMessage(const MSG *lpMsg)
 {
     LRESULT retval = 0;
     DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpDialogFunc;
+    if (lpDialogFunc == NULL)
+    {
+        DEBUG_PRINTF("DispatchMessage - lpDialogFunc is NULL\n");
+        return 0;
+    }
     if (lpMsg->message == WM_SETICON)
     {
         // Set window icon
@@ -208,7 +213,7 @@ LRESULT DispatchMessage(const MSG *lpMsg)
         HANDLE_ENTRY *handle = (HANDLE_ENTRY *)lpMsg->hwnd;
         if (handle != NULL)
         {
-            JS_CALL("setIcon", handle->id, (int)lpMsg->lParam);
+            JS_CALL("setIcon", handle, (int)lpMsg->lParam);
         }
     }
     else if (lpMsg->wParam == SC_CLOSE)

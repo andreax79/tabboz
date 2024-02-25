@@ -1395,120 +1395,123 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 35108: function($0, $1, $2) {
+ 35092: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 35136: function($0, $1) {
+ 35120: function($0, $1) {
   return showWindow($0, $1);
  },
- 35161: function($0, $1, $2, $3, $4) {
+ 35145: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 35239: function($0) {
+ 35223: function($0) {
   return destroyDialogBox($0);
  },
- 35267: function($0, $1, $2) {
+ 35251: function($0, $1, $2) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2);
   });
  },
- 35338: function($0) {
+ 35322: function($0) {
   return destroyDialogBox($0);
  },
- 35366: function($0, $1, $2) {
+ 35350: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35398: function($0, $1, $2) {
-  return setCheck($0, $1, $2);
- },
- 35424: function($0, $1, $2) {
-  return comboBoxAddString($0, $1, $2);
- },
- 35459: function($0, $1, $2) {
-  return comboBoxSelect($0, $1, $2);
- },
- 35491: function($0) {
+ 35382: function($0) {
   return getSystemMetrics($0);
  },
- 35519: function($0, $1) {
+ 35410: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35556: function($0, $1) {
+ 35447: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35593: function($0, $1) {
+ 35484: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35630: function($0, $1) {
+ 35521: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35667: function($0, $1, $2, $3, $4) {
+ 35558: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 35701: function($0, $1, $2, $3) {
+ 35592: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35736: function() {
+ 35627: function() {
   return stopWaiting();
  },
- 35757: function() {
+ 35648: function() {
   return shutdown();
  },
- 35775: function($0) {
+ 35666: function($0) {
   return showApp($0);
  },
- 35794: function() {
+ 35685: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 35867: function() {
+ 35758: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 35928: function() {
+ 35819: function() {
   return eventListenerSetup();
  },
- 35956: function($0) {
+ 35847: function($0, $1) {
+  return getCheck($0, $1);
+ },
+ 35870: function($0, $1, $2) {
+  return setCheck($0, $1, $2);
+ },
+ 35896: function($0, $1, $2) {
+  return comboBoxAddString($0, $1, $2);
+ },
+ 35931: function($0, $1, $2) {
+  return comboBoxSelect($0, $1, $2);
+ },
+ 35963: function($0) {
   return setActiveWindow($0);
  },
- 35983: function() {
+ 35990: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 36046: function($0, $1) {
+ 36053: function($0, $1) {
   return setIcon($0, $1);
  },
- 36068: function($0) {
+ 36075: function($0) {
   return showApp($0);
  },
- 36087: function($0, $1) {
+ 36094: function($0, $1) {
   localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
  },
- 36144: function($0, $1) {
+ 36151: function($0, $1) {
   stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
  },
- 36211: function($0) {
+ 36218: function($0) {
   new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
  },
- 36290: function($0, $1, $2, $3, $4) {
+ 36297: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36367: function($0, $1, $2, $3, $4) {
+ 36374: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36444: function() {
+ 36451: function() {
   document.querySelector(".menu106").classList.add("disabled");
  },
- 36505: function() {
+ 36512: function() {
   document.querySelector(".menu107").classList.add("disabled");
  }
 };
@@ -5078,7 +5081,7 @@ var _free = Module["_free"] = createExportWrapper("free");
 
 var _main = Module["_main"] = createExportWrapper("main");
 
-var _GetHandle = Module["_GetHandle"] = createExportWrapper("GetHandle");
+var _AllocateDlgItem = Module["_AllocateDlgItem"] = createExportWrapper("AllocateDlgItem");
 
 var _PrintMessages = Module["_PrintMessages"] = createExportWrapper("PrintMessages");
 

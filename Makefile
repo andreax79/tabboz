@@ -15,8 +15,17 @@ build:
 		-s DEMANGLE_SUPPORT=1 \
 		-s 'ASYNCIFY_IMPORTS=["emscripten_asm_const_int"]' \
 		-s 'EXPORTED_RUNTIME_METHODS=["ccall", "setValue"]' \
-		-s 'EXPORTED_FUNCTIONS=["_main", "_PostMessage", "_PrintMessages", "_GetHandle"]'
+		-s 'EXPORTED_FUNCTIONS=["_main", "_PostMessage", "_PrintMessages", "_AllocateDlgItem"]'
 
 format:
-	clang-format -i *.h *.c
+	clang-format -i *.h *.c tests/*.c
 	js-beautify -r resources/dialogs/js/twcc.js
+
+test:
+	emcc -DDEBUG=1 \
+		-sWASM=0 \
+		-sASSERTIONS=2 \
+		-sSTACK_OVERFLOW_CHECK=2 \
+		-sSAFE_HEAP=1 \
+		tests/test_handler.c handler.c && node a.out.js
+	rm -f a.out.js
