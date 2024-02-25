@@ -205,6 +205,36 @@ LRESULT SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam)
 }
 
 //*******************************************************************
+// Add a string to the list box of a combo box
+//*******************************************************************
+
+LRESULT ComboBoxAddString(HWND hDlg, int nIDDlgItem, LPSTR lpString)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return 0;
+    }
+    return JS_CALL_INT("comboBoxAddString", handle->id, nIDDlgItem, lpString);
+}
+
+//*******************************************************************
+// Select a string in the list of a combo box
+//*******************************************************************
+
+LRESULT ComboBoxSelect(HWND hDlg, int nIDDlgItem, WPARAM wParam)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return 0;
+    }
+    return JS_CALL_INT("comboBoxSelect", handle->id, nIDDlgItem, wParam);
+}
+
+//*******************************************************************
 // Retrieve the specified system metric
 //*******************************************************************
 

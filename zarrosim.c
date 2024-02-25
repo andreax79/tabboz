@@ -235,12 +235,15 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 {
     static char tmpsesso;
 
+    printf("FormatTabboz message=%d wParam=%d\n", WM_COMMAND, LOWORD(wParam));
+
     if (message == WM_INITDIALOG)
     {
 #ifndef TABBOZ_EM
         if (firsttime == 1)
+        {
             EnableWindow(GetDlgItem(hDlg, 2), 0);
-        ;
+        }
 #endif
         SetCheck(hDlg, 102, TRUE);
         if (random(2) == 1)
@@ -248,9 +251,8 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         else
             tmpsesso = 'F';
 
-        // sprintf(buf,"prova");
-        // SendMessage(GetDlgItem(hDlg, 110), CB_ADDSTRING, 0, t);
-
+        ComboBoxAddString(hDlg, 110, "3.5\", 1.44MB, 512 bytes/sector");
+        ComboBoxSelect(hDlg, 110, 0);
         return (TRUE);
     }
 
@@ -283,7 +285,6 @@ BOOL FAR PASCAL FormatTabboz(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             {
                 sesso = tmpsesso;
                 CalcolaSesso();
-                EndDialog(hDlg, TRUE);
             }
             EndDialog(hDlg, TRUE);
             return (TRUE);
@@ -378,6 +379,7 @@ void InitTabboz(void)
 
 #ifdef TABBOZ_WIN
     if (_argc > 1)
+    {
         if (!strcmp(_argv[1], "config"))
         {
             hWndMain = 0; // Segnala che non esiste proc. principale.
@@ -385,6 +387,14 @@ void InitTabboz(void)
             FineProgramma("config");
             exit(0);
         }
+        else if (!strcmp(_argv[1], "format"))
+        {
+            hWndMain = 0;
+            DialogBox(hInst, MAKEINTRESOURCE(FORMAT), NULL, FormatTabboz);
+            FineProgramma("format");
+            exit(0);
+        }
+    }
 #endif
 
     // 15 Mar 1998 - Ora mostra anche il logo iniziale
@@ -1181,11 +1191,11 @@ BOOL FAR PASCAL Configuration(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             return (TRUE);
 
         case 203: // Reset - 26 Marzo 1999
-            EndDialog(hDlg, TRUE);
+            /* EndDialog(hDlg, TRUE); */
 
             // Se il tabboz e' chiamato con il parametro "config", hWndMain NON ESITE !
-            if (hWndMain != 0)
-                ShowWindow(hWndMain, WIN_PICCOLO);
+            /* if (hWndMain != 0) */
+            /*     ShowWindow(hWndMain, WIN_PICCOLO); */
 
             lpproc = MakeProcInstance(FormatTabboz, hInst);
             DialogBox(hInst,

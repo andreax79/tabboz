@@ -195,7 +195,7 @@
 
     // Change the position and dimensions of the specified window
     function moveWindow(windowId, X, Y, nWidth, nHeight) {
-        const win = document.querySelector('#win' + windowId);
+        const win = document.querySelector(`#win${windowId}`);
         if (win == null) {
             return false;
         } else {
@@ -223,7 +223,7 @@
 
     // Retrieve the dimensions of a specified window
     function getWindowRectDimension(windowId, dimension) {
-        const win = document.querySelector('#win' + windowId);
+        const win = document.querySelector(`#win${windowId}`);
         if (win == null) {
             return 0;
         }
@@ -244,7 +244,7 @@
 
     // Set the title or text of a control in a dialog box
     function setDlgItemText(windowId, nIDDlgItem, lpString) {
-        let control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+        let control = document.querySelector(`#win${windowId} .control${nIDDlgItem}`);
         if (control == null) {
             return false;
         } else if (control.tagName == "INPUT") {
@@ -266,7 +266,7 @@
 
     // Retrieve the title or text associated with a control in a dialog box
     function getDlgItemText(windowId, nIDDlgItem, lpString, nMaxCount) {
-        let control = document.querySelector('#win' + windowId + ' input.control' + nIDDlgItem);
+        let control = document.querySelector(`#win${windowId} input.control${nIDDlgItem}`);
         if (control != null) {
             stringToUTF8(control.value, lpString, nMaxCount);
             return control.value.length;
@@ -282,9 +282,29 @@
 
     // Set the check state of a radio button or check box
     function setCheck(windowId, nIDDlgItem, wParam) {
-        const control = document.querySelector('#win' + windowId + ' .control' + nIDDlgItem);
+        const control = document.querySelector(`#win${windowId} .control${nIDDlgItem}`);
         if (control != null) {
             control.checked = (wParam != 0);
+        }
+        return 0;
+    }
+
+    // Add a string to the list box of a combo box
+    function comboBoxAddString(windowId, nIDDlgItem, lpString) {
+        const control = document.querySelector(`#win${windowId} select.control${nIDDlgItem}`);
+        if (control != null) {
+            const option = document.createElement('option');
+            option.text = UTF8ToString(lpString);
+            control.add(option, 0);
+        }
+        return 0;
+    }
+
+    // Select a string in the list of a combo box
+    function comboBoxSelect(windowId, nIDDlgItem, wParam) {
+        const control = document.querySelector(`#win${windowId} select.control${nIDDlgItem}`);
+        if (control != null) {
+            control.selectedIndex = wParam;
         }
         return 0;
     }
@@ -534,6 +554,8 @@
     exports.setDlgItemText = setDlgItemText;
     exports.getDlgItemText = getDlgItemText;
     exports.setCheck = setCheck;
+    exports.comboBoxAddString = comboBoxAddString;
+    exports.comboBoxSelect = comboBoxSelect;
     exports.getSystemMetrics = getSystemMetrics;
     exports.loadString = loadString;
     exports.loadStringResources = loadStringResources;

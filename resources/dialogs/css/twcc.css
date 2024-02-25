@@ -281,6 +281,11 @@ input[type="text"] {
     box-shadow: none
 }
 
+input[type="text"].disabled {
+    box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+    box-sizing: border-box;
+}
+
 
 /* Radio */
 input[type="radio"].bwcc + label::before

@@ -330,6 +330,8 @@ extern int           LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, i
 extern void          LoadStringResources(void);
 extern void          InitTabboz(void);
 extern LRESULT       SetCheck(HWND hDlg, int nIDDlgItem, WPARAM wParam);
+extern LRESULT       ComboBoxAddString(HWND hDlg, int nIDDlgItem, LPSTR lpString);
+extern LRESULT       ComboBoxSelect(HWND hDlg, int nIDDlgItem, WPARAM wParam);
 extern int           GetSystemMetrics(int nIndex);
 extern BOOL          GetWindowRect(HWND hWnd, LPRECT lpRect);
 extern BOOL          MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);

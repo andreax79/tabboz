@@ -1395,114 +1395,120 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 35044: function($0, $1, $2) {
+ 35108: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 35072: function($0, $1) {
+ 35136: function($0, $1) {
   return showWindow($0, $1);
  },
- 35097: function($0, $1, $2, $3, $4) {
+ 35161: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 35175: function($0) {
+ 35239: function($0) {
   return destroyDialogBox($0);
  },
- 35203: function($0, $1, $2) {
+ 35267: function($0, $1, $2) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2);
   });
  },
- 35274: function($0) {
+ 35338: function($0) {
   return destroyDialogBox($0);
  },
- 35302: function($0, $1, $2) {
+ 35366: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35334: function($0, $1, $2) {
+ 35398: function($0, $1, $2) {
   return setCheck($0, $1, $2);
  },
- 35360: function($0) {
+ 35424: function($0, $1, $2) {
+  return comboBoxAddString($0, $1, $2);
+ },
+ 35459: function($0, $1, $2) {
+  return comboBoxSelect($0, $1, $2);
+ },
+ 35491: function($0) {
   return getSystemMetrics($0);
  },
- 35388: function($0, $1) {
+ 35519: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35425: function($0, $1) {
+ 35556: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35462: function($0, $1) {
+ 35593: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35499: function($0, $1) {
+ 35630: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35536: function($0, $1, $2, $3, $4) {
+ 35667: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 35570: function($0, $1, $2, $3) {
+ 35701: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35605: function() {
+ 35736: function() {
   return stopWaiting();
  },
- 35626: function() {
+ 35757: function() {
   return shutdown();
  },
- 35644: function($0) {
+ 35775: function($0) {
   return showApp($0);
  },
- 35663: function() {
+ 35794: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 35736: function() {
+ 35867: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 35797: function() {
+ 35928: function() {
   return eventListenerSetup();
  },
- 35825: function($0) {
+ 35956: function($0) {
   return setActiveWindow($0);
  },
- 35852: function() {
+ 35983: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 35915: function($0, $1) {
+ 36046: function($0, $1) {
   return setIcon($0, $1);
  },
- 35937: function($0) {
+ 36068: function($0) {
   return showApp($0);
  },
- 35956: function($0, $1) {
+ 36087: function($0, $1) {
   localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
  },
- 36013: function($0, $1) {
+ 36144: function($0, $1) {
   stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
  },
- 36080: function($0) {
+ 36211: function($0) {
   new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
  },
- 36159: function($0, $1, $2, $3, $4) {
+ 36290: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36236: function($0, $1, $2, $3, $4) {
+ 36367: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 36313: function() {
+ 36444: function() {
   document.querySelector(".menu106").classList.add("disabled");
  },
- 36374: function() {
+ 36505: function() {
   document.querySelector(".menu107").classList.add("disabled");
  }
 };

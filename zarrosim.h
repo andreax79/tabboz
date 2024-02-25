@@ -104,6 +104,7 @@ static char copyright[] =
 #define LOGO 12
 #define LAVORO 13
 #define CONFIGURATION 14
+#define FORMAT 15
 #define SPEGNIMI 16
 #define NETWORK 17
 #define PROMPT 20

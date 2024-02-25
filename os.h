@@ -47,6 +47,8 @@ etc...
 #include <windows.h>
 
 #define SetCheck(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+#define ComboBoxAddString(hDlg, nIDDlgItem, lParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), CB_ADDSTRING, (WPARAM)0, (LPARAM)lParam)
+#define ComboBoxSelect(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), CB_SETCURSEL, (WPARAM)wParam, (LPARAM)0)
 
 #ifndef OFN_LONGNAMES
 #define OFN_LONGNAMES 0x00200000L
@@ -60,6 +62,8 @@ etc...
 #include <windows.h>
 
 #define SetCheck(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), BM_SETCHECK, wParam, 0L)
+#define ComboBoxAddString(hDlg, nIDDlgItem, lParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), CB_ADDSTRING, (WPARAM)0, (LPARAM)lParam)
+#define ComboBoxSelect(hDlg, nIDDlgItem, wParam) SendMessage(GetDlgItem(hDlg, nIDDlgItem), CB_SETCURSEL, (WPARAM)wParam, (LPARAM)0)
 
 #ifndef OFN_LONGNAMES
 #define OFN_LONGNAMES 0x00200000L

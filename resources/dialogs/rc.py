@@ -176,6 +176,7 @@ class Dialog:
         }
         if "WS_DISABLED" in control["style"]:
             control["extra"] += ' disabled="disabled"'
+            control["css_class"] += " disabled"
             control["style"] = [x for x in control["style"] if x != "WS_DISABLED"]
 
         if control["class"] != "BorCheck":
