@@ -1395,124 +1395,124 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 35092: function($0, $1, $2) {
+ 35092: function($0, $1) {
+  localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
+ },
+ 35149: function($0, $1) {
+  stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
+ },
+ 35216: function($0) {
+  new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
+ },
+ 35295: function($0, $1, $2, $3, $4) {
+  return Asyncify.handleAsync(function() {
+   return drawImage($0, $1, $2, $3, $4);
+  });
+ },
+ 35372: function($0, $1, $2, $3, $4) {
+  return Asyncify.handleAsync(function() {
+   return drawImage($0, $1, $2, $3, $4);
+  });
+ },
+ 35449: function() {
+  document.querySelector(".menu106").classList.add("disabled");
+ },
+ 35510: function() {
+  document.querySelector(".menu107").classList.add("disabled");
+ },
+ 35571: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 35120: function($0, $1) {
+ 35599: function($0, $1) {
   return showWindow($0, $1);
  },
- 35145: function($0, $1, $2, $3, $4) {
+ 35624: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 35223: function($0) {
+ 35702: function($0) {
   return destroyDialogBox($0);
  },
- 35251: function($0, $1, $2) {
+ 35730: function($0, $1, $2) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2);
   });
  },
- 35322: function($0) {
+ 35801: function($0) {
   return destroyDialogBox($0);
  },
- 35350: function($0, $1, $2) {
+ 35829: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35382: function($0) {
+ 35861: function($0) {
   return getSystemMetrics($0);
  },
- 35410: function($0, $1) {
+ 35889: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35447: function($0, $1) {
+ 35926: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35484: function($0, $1) {
+ 35963: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35521: function($0, $1) {
+ 36e3: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 35558: function($0, $1, $2, $3, $4) {
+ 36037: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 35592: function($0, $1, $2, $3) {
+ 36071: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35627: function() {
+ 36106: function() {
   return stopWaiting();
  },
- 35648: function() {
+ 36127: function() {
   return shutdown();
  },
- 35666: function($0) {
+ 36145: function($0) {
   return showApp($0);
  },
- 35685: function() {
+ 36164: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 35758: function() {
+ 36237: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 35819: function() {
+ 36298: function() {
   return eventListenerSetup();
  },
- 35847: function($0, $1) {
+ 36326: function($0, $1) {
   return getCheck($0, $1);
  },
- 35870: function($0, $1, $2) {
+ 36349: function($0, $1, $2) {
   return setCheck($0, $1, $2);
  },
- 35896: function($0, $1, $2) {
+ 36375: function($0, $1, $2) {
   return comboBoxAddString($0, $1, $2);
  },
- 35931: function($0, $1, $2) {
+ 36410: function($0, $1, $2) {
   return comboBoxSelect($0, $1, $2);
  },
- 35963: function($0) {
+ 36442: function($0) {
   return setActiveWindow($0);
  },
- 35990: function() {
+ 36469: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 36053: function($0, $1) {
+ 36532: function($0, $1) {
   return setIcon($0, $1);
  },
- 36075: function($0) {
+ 36554: function($0) {
   return showApp($0);
- },
- 36094: function($0, $1) {
-  localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
- },
- 36151: function($0, $1) {
-  stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
- },
- 36218: function($0) {
-  new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
- },
- 36297: function($0, $1, $2, $3, $4) {
-  return Asyncify.handleAsync(function() {
-   return drawImage($0, $1, $2, $3, $4);
-  });
- },
- 36374: function($0, $1, $2, $3, $4) {
-  return Asyncify.handleAsync(function() {
-   return drawImage($0, $1, $2, $3, $4);
-  });
- },
- 36451: function() {
-  document.querySelector(".menu106").classList.add("disabled");
- },
- 36512: function() {
-  document.querySelector(".menu107").classList.add("disabled");
  }
 };
 
@@ -5072,6 +5072,8 @@ Asyncify.instrumentWasmImports(asmLibraryArg);
 var asm = createWasm();
 
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
+
+var _GetDlgItem = Module["_GetDlgItem"] = createExportWrapper("GetDlgItem");
 
 var _PostMessage = Module["_PostMessage"] = createExportWrapper("PostMessage");
 

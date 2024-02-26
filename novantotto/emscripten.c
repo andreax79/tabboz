@@ -18,15 +18,11 @@
        along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "os.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "zarrosim.h"
-#ifdef TABBOZ_EM
+#include "novantotto.h"
 
 // clang-format off
 #ifdef DEBUG
@@ -170,6 +166,9 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
         // Invalid window handle
         return FALSE;
     }
+    // Dispatch destroy to children
+    DispatchToChildren(hWnd, WM_DESTROY, retval, 0);
+    // Send WM_QUIT message
     PostMessage(hWnd, WM_QUIT, retval, 0);
     return TRUE;
 }
@@ -294,6 +293,19 @@ HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
         return FALSE;
     }
     return DelProperty(handle->window.props, lpString);
+}
+
+//*******************************************************************
+// Return cursor id
+//*******************************************************************
+
+HCURSOR LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName)
+{
+    if (HIWORD((unsigned long)lpCursorName) != 0)
+    {
+        return NULL;
+    }
+    return (HCURSOR)lpCursorName;
 }
 
 //*******************************************************************
@@ -527,5 +539,3 @@ int main()
     emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &IconClickCb);
     return 0;
 }
-
-#endif

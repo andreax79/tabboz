@@ -42,6 +42,7 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 extern void            Atinom(HANDLE hInstance);
 extern int             vvc(int i); /* 15 Giugno 1998 - v0.7.1 - Verifica Valori Chiave */
 extern u_long          new_counter;
+extern ATOM            RegisterBMPViewClass(HANDLE hInst);
 extern ATOM            RegisterBMPTipaClass(HANDLE hInst);
 extern long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg, WORD wParam, LONG lParam);
 extern char            nome_del_file_su_cui_salvare[];
@@ -355,13 +356,13 @@ void InitTabboz(void)
     LoadString(hInst, 12, Daniele, sizeof(Daniele));
     LoadString(hInst, 2, Obscured, sizeof(Obscured));
 
-#ifdef TABBOZ_WIN
     /* Registra la Classe BMPView - E' giusto metterlo qui ??? - 25 Feb 1999 */
     RegisterBMPViewClass(hInst);
 
     /* Registra la Classe BMPTipa - 6 Maggio 1999 */
     RegisterBMPTipaClass(hInst);
 
+#ifdef TABBOZ_WIN
 #ifndef NONETWORK
     /* Azzera l' ultima connessione dalla rete */
     sprintf(lastconnect, "none (Server is Down !)");
@@ -1842,17 +1843,8 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
     case WM_DESTROY:
         if (hIcon)
             DestroyIcon(hIcon);
-#ifdef TABBOZ_EM
-        BMPViewWndProc(hWnd, WM_DESTROY, 0, 0);
-#endif
         KillTimer(hWnd, WM_TIMER);
         break;
-
-#ifdef TABBOZ_EM
-    case WM_PAINT:
-        BMPViewWndProc(hWnd, WM_PAINT, 0, 0);
-        break;
-#endif
 
     case WM_SYSCOMMAND:
         switch (LOWORD(wParam))
@@ -1932,7 +1924,6 @@ BOOL CALLBACK _export TabbozWndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
         fase_di_avvio = 0; /* 11 Giugno 1998 */
 #ifdef TABBOZ_EM
-        BMPViewWndProc(hWnd, WM_CREATE, 0, 0);
         /* Disabilita i menu Apri e Salva con nome */
         EM_ASM(document.querySelector(".menu106").classList.add("disabled"));
         EM_ASM(document.querySelector(".menu107").classList.add("disabled"));

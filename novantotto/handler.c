@@ -18,15 +18,11 @@
        along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "os.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "zarrosim.h"
-#ifdef TABBOZ_EM
+#include "novantotto.h"
 
 #define MIN_HANDLE_ENTRIES 100
 #define PROPERTIES_DEFAULT_ENTRIES 8
@@ -39,8 +35,8 @@
 #endif
 // clang-format on
 
-/* static HANDLE_TABLE *global_table; */
-HANDLE_TABLE *global_table;
+HANDLE_TABLE      *global_table;
+static PROPERTIES *global_classes;
 
 //*******************************************************************
 // Find property index
@@ -282,6 +278,10 @@ INT_PTR dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     HANDLE_ENTRY *h = (HANDLE_ENTRY *)hWnd;
     switch (uMsg)
     {
+    case WM_LBUTTONDOWN:
+        printf("Left button down\n");
+        // Left button down
+        return SendMessage(h->hwndParent, WM_COMMAND, h->dlgItem.nIDDlgItem, lParam);
     case BM_GETCHECK:
         // Get the check state of a radio button or check box
         return JS_CALL_INT("getCheck", h->hwndParent, h->dlgItem.nIDDlgItem);
@@ -302,7 +302,7 @@ INT_PTR dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
-HANDLE_ENTRY *AllocateDlgItem(HWND hwndParent, HMENU hMenu)
+HANDLE_ENTRY *AllocateDlgItem(LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu)
 {
     HANDLE_ENTRY *h = AllocateHandle(DlgItem, hwndParent);
     if (h == NULL)
@@ -310,7 +310,16 @@ HANDLE_ENTRY *AllocateDlgItem(HWND hwndParent, HMENU hMenu)
         return NULL;
     }
     h->dlgItem.nIDDlgItem = (int)hMenu;
-    h->lpDialogFunc = &dlgItemProc;
+    h->lpClassName = strdup(lpClassName);
+    WNDCLASS *wndClass = (WNDCLASS *)GetProperty(global_classes, lpClassName);
+    if (wndClass != NULL)
+    {
+        h->lpDialogFunc = wndClass->lpfnWndProc;
+    }
+    else
+    {
+        h->lpDialogFunc = &dlgItemProc;
+    }
     return h;
 }
 
@@ -330,6 +339,7 @@ void ReleaseHandle(HANDLE p)
             if (h->refcount == 0)
             {
                 h->id = 0;
+                free(h->lpClassName);
                 if (h->type == Window)
                 {
                     FreeProperties(h->window.props);
@@ -355,10 +365,9 @@ void ReleaseHandle(HANDLE p)
 
 HWND GetDlgItem(HWND hDlg, int nIDDlgItem)
 {
-    HANDLE_ENTRY *h;
     for (int i = 0; i < global_table->count; i++)
     {
-        h = &global_table->entries[i];
+        HANDLE_ENTRY *h = &global_table->entries[i];
         if ((h->refcount > 0) && (hDlg == h->hwndParent) && (nIDDlgItem == h->dlgItem.nIDDlgItem))
         {
             return (HWND)h;
@@ -366,6 +375,57 @@ HWND GetDlgItem(HWND hDlg, int nIDDlgItem)
     }
     DEBUG_PRINTF("GetDlgItem %d - not found\n", nIDDlgItem);
     return NULL;
+}
+
+//*******************************************************************
+// Register a window class
+//*******************************************************************
+
+ATOM RegisterClass(const WNDCLASS *lpWndClass)
+{
+    if (!global_classes)
+    {
+        DEBUG_PRINTF("RegisterClass global_classes is null\n");
+        if (!(global_classes = AllocateProperties()))
+        {
+            return 0;
+        }
+    }
+    WNDCLASS *h = malloc(sizeof(WNDCLASS));
+    if (h == NULL)
+    {
+        return 0;
+    }
+    memcpy(h, lpWndClass, sizeof(WNDCLASS));
+    // Check if already exists
+    WNDCLASS *prev = (WNDCLASS *)GetProperty(global_classes, lpWndClass->lpszClassName);
+    if (prev != NULL)
+    {
+        free(prev);
+        DelProperty(global_classes, lpWndClass->lpszClassName);
+    }
+    // Register the class
+    SetProperty(global_classes, lpWndClass->lpszClassName, (HANDLE)h);
+    return (ATOM)h;
+}
+
+//*******************************************************************
+// Unregister a window class
+//*******************************************************************
+
+BOOL UnregisterClass(LPSTR lpClassName, HANDLE hInstance)
+{
+    if (!global_classes)
+    {
+        return FALSE;
+    }
+    WNDCLASS *prev = (WNDCLASS *)DelProperty(global_classes, lpClassName);
+    if (prev == NULL)
+    {
+        return FALSE;
+    }
+    free(prev);
+    return TRUE;
 }
 
 //*******************************************************************
@@ -389,5 +449,3 @@ HANDLE_ENTRY *GetHandle(int index)
         return NULL;
     }
 }
-
-#endif

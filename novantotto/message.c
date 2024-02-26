@@ -18,13 +18,9 @@
        along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "os.h"
-
 #include <string.h>
 #include <stdio.h>
-
-#include "zarrosim.h"
-#ifdef TABBOZ_EM
+#include "novantotto.h"
 
 // clang-format off
 #ifdef DEBUG
@@ -206,6 +202,15 @@ LRESULT DispatchMessage(const MSG *lpMsg)
         DEBUG_PRINTF("DispatchMessage - lpDialogFunc is NULL\n");
         return 0;
     }
+    // Dispatch to children
+    if (lpMsg->message == WM_DESTROY || lpMsg->message == WM_CREATE)
+    {
+        DispatchToChildren(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
+    }
+    if (lpMsg->message == WM_INITDIALOG)
+    {
+        DispatchToChildren(lpMsg->hwnd, WM_CREATE, lpMsg->wParam, lpMsg->lParam);
+    }
     if (lpMsg->message == WM_SETICON)
     {
         // Set window icon
@@ -219,10 +224,12 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     else if (lpMsg->wParam == SC_CLOSE)
     {
         // Close window
-        DEBUG_PRINTF("DispatchMessage - WM_CLOSE\n");
+        DEBUG_PRINTF("DispatchMessage - SC_CLOSE\n");
         if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
+            // Dispatch destroy to children
+            DispatchToChildren(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
             // Dispatch Destroy
             lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
@@ -240,7 +247,8 @@ LRESULT DispatchMessage(const MSG *lpMsg)
         retval = lpDialogFunc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
         // Dispatch Repaint
         DEBUG_PRINTF("DispatchMessage - WM_PAINT\n");
-        lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0);
+        /* lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0); */
+        RedrawWindow(lpMsg->hwnd, NULL, NULL, 0);
     }
     DEBUG_PRINTF("DispatchMessage - done retval=%ld\n", retval);
     return retval;
@@ -292,6 +300,73 @@ BOOL SetMessageQueue(int size)
 }
 
 //*******************************************************************
+// Send a message to the children of hWnd
+//*******************************************************************
+
+void DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    // Redraw children
+    for (int i = 0; i < global_table->count; i++)
+    {
+        HANDLE_ENTRY *child = &global_table->entries[i];
+        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpDialogFunc != NULL))
+        {
+            child->lpDialogFunc(hWnd, uMsg, wParam, lParam);
+        }
+    }
+}
+
+//*******************************************************************
+
+BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags)
+{
+    // Redraw children
+    DispatchToChildren(hWnd, WM_PAINT, 0, 0);
+    // Redraw Window
+    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)hWnd)->lpDialogFunc;
+    if (lpDialogFunc == NULL)
+    {
+        return FALSE;
+    }
+    return lpDialogFunc(hWnd, WM_PAINT, 0, 0);
+}
+
+//*******************************************************************
+
+BOOL UpdateWindow(HWND hwnd)
+{
+    return RedrawWindow(hwnd, NULL, 0, RDW_UPDATENOW | RDW_ALLCHILDREN);
+}
+
+//*******************************************************************
+
+BOOL InvalidateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
+{
+    return RedrawWindow(hwnd, NULL, hrgn, RDW_INVALIDATE | (erase ? RDW_ERASE : 0));
+}
+
+//*******************************************************************
+
+BOOL InvalidateRect(HWND hwnd, const RECT *rect, BOOL erase)
+{
+    return RedrawWindow(hwnd, rect, 0, RDW_INVALIDATE | (erase ? RDW_ERASE : 0));
+}
+
+//*******************************************************************
+
+BOOL ValidateRgn(HWND hwnd, HRGN hrgn)
+{
+    return RedrawWindow(hwnd, NULL, hrgn, RDW_VALIDATE);
+}
+
+//*******************************************************************
+
+BOOL ValidateRect(HWND hwnd, const RECT *rect)
+{
+    return RedrawWindow(hwnd, rect, 0, RDW_VALIDATE);
+}
+
+//*******************************************************************
 // Print message queue
 //*******************************************************************
 
@@ -306,5 +381,3 @@ void PrintMessages()
         printf("> %d idx: %d hwnd: %ld message: %d\n", i, idx, (long)msg->hwnd, msg->message);
     }
 }
-
-#endif

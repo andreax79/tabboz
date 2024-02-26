@@ -438,10 +438,13 @@
         addMainMenu(c);
         // Make the window draggrable
         makeDraggable(c);
-        // Add DlgItems
+        // Allocate a DlgItem for each child
         c.querySelectorAll('.dlg_item').forEach(element => {
             const hMenu = Number(element.className.match(/\d+/));
-            _AllocateDlgItem(hWnd, hMenu);
+            const lpClassName = _malloc(128);
+            stringToUTF8(element.getAttribute('data-class'), lpClassName, 128);
+            _AllocateDlgItem(lpClassName, hWnd, hMenu);
+            _free(lpClassName);
         });
     }
 

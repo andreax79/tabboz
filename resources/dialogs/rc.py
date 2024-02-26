@@ -240,7 +240,7 @@ class Dialog:
         ):  # Button
             self.add(
                 """
-                      <button class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">{text}</button>
+                      <button class="{css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">{text}</button>
 """.format(
                     **control
                 )
@@ -248,7 +248,7 @@ class Dialog:
         elif "SS_ICON" in control["style"]:  # Icon
             self.add(
                 """
-<img src="resources/icons/{text}.gif" class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" />
+<img src="resources/icons/{text}.gif" class="{css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" />
 """.format(
                     **control
                 )
@@ -257,7 +257,7 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class} bwcc" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
+<input class="{css_class} bwcc" data-class="{class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
                     dialog_id=self.dialog_id,
@@ -270,7 +270,7 @@ class Dialog:
                 self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
+<input class="{css_class}" data-class="{class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
                         dialog_id=self.dialog_id,
@@ -281,7 +281,7 @@ class Dialog:
                 self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class}" {extra} type="checkbox" id="{combined_id}" />
+<input class="{css_class}" data-class="{class}" {extra} type="checkbox" id="{combined_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
                         **control
@@ -292,7 +292,7 @@ class Dialog:
                 control["width"] -= 25
                 self.add(
                 """
-<fieldset class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<fieldset class="{css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
   <legend>{text}</legend>
 </fieldset>""".format(
                         **control
@@ -305,7 +305,7 @@ class Dialog:
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<input class="{css_class} bwcc" {extra} type="checkbox" id="{combined_id}" />
+<input class="{css_class} bwcc" data-class="{class}" {extra} type="checkbox" id="{combined_id}" />
 <label for="{combined_id}">{text}</label>
 </div>""".format(
                     **control
@@ -316,7 +316,7 @@ class Dialog:
             self.add(
                 """
 <div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
-<select class="{css_class}" {extra} id="{combined_id}" style="width: {width}px;"></select>
+<select class="{css_class}" data-class="{class}" {extra} id="{combined_id}" style="width: {width}px;"></select>
 </div>""".format(
                     **control
                 )
@@ -325,7 +325,7 @@ class Dialog:
         elif control["class"] == "EDIT":  # Text input
             self.add(
                 """
-<input style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" class="{css_class}" {extra} type="text" id="{id}" />
+<input style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" class="{css_class}" data-class="{class}" {extra} type="text" id="{id}" />
 """.format(
                     dialog_id=self.dialog_id,
                     **control,
@@ -337,7 +337,7 @@ class Dialog:
                 control["text"] = "OK"
                 self.add(
                     """
-                      <button class="button_ok {css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+                      <button class="button_ok {css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
                       </button>
 """.format(
                         **control
@@ -347,7 +347,7 @@ class Dialog:
                 control["text"] = "Cancel"
                 self.add(
                     """
-                      <button class="button_cancel {css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+                      <button class="button_cancel {css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
                       </button>
 """.format(
                         **control
@@ -357,7 +357,7 @@ class Dialog:
                 control["text"] = control["id"] + 1000
                 self.add(
                     """
-<img src="resources/bitmaps/{text}.png" class="{css_class}" style="background-color: yellow; position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" />
+<img src="resources/bitmaps/{text}.png" class="{css_class}" data-class="{class}" style="background-color: yellow; position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" />
 """.format(
                         **control
                     )
@@ -366,7 +366,7 @@ class Dialog:
             control["css_class"] += " ws_border"
             self.add(
                 """
-<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" data-class="{class}">
 {text}
 </div>""".format(
                     **control
@@ -376,7 +376,7 @@ class Dialog:
             control["css_class"] += " ws_border"
             self.add(
                 """
-<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" data-class="{class}">
 {text}
 </div>""".format(
                     **control
@@ -386,7 +386,7 @@ class Dialog:
             self.add(
 
                 """
-<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" data-class="{class}">
 {text}
 </div>""".format(
                     **control
@@ -396,7 +396,7 @@ class Dialog:
             self.add(
 
                 """
-<canvas class="{css_class} {class}" width="{width}" height="{height}" style="position: absolute; left: {x}px; top: {y}px;">
+<canvas class="{css_class} {class}" width="{width}" height="{height}" style="position: absolute; left: {x}px; top: {y}px;" data-class="{class}">
 </canvas>""".format(
                     **control
                 )

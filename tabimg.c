@@ -27,6 +27,7 @@
 #include "os.h"
 #include "zarrosim.h"
 #include <stdio.h>
+#include <string.h>
 
 #define IMG_SIZEX 143
 #define IMG_SIZEY 275
@@ -399,25 +400,24 @@ long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
 /*********************************************************************/
 // Registra la Classe BMPView
 
-#ifndef TABBOZ_EM
 #pragma argsused
 ATOM RegisterBMPViewClass(HANDLE hInst)
 {
     WNDCLASS wc;
     memset(&wc, 0, sizeof(wc));
 
-    wc.lpfnWndProc = BMPViewWndProc;
+    wc.lpfnWndProc = (WNDPROC)BMPViewWndProc;
     wc.hInstance = hInst;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 #ifdef TABBOZ_WIN16
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW) + 1;
 #else
-    wc.hbrBackground = (COLOR_WINDOW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 #endif
     wc.lpszClassName = "BMPView";
     return RegisterClass(&wc);
 }
-#endif
+
 /*********************************************************************/
 /*********************************************************************/
 
@@ -567,22 +567,15 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
 /*********************************************************************/
 // Registra la Classe BMPTipa
 
-#ifndef TABBOZ_EM
 #pragma argsused
 ATOM RegisterBMPTipaClass(HANDLE hInst)
 {
     WNDCLASS wc;
     memset(&wc, 0, sizeof(wc));
-    wc.lpfnWndProc = BMPTipaWndProc;
+    wc.lpfnWndProc = (WNDPROC)BMPTipaWndProc;
     wc.hInstance = hInst;
     wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(10));
-//	wc.hCursor = LoadCursor(NULL,IDC_ARROW);
-#ifdef TABBOZ_WIN16
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
-#else
-    wc.hbrBackground = (COLOR_WINDOW);
-#endif
     wc.lpszClassName = "BMPTipa";
     return RegisterClass(&wc);
 }
-#endif

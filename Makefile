@@ -1,4 +1,19 @@
-sources = disco.c emscripten.c eventi.c handler.c lavoro.c message.c proteggi.c readkey.c scooter.c scuola.c tabimg.c telefono.c tempo.c tipa.c vestiti.c zarrosim.c
+sources = disco.c \
+		  eventi.c \
+		  lavoro.c \
+		  proteggi.c \
+		  readkey.c \
+		  scooter.c \
+		  scuola.c \
+		  tabimg.c \
+		  telefono.c \
+		  tempo.c \
+		  tipa.c \
+		  vestiti.c \
+		  zarrosim.c \
+		  novantotto/emscripten.c \
+		  novantotto/handler.c \
+		  novantotto/message.c
 
 # CFLAGS += -Wall -Wextra -Wpedantic \
 #          -Wformat=2 -Wno-unused-parameter -Wshadow \
@@ -15,17 +30,11 @@ build:
 		-s DEMANGLE_SUPPORT=1 \
 		-s 'ASYNCIFY_IMPORTS=["emscripten_asm_const_int"]' \
 		-s 'EXPORTED_RUNTIME_METHODS=["ccall", "setValue"]' \
-		-s 'EXPORTED_FUNCTIONS=["_main", "_PostMessage", "_PrintMessages", "_AllocateDlgItem"]'
+		-s 'EXPORTED_FUNCTIONS=["_main", "_GetDlgItem", "_PostMessage", "_PrintMessages", "_AllocateDlgItem"]'
 
 format:
-	clang-format -i *.h *.c tests/*.c
+	clang-format -i *.h *.c novantotto/*.h novantotto/*.c novantotto/tests/*.c
 	js-beautify -r resources/dialogs/js/twcc.js
 
 test:
-	emcc -DDEBUG=1 \
-		-sWASM=0 \
-		-sASSERTIONS=2 \
-		-sSTACK_OVERFLOW_CHECK=2 \
-		-sSAFE_HEAP=1 \
-		tests/test_handler.c handler.c && node a.out.js
-	rm -f a.out.js
+	make -C novantotto test
