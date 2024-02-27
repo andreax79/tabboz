@@ -201,53 +201,6 @@ typedef struct
 
 typedef struct
 {
-    LPCSTR key;   // key
-    HANDLE hData; // value
-} PROPERTY;
-
-typedef struct
-{
-    int       len;      // current length
-    int       capacity; // capacity
-    PROPERTY *entries;
-} PROPERTIES;
-
-typedef enum HandleType
-{
-    Window = 1,
-    DlgItem = 2
-} HandleType;
-
-typedef struct
-{
-    unsigned int refcount;
-    unsigned int id;
-    HandleType   type;
-    HWND         hwndParent;   // parent window
-    DLGPROC      lpDialogFunc; // window/dialog item procedure
-    LPSTR        lpClassName;
-    union {
-        // if type == Window
-        struct
-        {
-            PROPERTIES *props; // window properties
-        } window;
-        // if type == DlgItem
-        struct
-        {
-            int nIDDlgItem; // control identifier
-        } dlgItem;
-    };
-} HANDLE_ENTRY;
-
-typedef struct
-{
-    int           count;
-    HANDLE_ENTRY *entries;
-} HANDLE_TABLE;
-
-typedef struct
-{
     int count;
     int next;
     int free;
@@ -304,6 +257,7 @@ typedef struct
 #define WM_TIMER 0x0113
 #define WM_LBUTTONDOWN 0x0201
 #define WM_LBUTTONUP 0x0202
+#define WM_USER 0x0400
 
 #define WS_OVERLAPPED 0x00000000L
 #define WS_TILED WS_OVERLAPPED
@@ -465,54 +419,49 @@ typedef struct
 #define RDW_FRAME 0x0400
 #define RDW_NOFRAME 0x0800
 
-extern HWND          GetDlgItem(HWND DhDlg, int nIDDlgItem);
-extern HWND          SetFocus(HWND hWnd);
-extern INT_PTR       DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
-extern BOOL          EndDialog(HWND hwnd, INT_PTR retval);
-extern BOOL          SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
-extern UINT          GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
-extern BOOL          SetDlgItemInt(HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSigned);
-extern UINT          GetDlgItemInt(HWND hDlg, int nIDDlgItem, BOOL *lpTranslated, BOOL bSigned);
-extern int           MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
-extern BOOL          ShowWindow(HWND hWnd, int nCmdShow);
-extern int           LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
-extern void          LoadStringResources(void);
-extern void          InitTabboz(void);
-extern int           GetSystemMetrics(int nIndex);
-extern BOOL          GetWindowRect(HWND hWnd, LPRECT lpRect);
-extern BOOL          MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
-extern HANDLE        GetProp(HWND hWnd, LPCSTR lpString);
-extern BOOL          SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
-extern HANDLE        RemoveProp(HWND hWnd, LPCSTR lpString);
-extern void          ExitWindows(int dwReserved, int code);
-extern int           WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
-extern BOOL          GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
-extern LRESULT       DispatchMessage(const MSG *lpMsg);
-extern LRESULT       SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-extern BOOL          PostMessage(HWND hwnd, WORD message, WORD wParam, LONG lParam);
-extern HICON         LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
-extern HCURSOR       LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
-extern HBITMAP       LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
-extern BOOL          DestroyIcon(HICON hIcon);
-extern BOOL          DeleteObject(void *ho);
-extern HDC           BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
-extern BOOL          EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
-extern BOOL          SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
-extern LRESULT       DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-extern BOOL          GetOpenFileName(LPOPENFILENAME unnamedParam1);
-extern BOOL          GetSaveFileName(LPOPENFILENAME unnamedParam1);
-extern UINT_PTR      SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
-extern BOOL          KillTimer(HWND hWnd, UINT_PTR uIDEvent);
-extern ATOM          RegisterClass(const WNDCLASS *lpWndClass);
-extern BOOL          UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
-extern BOOL          RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
-extern BOOL          SetMessageQueue(int size);
-extern void          randomize();
-extern HANDLE        GetProperty(PROPERTIES *props, LPCSTR key);
-extern HANDLE        SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData);
-extern HANDLE        DelProperty(PROPERTIES *props, LPCSTR key);
-extern HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent);
-extern void          ReleaseHandle(HANDLE p);
-extern void          DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern HWND     GetDlgItem(HWND DhDlg, int nIDDlgItem);
+extern HWND     SetFocus(HWND hWnd);
+extern INT_PTR  DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
+extern BOOL     EndDialog(HWND hwnd, INT_PTR retval);
+extern BOOL     SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
+extern UINT     GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
+extern BOOL     SetDlgItemInt(HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSigned);
+extern UINT     GetDlgItemInt(HWND hDlg, int nIDDlgItem, BOOL *lpTranslated, BOOL bSigned);
+extern int      MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
+extern BOOL     ShowWindow(HWND hWnd, int nCmdShow);
+extern int      LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
+extern void     LoadStringResources(void);
+extern void     InitTabboz(void);
+extern int      GetSystemMetrics(int nIndex);
+extern BOOL     GetWindowRect(HWND hWnd, LPRECT lpRect);
+extern BOOL     MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
+extern HANDLE   GetProp(HWND hWnd, LPCSTR lpString);
+extern BOOL     SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
+extern HANDLE   RemoveProp(HWND hWnd, LPCSTR lpString);
+extern void     ExitWindows(int dwReserved, int code);
+extern int      WinMain(HANDLE hInstance, HANDLE hPrevInstance, LPSTR lpszCmdLine, int cmdShow);
+extern BOOL     GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
+extern LRESULT  DispatchMessage(const MSG *lpMsg);
+extern LRESULT  SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern BOOL     PostMessage(HWND hwnd, WORD message, WORD wParam, LONG lParam);
+extern BOOL     PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, BOOL wRemoveMsg);
+extern HICON    LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
+extern HCURSOR  LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
+extern HBITMAP  LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
+extern BOOL     DestroyIcon(HICON hIcon);
+extern BOOL     DeleteObject(void *ho);
+extern HDC      BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
+extern BOOL     EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
+extern BOOL     SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
+extern LRESULT  DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+extern BOOL     GetOpenFileName(LPOPENFILENAME unnamedParam1);
+extern BOOL     GetSaveFileName(LPOPENFILENAME unnamedParam1);
+extern UINT_PTR SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
+extern BOOL     KillTimer(HWND hWnd, UINT_PTR uIDEvent);
+extern ATOM     RegisterClass(const WNDCLASS *lpWndClass);
+extern BOOL     UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
+extern BOOL     RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
+extern BOOL     SetMessageQueue(int size);
+extern void     randomize();
 
 #endif // WINDEFS_H

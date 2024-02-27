@@ -23,179 +23,14 @@
 #include <string.h>
 #include <time.h>
 #include "novantotto.h"
+#include "property.h"
+#include "handler.h"
+#include "debug.h"
 
 #define MIN_HANDLE_ENTRIES 100
-#define PROPERTIES_DEFAULT_ENTRIES 8
-
-// clang-format off
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
-#else
-#define DEBUG_PRINTF(...) do {} while (0)
-#endif
-// clang-format on
 
 HANDLE_TABLE      *global_table;
 static PROPERTIES *global_classes;
-
-//*******************************************************************
-// Find property index
-//*******************************************************************
-
-int FindPropertyIndex(PROPERTIES *props, LPCSTR key)
-{
-    for (int i = 0; i < props->capacity; i++)
-    {
-        if ((props->entries[i].key != NULL) && (!strcmp(props->entries[i].key, key)))
-        {
-            DEBUG_PRINTF("FindPropertyIndex %s idx=%d\n", key, i);
-            return i;
-        }
-    }
-    DEBUG_PRINTF("FindPropertyIndex %s not found\n", key);
-    return -1;
-}
-
-//*******************************************************************
-// Find empty property index
-//*******************************************************************
-
-int FindEmptyPropertyIndex(PROPERTIES *props)
-{
-    for (int i = 0; i < props->capacity; i++)
-    {
-        if (props->entries[i].key == NULL)
-        {
-            DEBUG_PRINTF("FindEmptyPropertyIndex idx=%d\n", i);
-            return i;
-        }
-    }
-    DEBUG_PRINTF("FindEmptyPropertyIndex not found\n");
-    return -1;
-}
-
-//*******************************************************************
-// Get an entry from the property list
-//*******************************************************************
-
-HANDLE GetProperty(PROPERTIES *props, LPCSTR key)
-{
-    DEBUG_PRINTF("GetProperty %s\n", key);
-    int idx = FindPropertyIndex(props, key);
-    if (idx == -1)
-    {
-        return NULL;
-    }
-    else
-    {
-        return props->entries[idx].hData;
-    }
-}
-
-//*******************************************************************
-// Remove an entry from the property list
-//*******************************************************************
-
-HANDLE DelProperty(PROPERTIES *props, LPCSTR key)
-{
-    DEBUG_PRINTF("DelProperty %s\n", key);
-    int idx = FindPropertyIndex(props, key);
-    if (idx == -1)
-    {
-        return NULL;
-    }
-    else
-    {
-        HANDLE prev = props->entries[idx].hData;
-        props->entries[idx].hData = NULL;
-        free((void *)props->entries[idx].key);
-        props->entries[idx].key = NULL;
-        props->len--;
-        return prev;
-    }
-}
-
-//*******************************************************************
-// Set an entry in the property list
-//*******************************************************************
-
-HANDLE SetProperty(PROPERTIES *props, LPCSTR key, HANDLE hData)
-{
-    DEBUG_PRINTF("SetProperty %s\n", key);
-    int idx = FindPropertyIndex(props, key);
-    if (idx != -1) // Already exist
-    {
-        DEBUG_PRINTF("SetProperty %s (set) idx=%d\n", key, idx);
-        HANDLE prev = props->entries[idx].hData;
-        props->entries[idx].hData = hData;
-        return prev;
-    }
-    if (props->len == props->capacity) // Full
-    {
-        DEBUG_PRINTF("SetProperty %s realloc capacity=%d\n", key, props->capacity * 2);
-        PROPERTY *prev = props->entries;
-        props->entries = calloc(props->capacity * 2, sizeof(PROPERTY));
-        if (props->entries == NULL)
-        {
-            DEBUG_PRINTF("SetProperty %s calloc failed\n", key);
-            props->entries = prev;
-            return NULL;
-        }
-        memcpy(props->entries, prev, props->capacity * sizeof(PROPERTY));
-        props->capacity *= 2;
-        free(prev);
-    }
-    // Search for an unused entry
-    idx = FindEmptyPropertyIndex(props);
-    DEBUG_PRINTF("SetProperty %s (add) idx=%d\n", key, idx);
-    props->entries[idx].key = strdup(key);
-    props->entries[idx].hData = hData;
-    props->len++;
-    return NULL;
-}
-
-//*******************************************************************
-// Allocate a new properties table
-//*******************************************************************
-
-PROPERTIES *AllocateProperties(void)
-{
-    DEBUG_PRINTF("AllocateProperties\n");
-    PROPERTIES *props = calloc(1, sizeof(PROPERTIES));
-    if (props == NULL)
-    {
-        DEBUG_PRINTF("AllocateProperties calloc failed\n");
-        return NULL;
-    }
-    props->capacity = PROPERTIES_DEFAULT_ENTRIES;
-    props->len = 0;
-    props->entries = calloc(props->capacity, sizeof(PROPERTY));
-    if (props->entries == NULL)
-    {
-        DEBUG_PRINTF("AllocateProperties entries calloc failed\n");
-        free(props);
-        return NULL;
-    }
-    return props;
-}
-
-//*******************************************************************
-// Free properties table
-//*******************************************************************
-
-void FreeProperties(PROPERTIES *props)
-{
-    DEBUG_PRINTF("FreeProperties - capacity=%d len=%d\n", props->capacity, props->len);
-    for (int i = 0; i < props->capacity; i++)
-    {
-        if (props->entries[i].key != NULL)
-        {
-            free((void *)props->entries[i].key);
-        }
-    }
-    free(props->entries);
-    free(props);
-}
 
 //*******************************************************************
 // Allocate a new handle table
@@ -426,6 +261,23 @@ BOOL UnregisterClass(LPSTR lpClassName, HANDLE hInstance)
     }
     free(prev);
     return TRUE;
+}
+
+//*******************************************************************
+// Send a message to the children of hWnd
+//*******************************************************************
+
+void DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    // Redraw children
+    for (int i = 0; i < global_table->count; i++)
+    {
+        HANDLE_ENTRY *child = &global_table->entries[i];
+        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpDialogFunc != NULL))
+        {
+            child->lpDialogFunc(hWnd, uMsg, wParam, lParam);
+        }
+    }
 }
 
 //*******************************************************************

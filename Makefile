@@ -13,7 +13,9 @@ sources = disco.c \
 		  zarrosim.c \
 		  novantotto/emscripten.c \
 		  novantotto/handler.c \
-		  novantotto/message.c
+		  novantotto/message.c \
+		  novantotto/property.c \
+		  novantotto/window.c
 
 # CFLAGS += -Wall -Wextra -Wpedantic \
 #          -Wformat=2 -Wno-unused-parameter -Wshadow \

@@ -315,7 +315,7 @@ class Dialog:
         elif control["class"] == "COMBOBOX" and "CBS_DROPDOWNLIST" in control["style"]:  # Dropdown
             self.add(
                 """
-<div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
+<div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
 <select class="{css_class}" data-class="{class}" {extra} id="{combined_id}" style="width: {width}px;"></select>
 </div>""".format(
                     **control

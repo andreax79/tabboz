@@ -59,10 +59,9 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
                                   HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hdc;
-    if (handle != NULL)
+    if (hdc != NULL)
     {
-        JS_ASYNC_CALL("drawImage", handle, "BMPView", (int)hbmpSrc, x, y);
+        JS_ASYNC_CALL("drawImage", (int)hdc, "BMPView", (int)hbmpSrc, x, y);
     }
 }
 
@@ -480,10 +479,9 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
     if (hbmp)
     {
 #ifdef TABBOZ_EM
-        HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hwnd;
-        if (handle != NULL)
+        if (hwnd != NULL)
         {
-            JS_ASYNC_CALL("drawImage", handle, "BMPTipa", (int)hbmp, 0, 0);
+            JS_ASYNC_CALL("drawImage", (int)hwnd, "BMPTipa", (int)hbmp, 0, 0);
         }
 #else
         BITMAP bm;

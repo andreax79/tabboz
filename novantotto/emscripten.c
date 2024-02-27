@@ -22,17 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "novantotto.h"
-
-// clang-format off
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
-#else
-#define DEBUG_PRINTF(...) do {} while (0)
-#endif
-// clang-format on
-
 #include <emscripten/html5.h>
+#include "novantotto.h"
+#include "property.h"
+#include "handler.h"
+#include "debug.h"
 
 //*******************************************************************
 // Load a string resource into a buffer
@@ -41,21 +35,6 @@
 int LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax)
 {
     return JS_CALL_INT("loadString", uID, lpBuffer, cchBufferMax);
-}
-
-//*******************************************************************
-// Show/hide a window
-//*******************************************************************
-
-BOOL ShowWindow(HWND hWnd, int nCmdShow)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return FALSE;
-    }
-    return JS_CALL_INT("showWindow", handle, nCmdShow && SW_SHOWNORMAL);
 }
 
 //*******************************************************************
@@ -195,43 +174,6 @@ BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
 int GetSystemMetrics(int nIndex)
 {
     return JS_CALL_INT("getSystemMetrics", nIndex);
-}
-
-//*******************************************************************
-// Retrieve the dimensions of a specified window
-//*******************************************************************
-
-BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return FALSE;
-    }
-    else
-    {
-        lpRect->left = JS_CALL_INT("getWindowRectDimension", handle, 0);
-        lpRect->top = JS_CALL_INT("getWindowRectDimension", handle, 1);
-        lpRect->right = JS_CALL_INT("getWindowRectDimension", handle, 2);
-        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", handle, 3);
-        return TRUE;
-    }
-}
-
-//*******************************************************************
-// Change the position and dimensions of the specified window
-//*******************************************************************
-
-BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
-{
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return FALSE;
-    }
-    return JS_CALL_INT("moveWindow", handle, X, Y, nWidth, nHeight);
 }
 
 //*******************************************************************

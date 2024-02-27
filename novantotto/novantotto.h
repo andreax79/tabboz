@@ -23,5 +23,3 @@
 #define JS_ASYNC_CALL_INT(code, ...) emscripten_asm_const_int(CODE_EXPR("{return Asyncify.handleAsync(function(){ return " code "(" _JS_ARG(__VA_ARGS__) ")})}") _EM_ASM_PREP_ARGS(__VA_ARGS__))
 #define JS_CALL(code, ...) (void)JS_CALL_INT(code, __VA_ARGS__)
 #define JS_ASYNC_CALL(code, ...) (void)JS_ASYNC_CALL_INT(code, __VA_ARGS__)
-
-extern HANDLE_TABLE *global_table;

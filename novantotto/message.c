@@ -21,14 +21,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "novantotto.h"
-
-// clang-format off
-#ifdef DEBUG
-#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
-#else
-#define DEBUG_PRINTF(...) do {} while (0)
-#endif
-// clang-format on
+#include "handler.h"
+#include "debug.h"
 
 static MESAGES_QUEUE *queue = NULL;
 
@@ -37,12 +31,27 @@ static int next_idx(int idx)
     return (idx + 1) % queue->capacity;
 }
 
+static int prev_idx(int idx)
+{
+    return idx > 0 ? idx - 1 : queue->capacity - 1;
+}
+
+static inline void RequireQueue()
+{
+    if (queue == NULL)
+    {
+        SetMessageQueue(MESSAGE_LIMIT);
+    }
+}
+
 //*******************************************************************
 // Find next message index
 //*******************************************************************
 
 int FindMessage(HWND hwnd)
 {
+    RequireQueue();
+
     // Check if empty
     if (queue->count == 0)
     {
@@ -72,31 +81,30 @@ int FindMessage(HWND hwnd)
 
 void DelMessage(int idx)
 {
-    DEBUG_PRINTF("DelMessage %d\n", idx);
+    RequireQueue();
+    DEBUG_PRINTF("DelMessage %d next=%d\n", idx, queue->next);
+
     if (idx >= queue->next)
     {
         int count = idx - queue->next;
-        do
+        if (count)
         {
-            memmove(&queue->messages[next_idx(queue->next)],
+            memmove(&queue->messages[queue->next + 1],
                     &queue->messages[queue->next],
                     count * sizeof(MSG));
-            queue->next = next_idx(queue->next);
-            count--;
-        } while (count >= 0);
+        }
+        queue->next = next_idx(queue->next);
     }
     else
     {
         int count = queue->free - idx;
-        do
+        if (count)
         {
             memmove(&queue->messages[idx],
-                    &queue->messages[next_idx(idx)],
+                    &queue->messages[idx + 1],
                     count * sizeof(MSG));
-            queue->free = idx;
-            idx = next_idx(idx);
-            count--;
-        } while (count >= 0);
+        }
+        queue->free = prev_idx(queue->free);
     }
     queue->count--;
     DEBUG_PRINTF("DelMessage done - count=%d free=%d\n", queue->count, queue->free);
@@ -108,7 +116,9 @@ void DelMessage(int idx)
 
 BOOL PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, BOOL wRemoveMsg)
 {
+    RequireQueue();
     DEBUG_PRINTF("PeekMessage hwnd=%ld\n", (long)hwnd);
+
     int idx = FindMessage(hwnd);
     if (idx == -1)
     {
@@ -134,10 +144,11 @@ BOOL PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, B
 
 BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 {
+    RequireQueue();
     DEBUG_PRINTF("GetMessage\n");
 
     // Activate the window
-    DEBUG_PRINTF("setActiveWindow %d\n", hWnd);
+    DEBUG_PRINTF("setActiveWindow %d\n", (int)hWnd);
     JS_CALL("setActiveWindow", hWnd);
 
     while (TRUE)
@@ -153,6 +164,7 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
         // Wait for an event
         DEBUG_PRINTF("waitEvent\n");
         JS_ASYNC_CALL("waitEvent");
+        DEBUG_PRINTF("waitEvent - done\n");
     }
     return TRUE;
 }
@@ -163,8 +175,8 @@ BOOL GetMessage(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
 
 BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
 {
-
-    DEBUG_PRINTF("PostMessage - hWnd: %ldn Msg: %d wParam: %d lParam: %ld", (long)hWnd, Msg, wParam, lParam);
+    RequireQueue();
+    DEBUG_PRINTF("PostMessage - hWnd: %ld Msg: %d wParam: %d lParam: %ld\n", (long)hWnd, Msg, wParam, lParam);
     if ((queue->next == queue->free) && (queue->count > 0))
     {
         DEBUG_PRINTF("PostMessage failed - the queue is full\n");
@@ -300,79 +312,13 @@ BOOL SetMessageQueue(int size)
 }
 
 //*******************************************************************
-// Send a message to the children of hWnd
-//*******************************************************************
-
-void DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    // Redraw children
-    for (int i = 0; i < global_table->count; i++)
-    {
-        HANDLE_ENTRY *child = &global_table->entries[i];
-        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpDialogFunc != NULL))
-        {
-            child->lpDialogFunc(hWnd, uMsg, wParam, lParam);
-        }
-    }
-}
-
-//*******************************************************************
-
-BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags)
-{
-    // Redraw children
-    DispatchToChildren(hWnd, WM_PAINT, 0, 0);
-    // Redraw Window
-    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)hWnd)->lpDialogFunc;
-    if (lpDialogFunc == NULL)
-    {
-        return FALSE;
-    }
-    return lpDialogFunc(hWnd, WM_PAINT, 0, 0);
-}
-
-//*******************************************************************
-
-BOOL UpdateWindow(HWND hwnd)
-{
-    return RedrawWindow(hwnd, NULL, 0, RDW_UPDATENOW | RDW_ALLCHILDREN);
-}
-
-//*******************************************************************
-
-BOOL InvalidateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
-{
-    return RedrawWindow(hwnd, NULL, hrgn, RDW_INVALIDATE | (erase ? RDW_ERASE : 0));
-}
-
-//*******************************************************************
-
-BOOL InvalidateRect(HWND hwnd, const RECT *rect, BOOL erase)
-{
-    return RedrawWindow(hwnd, rect, 0, RDW_INVALIDATE | (erase ? RDW_ERASE : 0));
-}
-
-//*******************************************************************
-
-BOOL ValidateRgn(HWND hwnd, HRGN hrgn)
-{
-    return RedrawWindow(hwnd, NULL, hrgn, RDW_VALIDATE);
-}
-
-//*******************************************************************
-
-BOOL ValidateRect(HWND hwnd, const RECT *rect)
-{
-    return RedrawWindow(hwnd, rect, 0, RDW_VALIDATE);
-}
-
-//*******************************************************************
 // Print message queue
 //*******************************************************************
 
 void PrintMessages()
 {
-    DEBUG_PRINTF("PrintMessages");
+    RequireQueue();
+    DEBUG_PRINTF("PrintMessages\n");
     printf("count: %d next: %d free: %d capacity: %d\n",
            queue->count, queue->next, queue->free, queue->capacity);
     for (int i = 0, idx = queue->next; i < queue->count; i++, idx = next_idx(idx))
