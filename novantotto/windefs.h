@@ -45,7 +45,7 @@ typedef unsigned long  DWORD;
 typedef unsigned long  LONG;
 typedef BYTE           BOOLEAN;
 typedef int            ATOM; // typedef WORD ATOM;
-typedef void          *VOID;
+typedef void           VOID;
 typedef void          *PVOID;
 typedef void          *LPVOID;
 typedef char           CHAR;
@@ -70,6 +70,8 @@ typedef void          *FARPROC;
 #define LOBYTE(w) ((BYTE)((DWORD_PTR)(w)&0xff))
 #define HIBYTE(w) ((BYTE)(((DWORD_PTR)(w) >> 8) & 0xff))
 #define DECLARE_HANDLE(n) typedef HANDLE n
+#define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 
 DECLARE_HANDLE(HKEY);
 
@@ -106,6 +108,7 @@ typedef INT_PTR (*DLGPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*WNDPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*LPOFNHOOKPROC)(HWND, UINT, WPARAM, LPARAM);
 typedef INT_PTR (*TIMERPROC)(HWND, UINT, WPARAM, LPARAM);
+typedef INT_PTR (*LPCFHOOKPROC)(HWND, UINT, WPARAM, LPARAM);
 
 typedef struct
 {
@@ -198,6 +201,46 @@ typedef struct
     DWORD         dwReserved;
     DWORD         FlagsEx;
 } OPENFILENAME, *LPOPENFILENAME;
+
+#define LF_FACESIZE 32
+
+typedef struct
+{
+    LONG lfHeight;
+    LONG lfWidth;
+    LONG lfEscapement;
+    LONG lfOrientation;
+    LONG lfWeight;
+    BYTE lfItalic;
+    BYTE lfUnderline;
+    BYTE lfStrikeOut;
+    BYTE lfCharSet;
+    BYTE lfOutPrecision;
+    BYTE lfClipPrecision;
+    BYTE lfQuality;
+    BYTE lfPitchAndFamily;
+    CHAR lfFaceName[LF_FACESIZE];
+} LOGFONT, *PLOGFONT, *NPLOGFONT, *LPLOGFONT;
+
+typedef struct
+{
+    DWORD        lStructSize;
+    HWND         hwndOwner;
+    HDC          hDC;
+    LPLOGFONT    lpLogFont;
+    INT          iPointSize;
+    DWORD        Flags;
+    COLORREF     rgbColors;
+    LPARAM       lCustData;
+    LPCFHOOKPROC lpfnHook;
+    LPCSTR       lpTemplateName;
+    HINSTANCE    hInstance;
+    LPSTR        lpszStyle;
+    WORD         nFontType;
+    WORD         ___MISSING_ALIGNMENT__;
+    INT          nSizeMin;
+    INT          nSizeMax;
+} CHOOSEFONT;
 
 typedef struct
 {
@@ -406,6 +449,8 @@ typedef struct
 #define IDC_PIN MAKEINTRESOURCE(32671)
 #define IDC_PERSON MAKEINTRESOURCE(32672)
 
+#define IDI_APPLICATION MAKEINTRESOURCE(32512)
+
 #define RDW_INVALIDATE 0x0001
 #define RDW_INTERNALPAINT 0x0002
 #define RDW_ERASE 0x0004
@@ -418,6 +463,22 @@ typedef struct
 #define RDW_ERASENOW 0x0200
 #define RDW_FRAME 0x0400
 #define RDW_NOFRAME 0x0800
+
+#define FW_DONTCARE 0
+#define FW_THIN 100
+#define FW_EXTRALIGHT 200
+#define FW_ULTRALIGHT 200
+#define FW_LIGHT 300
+#define FW_NORMAL 400
+#define FW_REGULAR 400
+#define FW_MEDIUM 500
+#define FW_SEMIBOLD 600
+#define FW_DEMIBOLD 600
+#define FW_BOLD 700
+#define FW_EXTRABOLD 800
+#define FW_ULTRABOLD 800
+#define FW_HEAVY 900
+#define FW_BLACK 900
 
 extern HWND     GetDlgItem(HWND DhDlg, int nIDDlgItem);
 extern HWND     SetFocus(HWND hWnd);
@@ -460,6 +521,8 @@ extern UINT_PTR SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC l
 extern BOOL     KillTimer(HWND hWnd, UINT_PTR uIDEvent);
 extern ATOM     RegisterClass(const WNDCLASS *lpWndClass);
 extern BOOL     UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
+extern int      TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg);
+extern HACCEL   LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName);
 extern BOOL     RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
 extern BOOL     SetMessageQueue(int size);
 extern void     randomize();

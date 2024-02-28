@@ -443,7 +443,6 @@
             const hMenu = Number(element.className.match(/\d+/));
             const dataClass = element.getAttribute('data-class');
             if (hMenu != -1 && dataClass) {
-                console.log(hMenu, element);
                 const lpClassName = _malloc(128);
                 stringToUTF8(dataClass, lpClassName, 128);
                 _AllocateDlgItem(lpClassName, hWnd, hMenu);

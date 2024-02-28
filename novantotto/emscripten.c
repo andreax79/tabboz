@@ -295,6 +295,19 @@ BOOL DeleteObject(void *ho)
 }
 
 //*******************************************************************
+// Return accellerator table id
+//*******************************************************************
+
+HACCEL LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName)
+{
+    if (HIWORD((unsigned long)lpTableName) != 0)
+    {
+        return NULL;
+    }
+    return (HACCEL)lpTableName;
+}
+
+//*******************************************************************
 // Creates a timer
 //*******************************************************************
 
@@ -373,6 +386,15 @@ BOOL EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint)
 BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
 {
     return TRUE;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+int TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg)
+{
+    return 0;
 }
 
 //*******************************************************************
