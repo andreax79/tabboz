@@ -34,6 +34,7 @@
 #define APIENTRY WINAPI
 #define APIPRIVATE
 #define CONST const
+#define __export
 
 typedef int            BOOL;
 typedef int            INT_PTR;
@@ -153,6 +154,15 @@ typedef struct
     LONG x;
     LONG y;
 } POINT, *PPOINT, *NPPOINT, *LPPOINT;
+
+typedef struct
+{
+    POINT ptReserved;
+    POINT ptMaxSize;
+    POINT ptMaxPosition;
+    POINT ptMinTrackSize;
+    POINT ptMaxTrackSize;
+} MINMAXINFO, *PMINMAXINFO, *LPMINMAXINFO;
 
 typedef struct
 {
@@ -291,8 +301,10 @@ typedef struct
 #define WM_PAINT 0x000f
 #define WM_QUIT 0x0012
 #define WM_ENDSESSION 0x0016
+#define WM_GETMINMAXINFO 0x0024
 #define WM_QUERYDRAGICON 0x0037
 #define WM_SETICON 0x0080
+#define WM_NCDESTROY 0x0082
 #define WM_KEYDOWN 0x0100
 #define WM_INITDIALOG 0x0110
 #define WM_COMMAND 0x0111
@@ -480,6 +492,8 @@ typedef struct
 #define FW_HEAVY 900
 #define FW_BLACK 900
 
+#define CW_USEDEFAULT 0x8000
+
 extern HWND     GetDlgItem(HWND DhDlg, int nIDDlgItem);
 extern HWND     SetFocus(HWND hWnd);
 extern INT_PTR  DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
@@ -488,13 +502,18 @@ extern BOOL     SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString);
 extern UINT     GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount);
 extern BOOL     SetDlgItemInt(HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSigned);
 extern UINT     GetDlgItemInt(HWND hDlg, int nIDDlgItem, BOOL *lpTranslated, BOOL bSigned);
+extern HWND     CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
+extern HWND     CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 extern int      MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
+extern int      MessageBoxEx(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, WORD wLanguageId);
 extern BOOL     ShowWindow(HWND hWnd, int nCmdShow);
 extern int      LoadString(HINSTANCE hInstance, UINT uID, LPSTR lpBuffer, int cchBufferMax);
 extern void     LoadStringResources(void);
 extern void     InitTabboz(void);
 extern int      GetSystemMetrics(int nIndex);
 extern BOOL     GetWindowRect(HWND hWnd, LPRECT lpRect);
+extern void     AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu);
+extern BOOL     AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle);
 extern BOOL     MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint);
 extern HANDLE   GetProp(HWND hWnd, LPCSTR lpString);
 extern BOOL     SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData);
@@ -523,7 +542,12 @@ extern ATOM     RegisterClass(const WNDCLASS *lpWndClass);
 extern BOOL     UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
 extern int      TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg);
 extern HACCEL   LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName);
+extern BOOL     DestroyWindow(HWND hWnd);
 extern BOOL     RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
+extern DWORD    GetTickCount();
+extern BOOL     MessageBeep(UINT uType);
+extern BOOL     LockWorkStation();
+extern void     PostQuitMessage(int nExitCode);
 extern BOOL     SetMessageQueue(int size);
 extern void     randomize();
 

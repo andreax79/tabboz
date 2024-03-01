@@ -25,6 +25,8 @@ typedef struct
         struct
         {
             PROPERTIES *props; // window properties
+            BOOL        fEnd;  // end dialog flag
+            INT_PTR     dialogResult;
         } window;
         // if type == DlgItem
         struct

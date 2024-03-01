@@ -77,6 +77,56 @@ BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
 }
 
 //*******************************************************************
+// Calculates the required size of the window rectangle
+//*******************************************************************
+
+void AdjustWindowRect(LPRECT lpRect, DWORD dwStyle, BOOL bMenu)
+{
+    AdjustWindowRectEx(lpRect, dwStyle, bMenu, 0);
+}
+
+BOOL AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle)
+{
+
+    if (lpRect == NULL)
+    {
+        return FALSE;
+    }
+    if (bMenu)
+    {
+        lpRect->bottom += 18;
+    }
+    return TRUE;
+}
+
+//*******************************************************************
+// Destroy window
+//*******************************************************************
+
+BOOL DestroyWindow(HWND hWnd)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+
+    // Send destroy message
+    SendMessage(hWnd, WM_DESTROY, 0, 0);
+    SendMessage(hWnd, WM_NCDESTROY, 0, 0);
+
+    // Dispatch destroy to children
+    DispatchToChildren(hWnd, WM_DESTROY, 0, 0);
+
+    // Destroy the window
+    JS_CALL("destroyWindow", handle);
+    ReleaseHandle(handle);
+
+    return TRUE;
+}
+
+//*******************************************************************
 
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags)
 {

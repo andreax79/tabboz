@@ -5,49 +5,22 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes" />
-    <link rel="stylesheet" href="resources/dialogs/css/98.css" />
-    <link rel="stylesheet" href="resources/dialogs/css/twcc.css" />
-    <script src="resources/dialogs/js/twcc.js"></script>
+    <link rel="stylesheet" href="novantotto/css/98.css" />
+    <link rel="stylesheet" href="novantotto/css/novantotto.css" />
+    <script src="novantotto/js/novantotto.js"></script>
     <link rel="icon" type="image/x-icon" href="resources/icons/1.ico" />
   </head>
   <body>
     <div class="screen" id="screen">
-      <label id="zarrosim_icon" class="desktop-item">
-        <div class="icon"><img src="resources/icons/ZARROSIM.gif"></div>
-        <div class="icon-text">Tabboz Simulator</div>
-      </label>
     </div>
-    <div style="display: none">
-    <div class="window messagebox" id="messagebox">
-      <div class="title-bar">
-        <div class="title-bar-text">title</div>
-        <div class="title-bar-controls">
-          <button class="control61536" aria-label="Close"></button>
-        </div>
-      </div>
-      <div class="window-body">
-        <div class="container">
-          <img src="" class="icon" height="32" width="32" />
-          <p class="content">content</p>
-        </div>
-        <section class="field-row">
-          <button class="ok default control1">OK</button>
-          <button class="cancel default control2">Cancel</button>
-          <button class="default control6">Yes</button>
-          <button class="default control7">No</button>
-        </section>
-      </div>
-    </div>
-    <div class="wall" id="wall"></div>
-    </div>
-    <div class="shutdown" id="shutdown">
-        <span>It's now safe to turn off<br/>your computer.</span>
-    </div>
-
     <script type='text/javascript'>
     var Module = {
         preRun: [],
-        postRun: [],
+        postRun: [
+            function() {
+                addDesktopIcon('zarrosim', 'ZARROSIM', 'Tabboz Simulator');
+            }
+        ],
         print: (function() {
             return function(text) {
                 if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');

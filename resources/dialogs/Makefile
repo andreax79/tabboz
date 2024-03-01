@@ -1,5 +1,5 @@
 all:
-	@python3 rc.py dialogs.rc
+	RESOURCES_DIR=".." ../../novantotto/export/rc.sh dialogs.rc
 
 clean:
 	@rm -rf html includes

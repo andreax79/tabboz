@@ -2,5 +2,5 @@ Export resources (bitmaps, icons, strings, menus) from .RES files
 
 Usage:
 ```console
-$ make export
+$ RESOURCES_DIR="./resources" ./novantotto/export/export.sh *.RES
 ```

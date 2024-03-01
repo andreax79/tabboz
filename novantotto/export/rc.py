@@ -1,4 +1,5 @@
 import re
+import os
 import sys
 import json
 from pathlib import Path
@@ -11,9 +12,9 @@ PRE = """
   <title>{title}</title>
   <meta charset="UTF-8" />
   <base href="../../.." />
-  <link rel="stylesheet" href="resources/dialogs/css/98.css" />
-  <link rel="stylesheet" href="resources/dialogs/css/twcc.css" />
-  <script src="resources/dialogs/js/twcc.js"></script>
+  <link rel="stylesheet" href="novantotto/css/98.css" />
+  <link rel="stylesheet" href="novantotto/css/novantotto.css" />
+  <script src="novantotto/js/novantotto.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {{
         addMainMenu(document.querySelector('ul.main-menu'));
@@ -55,10 +56,17 @@ SCALE = 2
 MENU_HEIGHT = 18
 PATTERN = re.compile(r'(?:[^,"]|"(?:\\.|[^"])*")*')
 
-includes_dir = Path.cwd() / "includes"
-html_dir = Path.cwd() / "html"
+if not "RESOURCES_DIR" in os.environ:
+    print("Error: RESOURCES_DIR environment variable is not set.");
+    sys.exit(1)
+
+base_path = Path(os.environ["RESOURCES_DIR"])
+includes_dir = base_path / "dialogs" / "includes"
+html_dir = base_path / "dialogs" / "html"
+menu_dir = base_path / "menus"
 includes_dir.mkdir(parents=True, exist_ok=True)
 html_dir.mkdir(parents=True, exist_ok=True)
+menu_dir.mkdir(parents=True, exist_ok=True)
 
 
 def strip(list_of_strings: list[str]) -> list[str]:
@@ -405,7 +413,7 @@ class Dialog:
     def load_menu(self, menu_name: str) -> None:
         self.dy += MENU_HEIGHT
         self.height += MENU_HEIGHT
-        menu_json_file = Path.cwd() / ".." / "menus" / f"{menu_name}.json"
+        menu_json_file = menu_dir / f"{menu_name}.json"
         with menu_json_file.open("r") as f:
             menu_json = json.load(f)
             self.menu += '<ul class="main-menu">\n'

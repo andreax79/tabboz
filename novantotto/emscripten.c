@@ -82,17 +82,20 @@ int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
     }
     JS_ASYNC_CALL_INT("messageBox", handle, lpText, lpCaption, uType, parentWindowId);
     // Message loop
-    while (GetMessage(&msg, (HWND)handle, 0, 0) > 0)
+    while ((!handle->window.fEnd) && GetMessage(&msg, (HWND)handle, 0, 0) > 0)
     {
         printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
-    // Destroy the dialog box
-    JS_CALL("destroyDialogBox", handle);
-    ReleaseHandle(handle);
+    // Destroy the window
+    DestroyWindow((HWND)handle);
     return msg.wParam; // the value to be returned to the function that created the message box
 }
 
+int MessageBoxEx(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, WORD wLanguageId)
+{
+    return MessageBox(hWnd, lpText, lpCaption, uType);
+}
 //*******************************************************************
 // Create a modal dialog box from a dialog box template resource
 //*******************************************************************
@@ -122,15 +125,14 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     // Dispatch Repaint
     PostMessage((HWND)handle, WM_PAINT, 0, 0);
     // Message loop
-    while (GetMessage(&msg, (HWND)handle, 0, 0) > 0)
+    while ((!handle->window.fEnd) && GetMessage(&msg, (HWND)handle, 0, 0) > 0)
     {
         printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
-    // Destroy the dialog box
-    JS_CALL("destroyDialogBox", handle);
-    ReleaseHandle(handle);
-    return msg.wParam; // the value to be returned to the function that created the dialog box
+    // Destroy the window
+    DestroyWindow((HWND)handle);
+    return handle->window.dialogResult; // the value to be returned to the function that created the dialog box
 }
 
 //*******************************************************************
@@ -145,10 +147,9 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
         // Invalid window handle
         return FALSE;
     }
-    // Dispatch destroy to children
-    DispatchToChildren(hWnd, WM_DESTROY, retval, 0);
-    // Send WM_QUIT message
-    PostMessage(hWnd, WM_QUIT, retval, 0);
+    // Set end flag and result
+    handle->window.dialogResult = retval;
+    handle->window.fEnd = TRUE;
     return TRUE;
 }
 
@@ -416,6 +417,33 @@ void ExitWindows(int dwReserved, int code)
 }
 
 //*******************************************************************
+// Get the number of milliseconds that have elapsed since the app was started
+//*******************************************************************
+
+DWORD GetTickCount()
+{
+    return (int)emscripten_get_now();
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL MessageBeep(UINT uType)
+{
+    return TRUE;
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL LockWorkStation()
+{
+    return FALSE;
+}
+
+//*******************************************************************
 // No nothing
 //*******************************************************************
 
@@ -454,34 +482,23 @@ void randomize()
 // Start the application
 //*******************************************************************
 
-int WinMainStartup()
-{
-    HANDLE_ENTRY *handle = AllocateHandle(Window, NULL);
-    WinMain((HANDLE)handle, NULL, "", 0);
-    ReleaseHandle(handle);
-    return 0;
-}
-
-//*******************************************************************
-// Icon click callback
-//*******************************************************************
-
 static BOOL bIsOpen = FALSE;
 
-int IconClickCb(int eventType, const struct EmscriptenMouseEvent *someEvent, void *userData)
+int WinMainStartup()
 {
-    int ret = 0;
     if (!bIsOpen)
     {
         bIsOpen = TRUE;
-        ret = WinMainStartup();
+        HANDLE_ENTRY *handle = AllocateHandle(Window, NULL);
+        WinMain((HANDLE)handle, NULL, "", 0);
+        ReleaseHandle(handle);
         bIsOpen = FALSE;
     }
     else
     {
         JS_CALL("showApp", 1);
     }
-    return ret;
+    return 0;
 }
 
 //*******************************************************************
@@ -499,7 +516,5 @@ int main()
     // Add event listener
     JS_CALL("eventListenerSetup");
     /* printf("-->%d<--\n", MessageBox(0, "Test", "Test", MB_YESNO | MB_ICONINFORMATION)); */
-    // Register icon handler
-    emscripten_set_click_callback("#zarrosim_icon", NULL, TRUE, &IconClickCb);
     return 0;
 }

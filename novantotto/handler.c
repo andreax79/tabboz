@@ -86,6 +86,8 @@ HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent)
             h->window.props = NULL;
             if (type == Window)
             {
+                h->window.fEnd = FALSE;
+                h->window.dialogResult = 0;
                 h->window.props = AllocateProperties();
                 if (h->window.props == NULL)
                 {

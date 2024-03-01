@@ -133,28 +133,29 @@ button.default {
 }
 
 .button_ok {
-    background: url("../../bitmaps/1001.png") no-repeat;
+    background: url("../bitmaps/1001.png") no-repeat;
     box-shadow: none !important;
 }
 
 .button_ok:active {
-    background: url("../../bitmaps/3001.png") no-repeat;
+    background: url("../bitmaps/3001.png") no-repeat;
     box-shadow: none !important;
 }
 
 .button_cancel {
-    background: url("../../bitmaps/1002.png") no-repeat;
+    background: url("../bitmaps/1002.png") no-repeat;
     box-shadow: none !important;
 }
 
 .button_cancel:active {
-    background: url("../../bitmaps/3002.png") no-repeat;
+    background: url("../bitmaps/3002.png") no-repeat;
     box-shadow: none !important;
 }
 
 /* Message box */
 .messagebox {
     max-width: 60%;
+    position: absolute;
 }
 
 .messagebox .window-body .field-row {
@@ -290,27 +291,27 @@ input[type="text"].disabled {
 /* Radio */
 input[type="radio"].bwcc + label::before
 {
-    background: url("../../bitmaps/130.png") !important;
+    background: url("../bitmaps/130.png") !important;
 }
 
 
 input[type="radio"].bwcc:checked + label::before
 {
-    background: url("../../bitmaps/131.png") !important;
+    background: url("../bitmaps/131.png") !important;
 }
 
 
 /* Checkbox */
 input[type="checkbox"].bwcc + label::before
 {
-    background: url("../../bitmaps/110.png") !important;
+    background: url("../bitmaps/110.png") !important;
     box-shadow: none;
 }
 
 
 input[type="checkbox"].bwcc:checked + label::before
 {
-    background: url("../../bitmaps/111.png") !important;
+    background: url("../bitmaps/111.png") !important;
     box-shadow: none;
 }
 

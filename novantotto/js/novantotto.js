@@ -3,6 +3,44 @@
 
     _resolve = null;
     _activeWindowHwnd = null;
+    _isOpen = false;
+
+    const SM_CXSCREEN = 0;
+    const SM_CYSCREEN = 1;
+    const VK_ESCAPE = 0x1B;
+    const WM_KEYDOWN = 0x100;
+    const WM_COMMAND = 0x0111;
+    const CW_USEDEFAULT = 0x8000;
+
+    const MESSAGE_BOX_TMPL = `
+        <div class="window messagebox">
+          <div class="title-bar">
+            <div class="title-bar-text">title</div>
+            <div class="title-bar-controls">
+              <button class="control61536" aria-label="Close"></button>
+            </div>
+          </div>
+          <div class="window-body">
+            <div class="container">
+              <img src="" class="icon" height="32" width="32" />
+              <p class="content">content</p>
+            </div>
+            <section class="field-row">
+              <button class="ok default control1">OK</button>
+              <button class="cancel default control2">Cancel</button>
+              <button class="default control6">Yes</button>
+              <button class="default control7">No</button>
+            </section>
+          </div>
+        </div>`;
+    const WALL_TMPL = `<div class="wall" id="wall"></div>`;
+    const SHUTDOWN_TMPL = `<div class="shutdown"><span>It's now safe to turn off<br/>your computer.</span></div>`;
+    const DESKTOP_ICON_TMPL = `
+          <label id="zarrosim_icon" class="desktop-item">
+            <div class="icon"><img src="resources/icons/ZARROSIM.gif"></div>
+            <div class="icon-text">Tabboz Simulator</div>
+          </label>
+        </div>`;
 
     function addMainMenu(mainMenuEl) {
         let mainMenuElement = mainMenuEl;
@@ -183,11 +221,17 @@
         document.querySelectorAll('.window,.wall').forEach((item) => item.style.display = show ? 'block' : 'none');
     };
 
+    // Get the URL of a given icon
+    function iconURL(icon) {
+        return `resources/icons/${icon}.gif`;
+    }
+
     // Associate a icon with a window
     function setIcon(hWnd, icon) {
         const element = document.querySelector(`#win${hWnd} .title-bar-text`);
         if (element != null) {
-            element.innerHTML = `<img src="resources/icons/${icon}.gif" height="16" />` + element.innerText
+            const src = iconURL(icon);
+            element.innerHTML = `<img src="${src}" height="16" />` + element.innerText
         }
     };
 
@@ -319,9 +363,9 @@
     // Retrieve the specified system metric
     function getSystemMetrics(nIndex) {
         switch (nIndex) {
-            case 0: // SM_CXSCREEN
+            case SM_CXSCREEN:
                 return parseInt(getComputedStyle(document.getElementById('screen')).width);
-            case 1: // SM_CYSCREEN
+            case SM_CYSCREEN:
                 return parseInt(getComputedStyle(document.getElementById('screen')).height);
             default:
                 return 0;
@@ -329,14 +373,28 @@
         return 0;
     }
 
-    // Show a message box
-    async function messageBox(hWnd, lpText, lpCaption, uType, parentWindowId) {
-        const element = document.getElementById('messagebox');
-        const wall = document.getElementById('wall').cloneNode(true);
-        const c = element.cloneNode(true);
+    function createWindow(html, hWnd, x, y, parentWindowId) {
+        const wall = createElementFromHTML(WALL_TMPL);
+        const win = createElementFromHTML(html);
+        // Hide the window
+        win.style.display = 'none';
         // Set window id
         wall.id = 'wall' + hWnd;
-        c.id = 'win' + hWnd;
+        win.id = 'win' + hWnd;
+        // Add to the screen
+        const destination = document.getElementById('screen');
+        destination.appendChild(wall);
+        destination.appendChild(win);
+        // Set window position
+        setWindowInitialPosition(win, x, y, parentWindowId);
+        // Make the window draggrable
+        makeDraggable(win);
+        return win;
+    }
+
+    // Show a message box
+    async function messageBox(hWnd, lpText, lpCaption, uType, parentWindowId) {
+        const c = createWindow(MESSAGE_BOX_TMPL, hWnd, 0, 0, parentWindowId);
         // Icon
         if (uType & 0x00000020) { // MB_ICONQUESTION
             c.querySelector('img').src = "resources/icons/102.png";
@@ -374,14 +432,11 @@
                 focusVisible: true
             });
         }
-        c.style.position = 'absolute';
         // Set title and message
         c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
         c.querySelector('.content').innerText = UTF8ToString(lpText);
         // Add window to screen
         const destination = document.getElementById('screen');
-        destination.appendChild(wall);
-        destination.appendChild(c);
         // Set focus
         if (uType & 0x00000001) { // MB_OKCANCEL
             c.querySelector('.control1').focus({
@@ -396,12 +451,12 @@
                 focusVisible: true
             });
         }
-        // Center the dialog
-        centerDialog(c);
         // Activate the window
         setActiveWindow(hWnd);
-        // Make the window draggrable
-        makeDraggable(c);
+        // Show window
+        showWindow(hWnd, 1);
+        // Center the dialog
+        centerDialog(c);
     };
 
     // Center the dialog
@@ -421,25 +476,13 @@
         // Load html
         const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
         const html = await response.text();
-        const wall = document.getElementById('wall').cloneNode(true);
-        const c = createElementFromHTML(html);
-        // Set window id
-        wall.id = 'wall' + hWnd;
-        c.id = 'win' + hWnd;
-        // Set window position
-        setWindowInitialPosition(c, parentWindowId);
-        // Add window to screen
-        const destination = document.getElementById('screen');
-        destination.appendChild(wall);
-        destination.appendChild(c);
+        const win = createWindow(html, hWnd, CW_USEDEFAULT, CW_USEDEFAULT, parentWindowId);
         // Activate the window
         setActiveWindow(hWnd);
         // Add menu
-        addMainMenu(c);
-        // Make the window draggrable
-        makeDraggable(c);
+        addMainMenu(win);
         // Allocate a DlgItem for each child
-        c.querySelectorAll('.dlg_item').forEach(element => {
+        win.querySelectorAll('.dlg_item').forEach(element => {
             const hMenu = Number(element.className.match(/\d+/));
             const dataClass = element.getAttribute('data-class');
             if (hMenu != -1 && dataClass) {
@@ -449,23 +492,28 @@
                 _free(lpClassName);
             }
         });
+        // Show window
+        showWindow(hWnd, 1);
     }
 
-    // Destroy a dialog box
-    function destroyDialogBox(hWnd) {
+    // Destroy a window
+    function destroyWindow(hWnd) {
         const destination = document.getElementById('screen');
         destination.removeChild(document.getElementById('wall' + hWnd));
         destination.removeChild(document.getElementById('win' + hWnd));
     }
 
     // Set window position
-    function setWindowInitialPosition(c, parentWindowId) {
-        if (parentWindowId >= 0) {
+    function setWindowInitialPosition(win, x, y, parentWindowId) {
+        if (x != CW_USEDEFAULT) {
+            win.style.left = parseInt(x) + 'px';
+            win.style.top = parseInt(y) + 'px';
+        } else if (parentWindowId >= 0) {
             const parent = document.getElementById('win' + parentWindowId);
             if (parent != null) {
                 const style = getComputedStyle(parent);
-                c.style.left = (parseInt(style.left) + 40) + 'px';
-                c.style.top = (parseInt(style.top) + 40) + 'px';
+                win.style.left = (parseInt(style.left) + 40) + 'px';
+                win.style.top = (parseInt(style.top) + 40) + 'px';
             }
         }
     }
@@ -519,7 +567,7 @@
         switch (event.type) {
             case 'click':
                 if (match) {
-                    const message = 0x0111; // WM_COMMAND
+                    const message = WM_COMMAND;
                     const wParam = Number(match[0]);
                     const lParam = calculateClickPosition(event);
                     _PostMessage(_activeWindowHwnd, message, wParam, lParam);
@@ -527,7 +575,7 @@
                 break;
             case 'input':
                 if (match && !isCheckbox(event.target)) {
-                    const message = 0x0111; // WM_COMMAND
+                    const message = WM_COMMAND;
                     const wParam = Number(match[0]);
                     const lParam = 0;
                     _PostMessage(_activeWindowHwnd, message, wParam, lParam);
@@ -535,12 +583,12 @@
                 break;
             case 'keydown':
                 if (event.keyCode == 27) { // ESC
-                    const message = 0x100; // WM_KEYDOWN
-                    const wParam = 0x1B; // VK_ESCAPE
+                    const message = WM_KEYDOWN;
+                    const wParam = VK_ESCAPE;
                     const lParam = 0;
                     _PostMessage(_activeWindowHwnd, message, wParam, lParam);
                 } else if (event.target.nodeName == "BUTTON" && event.keyCode == 13 && match) { // Enter
-                    const message = 0x0111; // WM_COMMAND
+                    const message = WM_COMMAND;
                     const wParam = Number(match[0]);
                     const lParam = 0;
                     _PostMessage(_activeWindowHwnd, message, wParam, lParam);
@@ -552,9 +600,20 @@
 
     // Display shutdown screen
     function shutdown() {
-        document.querySelector("#shutdown").style.display = "block";
+        const element = createElementFromHTML(SHUTDOWN_TMPL);
+        element.style.display = 'block';
+        document.getElementById('screen').appendChild(element);
     }
 
+    // Add an icon to the desktop
+    function addDesktopIcon(name, title, icon) {
+        const element = createElementFromHTML(DESKTOP_ICON_TMPL);
+        element.style.display = 'block';
+        document.getElementById('screen').appendChild(element);
+        element.addEventListener('click', (event) => _WinMainStartup());
+    }
+
+    exports.addDesktopIcon = addDesktopIcon;
     exports.addMainMenu = addMainMenu;
     exports.makeDraggable = makeDraggable;
     exports.waitEvent = waitEvent;
@@ -577,7 +636,7 @@
     exports.loadStringResources = loadStringResources;
     exports.messageBox = messageBox;
     exports.dialogBox = dialogBox;
-    exports.destroyDialogBox = destroyDialogBox;
+    exports.destroyWindow = destroyWindow;
     exports.preload = preload;
     exports.eventListenerSetup = eventListenerSetup;
     exports.shutdown = shutdown;

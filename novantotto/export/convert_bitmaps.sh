@@ -1,5 +1,10 @@
-#!/usr/bin/env bash
-cd ../bitmaps
+#!/bin/bash
+if [ -z "$RESOURCES_DIR" ]; then
+    echo "Error: RESOURCES_DIR environment variable is not set."
+    exit 1
+fi
+
+cd "${RESOURCES_DIR}/bitmaps"
 for file in *.bmp; do
     if [ -f "$file" ]; then
         n="${file%.*}"

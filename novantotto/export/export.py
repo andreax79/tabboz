@@ -1,4 +1,5 @@
 import io
+import os
 import json
 import sys
 from dataclasses import dataclass
@@ -36,8 +37,11 @@ class ResourceItem:
     type: ResourceType
     data: bytes
 
+if not "RESOURCES_DIR" in os.environ:
+    print("Error: RESOURCES_DIR environment variable is not set.");
+    sys.exit(1)
 
-base_path = Path.cwd() / ".."
+base_path = Path(os.environ["RESOURCES_DIR"])
 bitmaps_dir = base_path / "bitmaps"
 icons_dir = base_path / "icons"
 strings_dir = base_path / "strings"

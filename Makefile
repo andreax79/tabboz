@@ -32,7 +32,7 @@ build:
 		-s DEMANGLE_SUPPORT=1 \
 		-s 'ASYNCIFY_IMPORTS=["emscripten_asm_const_int"]' \
 		-s 'EXPORTED_RUNTIME_METHODS=["ccall", "setValue"]' \
-		-s 'EXPORTED_FUNCTIONS=["_main", "_GetDlgItem", "_PostMessage", "_PrintMessages", "_AllocateDlgItem"]'
+		-s 'EXPORTED_FUNCTIONS=["_main", "_GetDlgItem", "_PostMessage", "_PrintMessages", "_AllocateDlgItem", "_GetTickCount", "_WinMainStartup"]'
 
 format:
 	clang-format -i *.h *.c novantotto/*.h novantotto/*.c novantotto/tests/*.c
@@ -40,3 +40,9 @@ format:
 
 test:
 	make -C novantotto test
+
+export:
+	RESOURCES_DIR="./resources" ./novantotto/export/export.sh *.RES
+
+dialogs:
+	RESOURCES_DIR="./resources/" ./novantotto/export/rc.sh resources/dialogs/dialogs.rc
