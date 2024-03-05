@@ -41,9 +41,14 @@ typedef int            INT_PTR;
 typedef int            INT;
 typedef unsigned int   UINT;
 typedef unsigned char  BYTE;
+typedef BYTE          *LPBYTE;
 typedef unsigned short WORD;
 typedef unsigned long  DWORD;
+typedef DWORD         *PDWORD;
+typedef DWORD         *LPDWORD;
 typedef unsigned long  LONG;
+typedef LONG          *PLONG;
+typedef long          *LPLONG;
 typedef BYTE           BOOLEAN;
 typedef int            ATOM; // typedef WORD ATOM;
 typedef void           VOID;
@@ -60,6 +65,7 @@ typedef LONG_PTR       LPARAM;
 typedef UINT_PTR       WPARAM;
 typedef LONG_PTR       LRESULT;
 typedef DWORD          COLORREF;
+typedef DWORD          ACCESS_MASK, *PACCESS_MASK;
 typedef unsigned long  DWORD_PTR;
 typedef PVOID          HANDLE;
 typedef void          *FARPROC;
@@ -251,6 +257,13 @@ typedef struct
     INT          nSizeMin;
     INT          nSizeMax;
 } CHOOSEFONT;
+
+typedef struct
+{
+    DWORD  nLength;
+    LPVOID lpSecurityDescriptor;
+    BOOL   bInheritHandle;
+} SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
 
 typedef struct
 {

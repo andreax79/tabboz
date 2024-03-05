@@ -9,7 +9,8 @@
 typedef enum HandleType
 {
     Window = 1,
-    DlgItem = 2
+    DlgItem = 2,
+    RegKey = 3
 } HandleType;
 
 typedef struct
@@ -33,6 +34,11 @@ typedef struct
         {
             int nIDDlgItem; // control identifier
         } dlgItem;
+        // if type == RegKey
+        struct
+        {
+            LPSTR lpSubKey;
+        } regKey;
     };
 } HANDLE_ENTRY;
 
