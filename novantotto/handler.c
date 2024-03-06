@@ -224,7 +224,7 @@ ATOM RegisterClass(const WNDCLASS *lpWndClass)
     }
     memcpy(h, lpWndClass, sizeof(WNDCLASS));
     // Check if already exists
-    WNDCLASS *prev = (WNDCLASS *)GetProperty(global_classes, lpWndClass->lpszClassName);
+    LPWNDCLASS prev = (LPWNDCLASS)GetProperty(global_classes, lpWndClass->lpszClassName);
     if (prev != NULL)
     {
         free(prev);
@@ -239,18 +239,33 @@ ATOM RegisterClass(const WNDCLASS *lpWndClass)
 // Unregister a window class
 //*******************************************************************
 
-BOOL UnregisterClass(LPSTR lpClassName, HANDLE hInstance)
+BOOL UnregisterClass(LPCSTR lpClassName, HANDLE hInstance)
 {
     if (!global_classes)
     {
         return FALSE;
     }
-    WNDCLASS *prev = (WNDCLASS *)DelProperty(global_classes, lpClassName);
-    if (prev == NULL)
+    LPWNDCLASS wndClass = (LPWNDCLASS)DelProperty(global_classes, lpClassName);
+    if (wndClass == NULL)
     {
         return FALSE;
     }
-    free(prev);
+    free(wndClass);
+    return TRUE;
+}
+
+//*******************************************************************
+// Get information about a window class.
+//*******************************************************************
+
+BOOL GetClassInfo(HINSTANCE hInstance, LPCSTR lpClassName, LPWNDCLASS lpWndClass)
+{
+    LPWNDCLASS wndClass = (LPWNDCLASS)GetProperty(global_classes, lpClassName);
+    if (wndClass == NULL)
+    {
+        return FALSE;
+    }
+    memcpy(lpWndClass, wndClass, sizeof(WNDCLASS));
     return TRUE;
 }
 

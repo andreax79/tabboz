@@ -62,9 +62,6 @@ extern HANDLE_TABLE *AllocateHandleTable(int count);
 extern HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent);
 extern HANDLE_ENTRY *AllocateDlgItem(LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu);
 extern void          ReleaseHandle(HANDLE p);
-extern HWND          GetDlgItem(HWND hDlg, int nIDDlgItem);
-extern ATOM          RegisterClass(const WNDCLASS *lpWndClass);
-extern BOOL          UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
 extern HANDLE_ENTRY *GetHandle(int index);
 extern void          DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
