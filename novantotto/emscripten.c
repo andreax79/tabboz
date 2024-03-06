@@ -48,6 +48,7 @@ INT_PTR messageBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             EndDialog(hWnd, wParam);
             return TRUE;
         }
+        return FALSE;
     }
     else if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE)
     {
@@ -60,8 +61,8 @@ INT_PTR messageBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
     int           parentWindowId = -1;
-    HANDLE_ENTRY *handle = AllocateHandle(Window, hWnd);
     MSG           msg;
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWnd);
 
     handle->lpDialogFunc = &messageBoxProc;
     // Get parent window number
@@ -85,6 +86,42 @@ int MessageBoxEx(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, WORD 
 {
     return MessageBox(hWnd, lpText, lpCaption, uType);
 }
+
+//*******************************************************************
+//
+//*******************************************************************
+
+HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    int           parentWindowId = -1;
+    WNDCLASS      wndClass;
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
+
+    handle->lpDialogFunc = &messageBoxProc;
+    // Get parent window number
+    if (hWndParent != NULL)
+    {
+        parentWindowId = (int)hWndParent;
+    }
+    // Get class
+    if (GetClassInfo(hInstance, lpClassName, &wndClass))
+    {
+        handle->lpDialogFunc = (DLGPROC)wndClass.lpfnWndProc;
+        // TODO - wndClass.lpszMenuName
+        // TODO - wndClass.hbrBackground
+        // TODO - wndClass.hIcon
+    }
+    JS_CALL("createWindow", NULL, handle, X, Y, nWidth, nHeight, lpWindowName, dwStyle, dwExStyle, parentWindowId);
+    // Show window
+    JS_CALL("showWindow", handle, 1);
+    return handle;
+}
+
+HWND CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    return CreateWindowEx(0, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+}
+
 //*******************************************************************
 // Create a modal dialog box from a dialog box template resource
 //*******************************************************************
@@ -94,8 +131,8 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
     int           controlId;
     int           dialog = (int)lpTemplateName;
     int           parentWindowId = -1;
-    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
     MSG           msg;
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
 
     if (lpDialogFunc == NULL)
     {
@@ -140,6 +177,24 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
     handle->window.dialogResult = retval;
     handle->window.fEnd = TRUE;
     return TRUE;
+}
+
+//*******************************************************************
+//
+//*******************************************************************
+
+HMENU GetSystemMenu(HWND hWnd, BOOL bRevert)
+{
+    return NULL; // TODO
+}
+
+//*******************************************************************
+//
+//*******************************************************************
+
+BOOL InsertMenu(HMENU hMenu, UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, LPCSTR lpNewItem)
+{
+    return TRUE; // TODO
 }
 
 //*******************************************************************
@@ -388,11 +443,17 @@ int TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg)
 }
 
 //*******************************************************************
-// No nothing
+// Call the default window procedure
 //*******************************************************************
 
 LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    switch (Msg)
+    {
+    case WM_CLOSE:
+        DestroyWindow(hWnd);
+        return 0;
+    }
     return 0;
 }
 
@@ -429,7 +490,8 @@ BOOL MessageBeep(UINT uType)
 
 BOOL PlaySound(LPCTSTR lpszSound, HMODULE hmod, DWORD fuSound)
 {
-    if (lpszSound != NULL) {
+    if (lpszSound != NULL)
+    {
         EM_ASM(new Audio('resources/wavs/' + UTF8ToString($0)).play(), lpszSound);
     }
     return TRUE;
@@ -500,7 +562,7 @@ int WinMainStartup()
     {
         bIsOpen = TRUE;
         HANDLE_ENTRY *handle = AllocateHandle(Window, NULL);
-        WinMain((HANDLE)handle, NULL, "", 0);
+        WinMain((HANDLE)handle, NULL, "", SW_SHOWNORMAL);
         ReleaseHandle(handle);
         bIsOpen = FALSE;
     }

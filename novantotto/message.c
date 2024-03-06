@@ -310,6 +310,23 @@ void PostQuitMessage(int nExitCode)
 }
 
 //*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL TranslateMessage(const MSG *lpMsg)
+{
+    switch (lpMsg->message)
+    {
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYDOWN:
+    case WM_SYSKEYUP:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+//*******************************************************************
 // Print message queue
 //*******************************************************************
 

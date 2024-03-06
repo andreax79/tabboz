@@ -19,7 +19,19 @@
     const WM_KEYDOWN = 0x100;
     const WM_COMMAND = 0x0111;
     const CW_USEDEFAULT = 0x8000;
+    const CW_SKIPRESIZE = 0x8888;
 
+    const WINDOW_TMPL = `
+        <div class="window messagebox">
+          <div class="title-bar">
+            <div class="title-bar-text">title</div>
+            <div class="title-bar-controls">
+              <button class="control61536" aria-label="Close"></button>
+            </div>
+          </div>
+          <div class="window-body">
+          </div>
+        </div>`;
     const MESSAGE_BOX_TMPL = `
         <div class="window messagebox">
           <div class="title-bar">
@@ -44,9 +56,9 @@
     const WALL_TMPL = `<div class="wall" id="wall"></div>`;
     const SHUTDOWN_TMPL = `<div class="shutdown"><span>It's now safe to turn off<br/>your computer.</span></div>`;
     const DESKTOP_ICON_TMPL = `
-          <label id="zarrosim_icon" class="desktop-item">
-            <div class="icon"><img src="resources/icons/ZARROSIM.gif"></div>
-            <div class="icon-text">Tabboz Simulator</div>
+          <label class="desktop-item">
+            <div class="icon"><img src="" /></div>
+            <div class="icon-text"></div>
           </label>
         </div>`;
 
@@ -381,9 +393,9 @@
         return 0;
     }
 
-    function createWindow(html, hWnd, x, y, parentWindowId) {
+    function createWindow(html, hWnd, x, y, width, height, lpCaption, dwStyle, dwExStyle, parentWindowId) {
         const wall = createElementFromHTML(WALL_TMPL);
-        const win = createElementFromHTML(html);
+        const win = createElementFromHTML(html || WINDOW_TMPL);
         // Hide the window
         win.style.display = 'none';
         // Set window id
@@ -394,24 +406,28 @@
         destination.appendChild(wall);
         destination.appendChild(win);
         // Set window position
-        setWindowInitialPosition(win, x, y, parentWindowId);
+        setWindowInitialPosition(win, x, y, width, height, parentWindowId);
         // Make the window draggrable
         makeDraggable(win);
+        // Set title
+        if (lpCaption) {
+            win.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
+        }
         return win;
     }
 
     // Show a message box
     async function messageBox(hWnd, lpText, lpCaption, uType, parentWindowId) {
-        const c = createWindow(MESSAGE_BOX_TMPL, hWnd, 0, 0, parentWindowId);
+        const c = createWindow(MESSAGE_BOX_TMPL, hWnd, 0, 0, CW_SKIPRESIZE, CW_SKIPRESIZE, lpCaption, 0, 0, parentWindowId);
         // Icon
         if (uType & 0x00000020) { // MB_ICONQUESTION
-            c.querySelector('img').src = "resources/icons/102.png";
+            c.querySelector('img').src = "novantotto/icons/102.png";
         } else if (uType & 0x00000010) { // MB_ICONSTOP
-            c.querySelector('img').src = "resources/icons/103.png";
+            c.querySelector('img').src = "novantotto/icons/103.png";
         } else if (uType & 0x00000030) { // MB_ICONEXCLAMATION
-            c.querySelector('img').src = "resources/icons/101.png";
+            c.querySelector('img').src = "novantotto/icons/101.png";
         } else if (uType & 0x00000040) { // MB_ICONINFORMATION
-            c.querySelector('img').src = "resources/icons/104.png";
+            c.querySelector('img').src = "novantotto/icons/104.png";
         }
         // Buttons
         if (uType & 0x00000001) { // MB_OKCANCEL
@@ -440,11 +456,8 @@
                 focusVisible: true
             });
         }
-        // Set title and message
-        c.querySelector('.title-bar-text').innerText = UTF8ToString(lpCaption);
+        // Set message
         c.querySelector('.content').innerText = UTF8ToString(lpText);
-        // Add window to screen
-        const destination = document.getElementById('screen');
         // Set focus
         if (uType & 0x00000001) { // MB_OKCANCEL
             c.querySelector('.control1').focus({
@@ -484,7 +497,7 @@
         // Load html
         const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
         const html = await response.text();
-        const win = createWindow(html, hWnd, CW_USEDEFAULT, CW_USEDEFAULT, parentWindowId);
+        const win = createWindow(html, hWnd, CW_USEDEFAULT, CW_USEDEFAULT, CW_SKIPRESIZE, CW_SKIPRESIZE, null, 0, 0, parentWindowId);
         // Activate the window
         setActiveWindow(hWnd);
         // Add menu
@@ -512,7 +525,7 @@
     }
 
     // Set window position
-    function setWindowInitialPosition(win, x, y, parentWindowId) {
+    function setWindowInitialPosition(win, x, y, width, height, parentWindowId) {
         if (x != CW_USEDEFAULT) {
             win.style.left = parseInt(x) + 'px';
             win.style.top = parseInt(y) + 'px';
@@ -523,6 +536,24 @@
                 win.style.left = (parseInt(style.left) + 40) + 'px';
                 win.style.top = (parseInt(style.top) + 40) + 'px';
             }
+        }
+        switch (width) {
+            case CW_SKIPRESIZE:
+                break;
+            case CW_USEDEFAULT:
+                win.style.width = 600 + 'px';
+                break;
+            default:
+                win.style.width = width + 'px';
+        }
+        switch (height) {
+            case CW_SKIPRESIZE:
+                break;
+            case CW_USEDEFAULT:
+                win.style.height = 400 + 'px';
+                break;
+            default:
+                win.style.height = height + 'px';
         }
     }
 
@@ -614,8 +645,10 @@
     }
 
     // Add an icon to the desktop
-    function addDesktopIcon(name, title, icon) {
+    function addDesktopIcon(name, icon, title) {
         const element = createElementFromHTML(DESKTOP_ICON_TMPL);
+        element.querySelector('.icon img').src = `resources/icons/${icon}.gif`;
+        element.querySelector('.icon-text').innerText = title;
         element.style.display = 'block';
         document.getElementById('screen').appendChild(element);
         element.addEventListener('click', (event) => _WinMainStartup());
@@ -644,6 +677,7 @@
     exports.loadStringResources = loadStringResources;
     exports.messageBox = messageBox;
     exports.dialogBox = dialogBox;
+    exports.createWindow = createWindow;
     exports.destroyWindow = destroyWindow;
     exports.preload = preload;
     exports.eventListenerSetup = eventListenerSetup;

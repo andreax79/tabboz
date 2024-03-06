@@ -67,6 +67,7 @@ typedef char           CHAR;
 typedef CHAR          *LPSTR;
 typedef const CHAR    *LPCSTR;
 typedef LPCSTR         LPCTSTR;
+typedef wchar_t        WCHAR;
 typedef long           LONG_PTR;
 typedef unsigned int   UINT_PTR;
 typedef unsigned long  ULONG_PTR;
@@ -78,6 +79,17 @@ typedef DWORD          ACCESS_MASK, *PACCESS_MASK;
 typedef unsigned long  DWORD_PTR;
 typedef PVOID          HANDLE;
 typedef void          *FARPROC;
+
+#ifdef UNICODE
+typedef WCHAR   TCHAR;
+typedef LPWSTR  PTSTR;
+typedef LPCWSTR LPCTSTR;
+#else
+typedef char   TCHAR;
+typedef LPSTR  PTSTR;
+typedef LPCSTR LPCTSTR;
+#endif
+typedef TCHAR *PTCHAR;
 
 #define MAKEWORD(bLow, bHigh) ((WORD)(((BYTE)((DWORD_PTR)(bLow)&0xff)) | (((WORD)((BYTE)((DWORD_PTR)(bHigh)&0xff))) << 8)))
 #define MAKELONG(wLow, wHigh) ((LONG)(((WORD)((DWORD_PTR)(wLow)&0xffff)) | (((DWORD)((WORD)((DWORD_PTR)(wHigh)&0xffff))) << 16)))
@@ -321,6 +333,7 @@ typedef struct
 #define WM_CREATE 0x0001
 #define WM_DESTROY 0x0002
 #define WM_PAINT 0x000f
+#define WM_CLOSE 0x0010
 #define WM_QUIT 0x0012
 #define WM_ENDSESSION 0x0016
 #define WM_GETMINMAXINFO 0x0024
@@ -328,6 +341,9 @@ typedef struct
 #define WM_SETICON 0x0080
 #define WM_NCDESTROY 0x0082
 #define WM_KEYDOWN 0x0100
+#define WM_KEYUP 0x0101
+#define WM_SYSKEYDOWN 0x0104
+#define WM_SYSKEYUP 0x0105
 #define WM_INITDIALOG 0x0110
 #define WM_COMMAND 0x0111
 #define WM_SYSCOMMAND 0x0112
@@ -515,6 +531,7 @@ typedef struct
 #define FW_BLACK 900
 
 #define CW_USEDEFAULT 0x8000
+#define CW_SKIPRESIZE 0x8888
 
 #define SND_SYNC 0x0000
 #define SND_ASYNC 0x0001
@@ -533,6 +550,7 @@ extern BOOL     SetDlgItemInt(HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSign
 extern UINT     GetDlgItemInt(HWND hDlg, int nIDDlgItem, BOOL *lpTranslated, BOOL bSigned);
 extern HWND     CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 extern HWND     CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
+extern BOOL     UpdateWindow(HWND hWnd);
 extern int      MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType);
 extern int      MessageBoxEx(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType, WORD wLanguageId);
 extern BOOL     ShowWindow(HWND hWnd, int nCmdShow);
@@ -554,6 +572,7 @@ extern LRESULT  DispatchMessage(const MSG *lpMsg);
 extern LRESULT  SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern BOOL     PostMessage(HWND hwnd, WORD message, WORD wParam, LONG lParam);
 extern BOOL     PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, BOOL wRemoveMsg);
+extern BOOL     TranslateMessage(const MSG *lpMsg);
 extern HICON    LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
 extern HCURSOR  LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
 extern HBITMAP  LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
@@ -568,7 +587,8 @@ extern BOOL     GetSaveFileName(LPOPENFILENAME unnamedParam1);
 extern UINT_PTR SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
 extern BOOL     KillTimer(HWND hWnd, UINT_PTR uIDEvent);
 extern ATOM     RegisterClass(const WNDCLASS *lpWndClass);
-extern BOOL     UnregisterClass(LPSTR lpClassName, HANDLE hInstance);
+extern BOOL     UnregisterClass(LPCSTR lpClassName, HANDLE hInstance);
+extern BOOL     GetClassInfo(HINSTANCE hInstance, LPCSTR lpClassName, LPWNDCLASS lpWndClass);
 extern int      TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg);
 extern HACCEL   LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName);
 extern BOOL     DestroyWindow(HWND hWnd);
@@ -588,6 +608,8 @@ extern UINT     GetPrivateProfileInt(LPSTR lpAppName, LPSTR lpKeyName, INT nDefa
 extern UINT     GetProfileInt(LPSTR lpAppName, LPSTR lpKeyName, INT nDefault);
 extern BOOL     PlaySound(LPCTSTR pszSound, HMODULE hmod, DWORD fdwSound);
 extern BOOL     sndPlaySound(LPCTSTR lpszSound, UINT fuSound);
+extern HMENU    GetSystemMenu(HWND hWnd, BOOL bRevert);
+extern BOOL     InsertMenu(HMENU hMenu, UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, LPCSTR lpNewItem);
 extern void     randomize();
 
 #include "winreg.h"
