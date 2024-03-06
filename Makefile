@@ -38,7 +38,7 @@ build:
 
 format:
 	clang-format -i *.h *.c novantotto/*.h novantotto/*.c novantotto/tests/*.c
-	js-beautify -r resources/dialogs/js/twcc.js
+	js-beautify -r novantotto/js/novantotto.js
 
 test:
 	make -C novantotto test

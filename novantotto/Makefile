@@ -46,3 +46,4 @@ test-profile:
 
 format:
 	clang-format -i *.h *.c tests/*.c
+	js-beautify -r js/novantotto.js
