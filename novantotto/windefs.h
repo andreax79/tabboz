@@ -507,6 +507,13 @@ typedef struct
 
 #define CW_USEDEFAULT 0x8000
 
+#define SND_SYNC 0x0000
+#define SND_ASYNC 0x0001
+#define SND_NODEFAULT 0x0002
+#define SND_MEMORY 0x0004
+#define SND_LOOP 0x0008
+#define SND_NOSTOP 0x0010
+
 extern HWND     GetDlgItem(HWND DhDlg, int nIDDlgItem);
 extern HWND     SetFocus(HWND hWnd);
 extern INT_PTR  DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc);
@@ -562,6 +569,18 @@ extern BOOL     MessageBeep(UINT uType);
 extern BOOL     LockWorkStation();
 extern void     PostQuitMessage(int nExitCode);
 extern BOOL     SetMessageQueue(int size);
+extern BOOL     WritePrivateProfileString(LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpString, LPCSTR lpFileName);
+extern BOOL     WriteProfileString(LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpString);
+extern BOOL     WritePrivateProfileSection(LPCSTR lpAppName, LPCSTR lpString, LPCSTR lpFileName);
+extern DWORD    GetPrivateProfileSection(LPCSTR lpAppName, LPSTR lpReturnedString, DWORD nSize, LPCSTR lpFileName);
+extern DWORD    GetPrivateProfileString(LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpDefault, LPSTR lpReturnedString, DWORD nSize, LPCSTR lpFileName);
+extern DWORD    GetProfileString(LPCSTR lpAppName, LPCSTR lpKeyName, LPCSTR lpDefault, LPSTR lpReturnedString, DWORD nSize);
+extern UINT     GetPrivateProfileInt(LPSTR lpAppName, LPSTR lpKeyName, INT nDefault, LPSTR lpFileName);
+extern UINT     GetProfileInt(LPSTR lpAppName, LPSTR lpKeyName, INT nDefault);
+extern BOOL     PlaySound(LPCTSTR pszSound, HMODULE hmod, DWORD fdwSound);
+extern BOOL     sndPlaySound(LPCTSTR lpszSound, UINT fuSound);
 extern void     randomize();
+
+#include "winreg.h"
 
 #endif // WINDEFS_H
