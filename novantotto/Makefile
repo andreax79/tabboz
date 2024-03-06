@@ -1,4 +1,4 @@
-test: test-handler test-message test-registry
+test: test-handler test-message test-registry test-profile
 
 .PHONY: test-handler
 test-handler:
@@ -32,6 +32,17 @@ test-registry:
 	@cat tests/LocalStorage.js a.out.js_ > a.out.js
 	@node a.out.js
 	@rm -f a.out.js a.out.js_
+
+.PHONY: test-profile
+test-profile:
+	@emcc \
+		-sWASM=0 \
+		-sASSERTIONS=2 \
+		-sSTACK_OVERFLOW_CHECK=2 \
+		-sSAFE_HEAP=1 \
+		tests/test_profile.c profile.c
+	@node a.out.js
+	@rm -f a.out.js
 
 format:
 	clang-format -i *.h *.c tests/*.c

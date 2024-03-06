@@ -80,9 +80,11 @@ char *RRKey(char *xKey)
 // Windows 32 ---------------------------------------------------------------
 // Per Windows 9X, NT, 2000, ...
 
-#ifdef TABBOZ32
+#if defined(TABBOZ_WIN32) || defined(TABBOZ_EM)
 
+#ifdef TABBOZ_WIN32
 #include <mmsystem.h> // Per sndPlaySound
+#endif
 
 #define REG_MAXSIZE 30 // Numero massimo di caratteri
 #define TABBOZ_KEY_NAME "Software\\Obscured Truckware\\Tabboz Simulator 32"
@@ -147,7 +149,7 @@ char *TabbozReadKey(char *KeyName, char *KeyValue)
     else
     { // 21 lug 2000 - Lettura da un file specifico.
         GetPrivateProfileString("Tabboz", KeyName, NULL, KeyValue, 32, nome_del_file_su_cui_salvare);
-        if (*KeyValue == NULL)
+        if (*KeyValue == '\0')
             return NULL;
         return KeyValue;
     }
@@ -157,7 +159,7 @@ char *TabbozReadKey(char *KeyName, char *KeyValue)
 void TabbozPlaySound(int number)
 {
     char filename[20];
-    sprintf(filename, "Tabs%04d.Wav", number);
+    sprintf(filename, "tabs%04d.wav", number);
     sndPlaySound(filename, SND_ASYNC | SND_NODEFAULT);
 };
 
@@ -175,7 +177,8 @@ char *RRKey(char *xKey)
 // --------------------------------------------------------------------------
 // Emscripten --------------------------------------------------------
 
-#ifdef TABBOZ_EM
+#if 0
+// #ifdef TABBOZ_EM
 
 // Store values in localStorage
 void TabbozAddKey(char *KeyName, char *KeyValue)

@@ -15,6 +15,8 @@ sources = disco.c \
 		  novantotto/handler.c \
 		  novantotto/message.c \
 		  novantotto/property.c \
+		  novantotto/profile.c \
+		  novantotto/registry.c \
 		  novantotto/window.c
 
 # CFLAGS += -Wall -Wextra -Wpedantic \

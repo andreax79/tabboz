@@ -435,6 +435,27 @@ BOOL MessageBeep(UINT uType)
 }
 
 //*******************************************************************
+// Play a sound specified by the given file name
+//*******************************************************************
+
+BOOL PlaySound(LPCTSTR lpszSound, HMODULE hmod, DWORD fuSound)
+{
+    if (lpszSound != NULL) {
+        EM_ASM(new Audio('resources/wavs/' + UTF8ToString($0)).play(), lpszSound);
+    }
+    return TRUE;
+}
+
+//*******************************************************************
+// Play a sound specified by the given file name
+//*******************************************************************
+
+BOOL sndPlaySound(LPCTSTR lpszSound, UINT fuSound)
+{
+    return PlaySound(lpszSound, NULL, fuSound);
+}
+
+//*******************************************************************
 // No nothing
 //*******************************************************************
 

@@ -1425,120 +1425,222 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 35076: function($0, $1) {
-  localStorage.setItem(UTF8ToString($0), UTF8ToString($1));
- },
- 35133: function($0, $1) {
-  stringToUTF8(localStorage.getItem(UTF8ToString($0)) || "", $1, 32);
- },
- 35200: function($0) {
-  new Audio("resources/wavs/tabs" + String($0).padStart(4, "0") + ".wav").play();
- },
- 35279: function($0, $1, $2, $3, $4) {
+ 35332: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 35356: function($0, $1, $2, $3, $4) {
+ 35409: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return drawImage($0, $1, $2, $3, $4);
   });
  },
- 35433: function() {
+ 35486: function() {
   document.querySelector(".menu106").classList.add("disabled");
  },
- 35494: function() {
+ 35547: function() {
   document.querySelector(".menu107").classList.add("disabled");
  },
- 35555: function($0, $1, $2) {
+ 35608: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 35583: function($0, $1, $2, $3, $4) {
+ 35636: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 35661: function($0, $1, $2) {
+ 35714: function($0, $1, $2) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2);
   });
  },
- 35732: function($0, $1, $2) {
+ 35785: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35764: function($0) {
+ 35817: function($0) {
   return getSystemMetrics($0);
  },
- 35792: function($0, $1, $2, $3) {
+ 35845: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35827: function() {
+ 35880: function() {
   return stopWaiting();
  },
- 35848: function() {
+ 35901: function() {
   return shutdown();
  },
- 35866: function($0) {
+ 35919: function($0) {
+  new Audio("resources/wavs/" + UTF8ToString($0)).play();
+ },
+ 35974: function($0) {
   return showApp($0);
  },
- 35885: function() {
+ 35993: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 35958: function() {
+ 36066: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 36019: function() {
+ 36127: function() {
   return eventListenerSetup();
  },
- 36047: function($0, $1) {
+ 36155: function($0, $1) {
   return getCheck($0, $1);
  },
- 36070: function($0, $1, $2) {
+ 36178: function($0, $1, $2) {
   return setCheck($0, $1, $2);
  },
- 36096: function($0, $1, $2) {
+ 36204: function($0, $1, $2) {
   return comboBoxAddString($0, $1, $2);
  },
- 36131: function($0, $1, $2) {
+ 36239: function($0, $1, $2) {
   return comboBoxSelect($0, $1, $2);
  },
- 36163: function($0) {
+ 36271: function($0) {
   return setActiveWindow($0);
  },
- 36190: function() {
+ 36298: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 36253: function($0, $1) {
+ 36361: function($0, $1) {
   return setIcon($0, $1);
  },
- 36275: function($0) {
+ 36383: function($0) {
   return showApp($0);
  },
- 36294: function($0, $1) {
+ 36402: function($0) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  if (item == null) {
+   localStorage.setItem(UTF8ToString($0), "{}");
+  }
+ },
+ 36525: function($0) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  if (item == null) {
+   return 2;
+  } else {
+   return 0;
+  }
+ },
+ 36631: function($0, $1) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  let dict = JSON.parse(item || "{}");
+  dict[""] = UTF8ToString($1);
+  item = JSON.stringify(dict);
+  localStorage.setItem(UTF8ToString($0), item);
+ },
+ 36827: function($0, $1, $2, $3) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  let dict = JSON.parse(item || "{}");
+  const key = UTF8ToString($1).toLowerCase();
+  dict[key] = {};
+  dict[key].type = $3;
+  switch (dict[key].type) {
+  case 4:
+  case 5:
+   dict[key].value = getValue($2, "i32");
+   break;
+
+  case 11:
+   dict[key].value = getValue($2, "i64");
+   break;
+
+  default:
+   dict[key].value = UTF8ToString($2);
+   break;
+  }
+  item = JSON.stringify(dict);
+  localStorage.setItem(UTF8ToString($0), item);
+ },
+ 37271: function($0) {
+  localStorage.removeItem(UTF8ToString($0));
+ },
+ 37313: function($0, $1) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  if (item == null) {
+   return 2;
+  }
+  let dict = JSON.parse(item);
+  let value = dict[UTF8ToString($1).toLowerCase()];
+  if (value == null) {
+   return 2;
+  }
+  delete dict[UTF8ToString($1).toLowerCase()];
+  item = JSON.stringify(dict);
+  localStorage.setItem(UTF8ToString($0), item);
+  return 0;
+ },
+ 37642: function($0, $1, $2) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  if (item == null) {
+   return 2;
+  }
+  let dict = JSON.parse(item);
+  let value = dict[""];
+  if (value == null) {
+   return 2;
+  }
+  if ($2 != 0) {
+   stringToUTF8(value, $1, $2);
+  }
+  return 0;
+ },
+ 37869: function($0, $1, $2, $3, $4) {
+  let item = localStorage.getItem(UTF8ToString($0));
+  if (item == null) {
+   return 2;
+  }
+  let dict = JSON.parse(item);
+  const key = UTF8ToString($1).toLowerCase();
+  if (dict[key] == null) {
+   return 2;
+  }
+  if ($2 != 0) {
+   switch (dict[key].type) {
+   case 4:
+   case 5:
+    setValue($2, dict[key].value, "i32");
+    break;
+
+   case 11:
+    setValue($2, dict[key].value, "i64");
+    break;
+
+   default:
+    stringToUTF8(dict[key].value, $2, $3);
+    break;
+   }
+  }
+  if ($4 != 0) {
+   setValue($4, dict[key].type, "i16");
+  }
+  return 0;
+ },
+ 38344: function($0, $1) {
   return showWindow($0, $1);
  },
- 36319: function($0, $1, $2, $3, $4) {
+ 38369: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 36353: function($0, $1) {
+ 38403: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 36390: function($0, $1) {
+ 38440: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 36427: function($0, $1) {
+ 38477: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 36464: function($0, $1) {
+ 38514: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 36501: function($0) {
+ 38551: function($0) {
   return destroyWindow($0);
  }
 };
@@ -4282,6 +4384,40 @@ function ___syscall_open(path, flags, varargs) {
  }
 }
 
+function ___syscall_rename(old_path, new_path) {
+ try {
+  old_path = SYSCALLS.getStr(old_path);
+  new_path = SYSCALLS.getStr(new_path);
+  FS.rename(old_path, new_path);
+  return 0;
+ } catch (e) {
+  if (typeof FS == "undefined" || !(e instanceof FS.ErrnoError)) throw e;
+  return -e.errno;
+ }
+}
+
+function ___syscall_rmdir(path) {
+ try {
+  path = SYSCALLS.getStr(path);
+  FS.rmdir(path);
+  return 0;
+ } catch (e) {
+  if (typeof FS == "undefined" || !(e instanceof FS.ErrnoError)) throw e;
+  return -e.errno;
+ }
+}
+
+function ___syscall_unlink(path) {
+ try {
+  path = SYSCALLS.getStr(path);
+  FS.unlink(path);
+  return 0;
+ } catch (e) {
+  if (typeof FS == "undefined" || !(e instanceof FS.ErrnoError)) throw e;
+  return -e.errno;
+ }
+}
+
 function __localtime_js(time, tmPtr) {
  var date = new Date((SAFE_HEAP_LOAD(time | 0, 4, 0) | 0) * 1e3);
  SAFE_HEAP_STORE(tmPtr | 0, date.getSeconds() | 0, 4);
@@ -4897,6 +5033,9 @@ var asmLibraryArg = {
  "__syscall_fcntl64": ___syscall_fcntl64,
  "__syscall_ioctl": ___syscall_ioctl,
  "__syscall_open": ___syscall_open,
+ "__syscall_rename": ___syscall_rename,
+ "__syscall_rmdir": ___syscall_rmdir,
+ "__syscall_unlink": ___syscall_unlink,
  "_localtime_js": __localtime_js,
  "_tzset_js": __tzset_js,
  "abort": _abort,
