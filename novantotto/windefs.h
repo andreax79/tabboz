@@ -575,6 +575,7 @@ extern BOOL     PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgF
 extern BOOL     TranslateMessage(const MSG *lpMsg);
 extern HICON    LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
 extern HCURSOR  LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
+extern HMENU    LoadMenu(HINSTANCE hInstance, LPCSTR lpMenuName);
 extern HBITMAP  LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
 extern BOOL     DestroyIcon(HICON hIcon);
 extern BOOL     DeleteObject(void *ho);

@@ -29,6 +29,7 @@
               <button class="control61536" aria-label="Close"></button>
             </div>
           </div>
+          <div class="menubar"><ul class="main-menu"></div>
           <div class="window-body">
           </div>
         </div>`;
@@ -156,6 +157,51 @@
                 closeMenu();
             }
         });
+    }
+
+
+    function generateMenuHTML(menuStructure) {
+        function generateMenuItemHTML(item, level) {
+            const label = item.label.replace('&', '');
+            let html = `<li class="${item.kind == 'separator' ? 'separator' : `menu menu${item.menu_id}`}">${label}</li>`;
+            if (item.items && item.items.length > 0) {
+                html += '<ul>';
+                for (const subItem of item.items) {
+                    html += generateMenuItemHTML(subItem, level + 1);
+                }
+                html += '</ul>';
+            }
+            return html;
+        }
+
+        let html = '<ul class="main-menu">';
+        for (const menu of menuStructure) {
+            const label = menu.label.replace('&', '');
+            html += `<li>${label}`;
+            if (menu.items && menu.items.length > 0) {
+                html += '<ul>';
+                for (const item of menu.items) {
+                    html += generateMenuItemHTML(item, 1);
+                }
+                html += '</ul>';
+            }
+            html += '</li>';
+        }
+        html += '</ul>';
+        return html;
+    }
+
+    // Add main menu to a window
+    async function addMenuToWindow(hWnd, hMenu) {
+        const win = document.querySelector(`#win${hWnd}`);
+        if (win != null) {
+            // Retrieve the menu
+            const response = await fetch(`resources/menus/${hMenu}.json`);
+            const menu = await response.json();
+            win.querySelector('.menubar').innerHTML = generateMenuHTML(menu);
+            // Activate the menu
+            addMainMenu(win);
+        }
     }
 
     // Make a window draggrable
@@ -656,6 +702,7 @@
 
     exports.addDesktopIcon = addDesktopIcon;
     exports.addMainMenu = addMainMenu;
+    exports.addMenuToWindow = addMenuToWindow;
     exports.makeDraggable = makeDraggable;
     exports.waitEvent = waitEvent;
     exports.stopWaiting = stopWaiting;

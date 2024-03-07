@@ -107,11 +107,20 @@ HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DW
     if (GetClassInfo(hInstance, lpClassName, &wndClass))
     {
         handle->lpDialogFunc = (DLGPROC)wndClass.lpfnWndProc;
+        if (wndClass.lpszMenuName != NULL && hMenu == NULL)
+        {
+            hMenu = LoadMenu(hInstance, wndClass.lpszMenuName);
+        }
         // TODO - wndClass.lpszMenuName
         // TODO - wndClass.hbrBackground
         // TODO - wndClass.hIcon
     }
     JS_CALL("createWindow", NULL, handle, X, Y, nWidth, nHeight, lpWindowName, dwStyle, dwExStyle, parentWindowId);
+    // Main menu
+    if (hMenu != NULL)
+    {
+        JS_ASYNC_CALL("addMenuToWindow", handle, hMenu);
+    }
     // Show window
     JS_CALL("showWindow", handle, 1);
     return handle;
@@ -306,6 +315,19 @@ HICON LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName)
         return NULL;
     }
     return (HICON)lpIconName;
+}
+
+//*******************************************************************
+// Return menu id
+//*******************************************************************
+
+HMENU LoadMenu(HINSTANCE hInstance, LPCSTR lpMenuName)
+{
+    if (HIWORD((unsigned long)lpMenuName) != 0)
+    {
+        return NULL;
+    }
+    return (HMENU)lpMenuName;
 }
 
 //*******************************************************************
