@@ -1,9 +1,11 @@
-import re
-import os
-import sys
+import argparse
 import json
+import os
+import re
+import sys
 from pathlib import Path
 
+from pcpp import Preprocessor
 
 PRE = """
 <!DOCTYPE html>
@@ -57,7 +59,7 @@ MENU_HEIGHT = 18
 PATTERN = re.compile(r'(?:[^,"]|"(?:\\.|[^"])*")*')
 
 if not "RESOURCES_DIR" in os.environ:
-    print("Error: RESOURCES_DIR environment variable is not set.");
+    print("Error: RESOURCES_DIR environment variable is not set.")
     sys.exit(1)
 
 base_path = Path(os.environ["RESOURCES_DIR"])
@@ -179,9 +181,59 @@ class Dialog:
             "y": int(x[5]) * SCALE + self.dy,
             "width": int(x[6]) * SCALE,
             "height": int(x[7]) * SCALE,
-            "css_class": f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control",
+            "css_class": (
+                f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control"
+            ),
             "extra": "",
         }
+        return self.post_parse(control)
+
+    def parse_text(self, line: str, style: str) -> dict[str, str | int]:
+        x = split_string(line)
+        control = {
+            "text": prepare_text(x[0]),
+            "id": int(x[1]),
+            "x": int(x[2]) * SCALE + self.dx,
+            "y": int(x[3]) * SCALE + self.dy,
+            "width": int(x[4]) * SCALE,
+            "height": int(x[5]) * SCALE,
+            "style": (strip(x[6]).split("|") if len(x) > 6 else [])
+            + ([style] if style else []),
+            "combined_id": (int(x[1]) << 16) + int(self.dialog_id),
+            "css_class": (
+                f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control"
+            ),
+            "class": "STATIC",
+            "extra": "",
+        }
+        return self.post_parse(control)
+
+    def parse_pushbutton(self, line: str, style: str) -> dict[str, str | int]:
+        x = split_string(line)
+        if style:
+            style = [style]
+        else:
+            style = []
+        if len(x) > 6:
+            style = strip(x[6].split("|")) + style
+        control = {
+            "text": prepare_text(x[0]),
+            "id": int(x[1]),
+            "x": int(x[2]) * SCALE + self.dx,
+            "y": int(x[3]) * SCALE + self.dy,
+            "width": int(x[4]) * SCALE,
+            "height": int(x[5]) * SCALE,
+            "style": style,
+            "combined_id": (int(x[1]) << 16) + int(self.dialog_id),
+            "css_class": (
+                f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control"
+            ),
+            "class": "STATIC",
+            "extra": "",
+        }
+        return self.post_parse(control)
+
+    def post_parse(self, control: dict[str, int | str]) -> dict[str, int | str]:
         if "WS_DISABLED" in control["style"]:
             control["extra"] += ' disabled="disabled"'
             control["css_class"] += " disabled"
@@ -240,8 +292,7 @@ class Dialog:
             control["css_class"] += " " + control["class"].lower()
         return control
 
-    def add_control(self, line: str) -> dict[str, str | int]:
-        control = self.parse_control(line)
+    def add_control(self, control: dict[str, int | str]) -> None:
         if (
             "BS_PUSHBUTTON" in control["style"]
             or "BS_DEFPUSHBUTTON" in control["style"]
@@ -276,7 +327,7 @@ class Dialog:
         elif control["class"] == "BUTTON":
             if "BS_AUTORADIOBUTTON" in control["style"]:  # Radio button
                 self.add(
-                """
+                    """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
 <input class="{css_class}" data-class="{class}" {extra} type="radio" id="{combined_id}" name="bor_radio{dialog_id}" />
 <label for="{combined_id}">{text}</label>
@@ -285,9 +336,12 @@ class Dialog:
                         **control,
                     )
                 )
-            elif "BS_CHECKBOX" in control["style"] or "BS_AUTOCHECKBOX" in control["style"]:  # Checkbox
+            elif (
+                "BS_CHECKBOX" in control["style"]
+                or "BS_AUTOCHECKBOX" in control["style"]
+            ):  # Checkbox
                 self.add(
-                """
+                    """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
 <input class="{css_class}" data-class="{class}" {extra} type="checkbox" id="{combined_id}" />
 <label for="{combined_id}">{text}</label>
@@ -299,7 +353,7 @@ class Dialog:
                 control["height"] -= 25
                 control["width"] -= 25
                 self.add(
-                """
+                    """
 <fieldset class="{css_class}" data-class="{class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
   <legend>{text}</legend>
 </fieldset>""".format(
@@ -320,7 +374,9 @@ class Dialog:
                 )
             )
 
-        elif control["class"] == "COMBOBOX" and "CBS_DROPDOWNLIST" in control["style"]:  # Dropdown
+        elif (
+            control["class"] == "COMBOBOX" and "CBS_DROPDOWNLIST" in control["style"]
+        ):  # Dropdown
             self.add(
                 """
 <div style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px">
@@ -390,9 +446,8 @@ class Dialog:
                     **control
                 )
             )
-        elif control["class"] == "STATIC" or control["class"] == "BorStatic":
+        elif control["class"] in "STATIC" or control["class"] == "BorStatic":
             self.add(
-
                 """
 <div class="{css_class}" style="position: absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px" data-class="{class}">
 {text}
@@ -402,7 +457,6 @@ class Dialog:
             )
         else:  # Custom
             self.add(
-
                 """
 <canvas class="{css_class} {class}" width="{width}" height="{height}" style="position: absolute; left: {x}px; top: {y}px;" data-class="{class}">
 </canvas>""".format(
@@ -437,13 +491,38 @@ class Dialog:
             self.menu += "</ul>\n"
 
 
+def preprocessor(filename: str) -> str:
+    # C Preprocessor
+    preprocessor = Preprocessor()
+    # Add some definitions
+    preprocessor.define("IDOK 1")
+    preprocessor.define("IDCANCEL 2")
+    preprocessor.define("IDABORT 3")
+    preprocessor.define("IDRETRY 4")
+    preprocessor.define("IDIGNORE 5")
+    preprocessor.define("IDYES 6")
+    preprocessor.define("IDNO 7")
+    preprocessor.define("IDCLOSE 8")
+    preprocessor.define("IDHELP 9")
+    preprocessor.define("IDTRYAGAIN 10")
+    preprocessor.define("IDCONTINUE 11")
+
+    with open(filename, "r") as f:
+        preprocessor.parse(f.read(), filename)
+    filename = filename + ".post"
+    with open(filename, "w") as f:
+        preprocessor.write(f)
+    return filename
+
+
 def convert_rc(filename: str) -> None:
+    filename = preprocessor(filename)
     dialog: Dialog | None = None
     with open(filename, "r") as file:
         in_definition = False
         for line in file:
             line = line.strip()
-            if not line:
+            if not line or line.startswith("#") or line.startswith("//"):
                 continue
             if " " in line:
                 t, line = line.split(" ", 1)
@@ -468,24 +547,45 @@ def convert_rc(filename: str) -> None:
                 dialog.load_menu(unquote(line).upper())
                 continue
             if not in_definition:
-                if t == "{":
+                if t == "{" or t == "BEGIN":
                     in_definition = True
                     continue
                 else:
                     x = split_string(line)
-            elif t == "}":
+            elif t == "}" or t == "END":
                 in_definition = False
                 continue
             if in_definition:
                 if t == "CONTROL":
-                    dialog.add_control(line)
+                    control = dialog.parse_control(line)
+                    dialog.add_control(control)
+                elif t == "LTEXT":
+                    control = dialog.parse_text(line, "SS_LEFT")
+                    dialog.add_control(control)
+                elif t == "CTEXT":
+                    control = dialog.parse_text(line, "SS_CENTER")
+                    dialog.add_control(control)
+                elif t == "RTEXT":
+                    control = dialog.parse_text(line, "SS_RIGHT")
+                    dialog.add_control(control)
+                elif t == "DEFPUSHBUTTON":
+                    control = dialog.parse_pushbutton(line, "BS_DEFPUSHBUTTON")
+                    dialog.add_control(control)
+                elif t == "PUSHBUTTON":
+                    control = dialog.parse_pushbutton(line, "BS_PUSHBUTTON")
+                    dialog.add_control(control)
+
     if dialog is not None:
         dialog.write()
         dialog = None
 
 
 def main() -> None:
-    for filename in sys.argv[1:]:
+    parser = argparse.ArgumentParser(description="rc compiler")
+    parser.add_argument('-f', '--force', action='store_true', help='Force processing')
+    parser.add_argument('files', nargs='+', help='List of files to process')
+    args = parser.parse_args()
+    for filename in args.files:
         convert_rc(filename)
     sys.stdout.write("\n")
 
