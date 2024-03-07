@@ -13,7 +13,54 @@
 #include <time.h>
 #include "novantotto.h"
 #include "property.h"
+#include "handler.h"
 #include "debug.h"
+
+//*******************************************************************
+// Get an entry from the property list of the specified window
+//*******************************************************************
+
+HANDLE GetProp(HWND hWnd, LPCSTR lpString)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    return GetProperty(handle->window.props, lpString);
+}
+
+//*******************************************************************
+// Add/change an entry in the property list of the specified window
+//*******************************************************************
+
+BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    SetProperty(handle->window.props, lpString, hData);
+    return TRUE;
+}
+
+//*******************************************************************
+// Remove an entry from the property list of the specified window
+//*******************************************************************
+
+HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
+{
+    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
+    if (handle == NULL)
+    {
+        // Invalid window handle
+        return FALSE;
+    }
+    return DelProperty(handle->window.props, lpString);
+}
 
 //*******************************************************************
 // Find property index

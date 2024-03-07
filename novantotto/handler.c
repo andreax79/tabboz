@@ -96,60 +96,6 @@ HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent)
 }
 
 //*******************************************************************
-// Allocate a dialog control
-//*******************************************************************
-
-INT_PTR dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    HANDLE_ENTRY *h = (HANDLE_ENTRY *)hWnd;
-    switch (uMsg)
-    {
-    case WM_LBUTTONDOWN:
-        printf("Left button down\n");
-        // Left button down
-        return SendMessage(h->hwndParent, WM_COMMAND, h->dlgItem.nIDDlgItem, lParam);
-    case BM_GETCHECK:
-        // Get the check state of a radio button or check box
-        return JS_CALL_INT("getCheck", h->hwndParent, h->dlgItem.nIDDlgItem);
-    case BM_SETCHECK:
-        // Set the check state of a radio button or check box
-        return JS_CALL_INT("setCheck", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
-    case CB_ADDSTRING:
-        // Add a string to the list box of a combo box
-        return JS_CALL_INT("comboBoxAddString", h->hwndParent, h->dlgItem.nIDDlgItem, lParam);
-    case CB_SETCURSEL:
-        // Select a string in the list of a combo box
-        return JS_CALL_INT("comboBoxSelect", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
-    case WM_PAINT:
-        return TRUE;
-    default:
-        DEBUG_PRINTF("dlgItemProc uMsg=%d wParam=%d lParam=%ld\n", uMsg, wParam, lParam);
-    }
-    return FALSE;
-}
-
-HANDLE_ENTRY *AllocateDlgItem(LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu)
-{
-    HANDLE_ENTRY *h = AllocateHandle(DlgItem, hwndParent);
-    if (h == NULL)
-    {
-        return NULL;
-    }
-    h->dlgItem.nIDDlgItem = (int)hMenu;
-    h->lpClassName = strdup(lpClassName);
-    WNDCLASS *wndClass = (WNDCLASS *)GetProperty(global_classes, lpClassName);
-    if (wndClass != NULL)
-    {
-        h->lpDialogFunc = wndClass->lpfnWndProc;
-    }
-    else
-    {
-        h->lpDialogFunc = &dlgItemProc;
-    }
-    return h;
-}
-
-//*******************************************************************
 // Release an handle
 //*******************************************************************
 
@@ -279,9 +225,9 @@ void DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     for (int i = 0; i < global_table->count; i++)
     {
         HANDLE_ENTRY *child = &global_table->entries[i];
-        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpDialogFunc != NULL))
+        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpfnWndProc != NULL))
         {
-            child->lpDialogFunc(hWnd, uMsg, wParam, lParam);
+            child->lpfnWndProc(hWnd, uMsg, wParam, lParam);
         }
     }
 }

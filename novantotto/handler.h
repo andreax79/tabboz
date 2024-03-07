@@ -27,8 +27,8 @@ typedef struct
     unsigned int refcount;
     unsigned int id;
     HandleType   type;
-    HWND         hwndParent;   // parent window
-    DLGPROC      lpDialogFunc; // window/dialog item procedure
+    HWND         hwndParent;  // parent window
+    WNDPROC      lpfnWndProc; // window/dialog item procedure
     LPSTR        lpClassName;
     union {
         // if type == Window
@@ -60,7 +60,6 @@ typedef struct
 extern HANDLE_TABLE *global_table;
 extern HANDLE_TABLE *AllocateHandleTable(int count);
 extern HANDLE_ENTRY *AllocateHandle(HandleType type, HWND hwndParent);
-extern HANDLE_ENTRY *AllocateDlgItem(LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu);
 extern void          ReleaseHandle(HANDLE p);
 extern HANDLE_ENTRY *GetHandle(int index);
 extern void          DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

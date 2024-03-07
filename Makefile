@@ -11,13 +11,7 @@ sources = disco.c \
 		  tipa.c \
 		  vestiti.c \
 		  zarrosim.c \
-		  novantotto/emscripten.c \
-		  novantotto/handler.c \
-		  novantotto/message.c \
-		  novantotto/property.c \
-		  novantotto/profile.c \
-		  novantotto/registry.c \
-		  novantotto/window.c
+		  novantotto/*.c
 
 # CFLAGS += -Wall -Wextra -Wpedantic \
 #          -Wformat=2 -Wno-unused-parameter -Wshadow \

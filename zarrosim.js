@@ -1441,86 +1441,83 @@ var ASM_CONSTS = {
  35547: function() {
   document.querySelector(".menu107").classList.add("disabled");
  },
- 35608: function($0, $1, $2) {
-  return loadString($0, $1, $2);
- },
- 35636: function($0, $1, $2, $3, $4) {
+ 35608: function($0, $1, $2, $3) {
   return Asyncify.handleAsync(function() {
-   return messageBox($0, $1, $2, $3, $4);
+   return dialogBox($0, $1, $2, $3);
   });
  },
- 35714: function($0, $1, $2) {
-  return Asyncify.handleAsync(function() {
-   return dialogBox($0, $1, $2);
-  });
+ 35682: function($0, $1) {
+  return getCheck($0, $1);
  },
- 35785: function($0, $1, $2) {
-  return setDlgItemText($0, $1, $2);
+ 35705: function($0, $1, $2) {
+  return setCheck($0, $1, $2);
  },
- 35817: function($0) {
-  return getSystemMetrics($0);
+ 35731: function($0, $1, $2) {
+  return comboBoxAddString($0, $1, $2);
  },
- 35845: function($0, $1, $2, $3) {
+ 35766: function($0, $1, $2) {
+  return comboBoxSelect($0, $1, $2);
+ },
+ 35798: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35880: function() {
-  return stopWaiting();
+ 35833: function($0, $1, $2) {
+  return setDlgItemText($0, $1, $2);
  },
- 35901: function() {
+ 35865: function($0, $1, $2) {
+  return loadString($0, $1, $2);
+ },
+ 35893: function($0) {
+  return getSystemMetrics($0);
+ },
+ 35921: function() {
   return shutdown();
  },
- 35919: function($0) {
+ 35939: function($0) {
   new Audio("resources/wavs/" + UTF8ToString($0)).play();
  },
- 35974: function($0) {
+ 35994: function($0) {
   return showApp($0);
  },
- 35993: function() {
+ 36013: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 36066: function() {
+ 36086: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 36127: function() {
+ 36147: function() {
   return eventListenerSetup();
  },
- 36155: function($0, $1) {
-  return getCheck($0, $1);
- },
- 36178: function($0, $1, $2) {
-  return setCheck($0, $1, $2);
- },
- 36204: function($0, $1, $2) {
-  return comboBoxAddString($0, $1, $2);
- },
- 36239: function($0, $1, $2) {
-  return comboBoxSelect($0, $1, $2);
- },
- 36271: function($0) {
+ 36175: function($0) {
   return setActiveWindow($0);
  },
- 36298: function() {
+ 36202: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 36361: function($0, $1) {
+ 36265: function($0, $1) {
   return setIcon($0, $1);
  },
- 36383: function($0) {
+ 36287: function($0) {
   return showApp($0);
  },
- 36402: function($0) {
+ 36306: function($0, $1, $2, $3, $4) {
+  return Asyncify.handleAsync(function() {
+   return messageBox($0, $1, $2, $3, $4);
+  });
+ },
+ 36384: function($0) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    localStorage.setItem(UTF8ToString($0), "{}");
   }
  },
- 36525: function($0) {
+ 36507: function($0) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1528,14 +1525,14 @@ var ASM_CONSTS = {
    return 0;
   }
  },
- 36631: function($0, $1) {
+ 36613: function($0, $1) {
   let item = localStorage.getItem(UTF8ToString($0));
   let dict = JSON.parse(item || "{}");
   dict[""] = UTF8ToString($1);
   item = JSON.stringify(dict);
   localStorage.setItem(UTF8ToString($0), item);
  },
- 36827: function($0, $1, $2, $3) {
+ 36809: function($0, $1, $2, $3) {
   let item = localStorage.getItem(UTF8ToString($0));
   let dict = JSON.parse(item || "{}");
   const key = UTF8ToString($1).toLowerCase();
@@ -1558,10 +1555,10 @@ var ASM_CONSTS = {
   item = JSON.stringify(dict);
   localStorage.setItem(UTF8ToString($0), item);
  },
- 37271: function($0) {
+ 37253: function($0) {
   localStorage.removeItem(UTF8ToString($0));
  },
- 37313: function($0, $1) {
+ 37295: function($0, $1) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1576,7 +1573,7 @@ var ASM_CONSTS = {
   localStorage.setItem(UTF8ToString($0), item);
   return 0;
  },
- 37642: function($0, $1, $2) {
+ 37624: function($0, $1, $2) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1591,7 +1588,7 @@ var ASM_CONSTS = {
   }
   return 0;
  },
- 37869: function($0, $1, $2, $3, $4) {
+ 37851: function($0, $1, $2, $3, $4) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1622,25 +1619,39 @@ var ASM_CONSTS = {
   }
   return 0;
  },
- 38344: function($0, $1) {
+ 38326: function() {
+  return stopWaiting();
+ },
+ 38347: function($0, $1, $2, $3, $4, $5, $6, $7, $8, $9) {
+  return createWindow($0, $1, $2, $3, $4, $5, $6, $7, $8, $9);
+ },
+ 38398: function($0, $1) {
+  return Asyncify.handleAsync(function() {
+   return addMenuToWindow($0, $1);
+  });
+ },
+ 38472: function($0, $1) {
   return showWindow($0, $1);
  },
- 38369: function($0, $1, $2, $3, $4) {
+ 38497: function($0, $1) {
+  return showWindow($0, $1);
+ },
+ 38522: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 38403: function($0, $1) {
+ 38556: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38440: function($0, $1) {
+ 38593: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38477: function($0, $1) {
+ 38630: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38514: function($0, $1) {
+ 38667: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38551: function($0) {
+ 38704: function($0) {
   return destroyWindow($0);
  }
 };
@@ -5066,9 +5077,7 @@ var _GetDlgItem = Module["_GetDlgItem"] = createExportWrapper("GetDlgItem");
 
 var _PostMessage = Module["_PostMessage"] = createExportWrapper("PostMessage");
 
-var _malloc = Module["_malloc"] = createExportWrapper("malloc");
-
-var _free = Module["_free"] = createExportWrapper("free");
+var _AllocateDlgItem = Module["_AllocateDlgItem"] = createExportWrapper("AllocateDlgItem");
 
 var _GetTickCount = Module["_GetTickCount"] = createExportWrapper("GetTickCount");
 
@@ -5076,7 +5085,9 @@ var _WinMainStartup = Module["_WinMainStartup"] = createExportWrapper("WinMainSt
 
 var _main = Module["_main"] = createExportWrapper("main");
 
-var _AllocateDlgItem = Module["_AllocateDlgItem"] = createExportWrapper("AllocateDlgItem");
+var _free = Module["_free"] = createExportWrapper("free");
+
+var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 var _PrintMessages = Module["_PrintMessages"] = createExportWrapper("PrintMessages");
 

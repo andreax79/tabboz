@@ -14,6 +14,65 @@
 #include "debug.h"
 
 //*******************************************************************
+// Call the default window procedure
+//*******************************************************************
+
+LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (Msg)
+    {
+    case WM_CLOSE:
+        DestroyWindow(hWnd);
+        return 0;
+    }
+    return 0;
+}
+
+//*******************************************************************
+// Create a window
+//*******************************************************************
+
+HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    int           parentWindowId = -1;
+    WNDCLASS      wndClass;
+    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
+
+    handle->lpfnWndProc = &DefWindowProc;
+    // Get parent window number
+    if (hWndParent != NULL)
+    {
+        parentWindowId = (int)hWndParent;
+    }
+    // Get class
+    if (GetClassInfo(hInstance, lpClassName, &wndClass))
+    {
+        handle->lpfnWndProc = wndClass.lpfnWndProc;
+        if (wndClass.lpszMenuName != NULL && hMenu == NULL)
+        {
+            hMenu = LoadMenu(hInstance, wndClass.lpszMenuName);
+        }
+        // TODO - wndClass.lpszMenuName
+        // TODO - wndClass.hbrBackground
+        // TODO - wndClass.hIcon
+    }
+    JS_CALL("createWindow", NULL, handle, X, Y, nWidth, nHeight, lpWindowName, dwStyle, dwExStyle, parentWindowId);
+    // Main menu
+    if (hMenu != NULL)
+    {
+        JS_ASYNC_CALL("addMenuToWindow", handle, hMenu);
+    }
+    // Show window
+    JS_CALL("showWindow", handle, 1);
+    return handle;
+}
+
+HWND CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
+{
+    return CreateWindowEx(0, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+}
+
+//*******************************************************************
 // Show/hide a window
 //*******************************************************************
 
@@ -122,12 +181,12 @@ BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags
     // Redraw children
     DispatchToChildren(hWnd, WM_PAINT, 0, 0);
     // Redraw Window
-    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)hWnd)->lpDialogFunc;
-    if (lpDialogFunc == NULL)
+    WNDPROC lpfnWndProc = ((HANDLE_ENTRY *)hWnd)->lpfnWndProc;
+    if (lpfnWndProc == NULL)
     {
         return FALSE;
     }
-    return lpDialogFunc(hWnd, WM_PAINT, 0, 0);
+    return lpfnWndProc(hWnd, WM_PAINT, 0, 0);
 }
 
 //*******************************************************************
@@ -163,4 +222,13 @@ BOOL ValidateRgn(HWND hwnd, HRGN hrgn)
 BOOL ValidateRect(HWND hwnd, const RECT *rect)
 {
     return RedrawWindow(hwnd, rect, 0, RDW_VALIDATE);
+}
+
+//*******************************************************************
+// No nothing
+//*******************************************************************
+
+BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
+{
+    return TRUE; // TODO
 }

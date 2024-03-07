@@ -197,10 +197,10 @@ BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
 LRESULT DispatchMessage(const MSG *lpMsg)
 {
     LRESULT retval = 0;
-    DLGPROC lpDialogFunc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpDialogFunc;
-    if (lpDialogFunc == NULL)
+    WNDPROC lpfnWndProc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpfnWndProc;
+    if (lpfnWndProc == NULL)
     {
-        DEBUG_PRINTF("DispatchMessage - lpDialogFunc is NULL\n");
+        DEBUG_PRINTF("DispatchMessage - lpfnWndProc is NULL\n");
         return 0;
     }
     // Dispatch to children
@@ -226,13 +226,13 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     {
         // Close window
         DEBUG_PRINTF("DispatchMessage - SC_CLOSE\n");
-        if (!lpDialogFunc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
+        if (!lpfnWndProc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
             // Dispatch destroy to children
             DispatchToChildren(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
             // Dispatch Destroy
-            lpDialogFunc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
+            lpfnWndProc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
     }
     else if (lpMsg->wParam == SC_MINIMIZE)
@@ -245,10 +245,10 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     {
         // Dispatch Commmand
         DEBUG_PRINTF("DispatchMessage - Dispatch command hwnd=%ld message=%d wParam=%d lParam=%ld\n", (long)lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
-        retval = lpDialogFunc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
+        retval = lpfnWndProc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
         // Dispatch Repaint
         DEBUG_PRINTF("DispatchMessage - WM_PAINT\n");
-        /* lpDialogFunc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0); */
+        /* lpfnWndProc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0); */
         RedrawWindow(lpMsg->hwnd, NULL, NULL, 0);
     }
     DEBUG_PRINTF("DispatchMessage - done retval=%ld\n", retval);
@@ -326,6 +326,7 @@ BOOL TranslateMessage(const MSG *lpMsg)
         return FALSE;
     }
 }
+
 //*******************************************************************
 // Print message queue
 //*******************************************************************

@@ -539,7 +539,7 @@
     }
 
     // Show dialog box
-    async function dialogBox(hWnd, dialog, parentWindowId) {
+    async function dialogBox(hWnd, dialog, parentWindowId, hInstance) {
         // Load html
         const response = await fetch("resources/dialogs/includes/" + dialog + ".inc.html");
         const html = await response.text();
@@ -555,7 +555,7 @@
             if (hMenu != -1 && dataClass) {
                 const lpClassName = _malloc(128);
                 stringToUTF8(dataClass, lpClassName, 128);
-                _AllocateDlgItem(lpClassName, hWnd, hMenu);
+                _AllocateDlgItem(hInstance, lpClassName, hWnd, hMenu);
                 _free(lpClassName);
             }
         });

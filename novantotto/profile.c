@@ -12,8 +12,6 @@
 #include <string.h>
 #include <time.h>
 #include "novantotto.h"
-#include "handler.h"
-#include "winreg.h"
 #include "winerror.h"
 #include "debug.h"
 
