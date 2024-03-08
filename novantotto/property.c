@@ -13,7 +13,7 @@
 #include <time.h>
 #include "novantotto.h"
 #include "property.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 //*******************************************************************
@@ -22,13 +22,13 @@
 
 HANDLE GetProp(HWND hWnd, LPCSTR lpString)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_ANY);
+    if (res == NULL || res->props == NULL)
     {
-        // Invalid window handle
-        return FALSE;
+        // Invalid window handle or no properties
+        return NULL;
     }
-    return GetProperty(handle->window.props, lpString);
+    return GetProperty(res->props, lpString);
 }
 
 //*******************************************************************
@@ -37,13 +37,22 @@ HANDLE GetProp(HWND hWnd, LPCSTR lpString)
 
 BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_ANY);
+    if (res == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
-    SetProperty(handle->window.props, lpString, hData);
+    if (res->props == NULL)
+    {
+        // Allocate properties
+        res->props = AllocateProperties();
+        if (res->props == NULL)
+        {
+            return FALSE;
+        }
+    }
+    SetProperty(res->props, lpString, hData);
     return TRUE;
 }
 
@@ -53,13 +62,13 @@ BOOL SetProp(HWND hWnd, LPCSTR lpString, HANDLE hData)
 
 HANDLE RemoveProp(HWND hWnd, LPCSTR lpString)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_ANY);
+    if (res == NULL || res->props == NULL)
     {
-        // Invalid window handle
-        return FALSE;
+        // Invalid window handle or no properties
+        return NULL;
     }
-    return DelProperty(handle->window.props, lpString);
+    return DelProperty(res->props, lpString);
 }
 
 //*******************************************************************

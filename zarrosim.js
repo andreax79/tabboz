@@ -1425,99 +1425,86 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 35332: function($0, $1, $2, $3, $4) {
-  return Asyncify.handleAsync(function() {
-   return drawImage($0, $1, $2, $3, $4);
-  });
- },
- 35409: function($0, $1, $2, $3, $4) {
-  return Asyncify.handleAsync(function() {
-   return drawImage($0, $1, $2, $3, $4);
-  });
- },
- 35486: function() {
+ 100852: function() {
   document.querySelector(".menu106").classList.add("disabled");
  },
- 35547: function() {
+ 100913: function() {
   document.querySelector(".menu107").classList.add("disabled");
  },
- 35608: function($0, $1, $2, $3) {
+ 100974: function($0, $1, $2, $3) {
   return Asyncify.handleAsync(function() {
    return dialogBox($0, $1, $2, $3);
   });
  },
- 35682: function($0, $1) {
+ 101048: function($0, $1) {
   return getCheck($0, $1);
  },
- 35705: function($0, $1, $2) {
+ 101071: function($0, $1, $2) {
   return setCheck($0, $1, $2);
  },
- 35731: function($0, $1, $2) {
+ 101097: function($0, $1, $2) {
   return comboBoxAddString($0, $1, $2);
  },
- 35766: function($0, $1, $2) {
+ 101132: function($0, $1, $2) {
   return comboBoxSelect($0, $1, $2);
  },
- 35798: function($0, $1, $2, $3) {
+ 101164: function($0, $1, $2, $3) {
   return getDlgItemText($0, $1, $2, $3);
  },
- 35833: function($0, $1, $2) {
+ 101199: function($0, $1, $2) {
   return setDlgItemText($0, $1, $2);
  },
- 35865: function($0, $1, $2) {
+ 101231: function($0, $1, $2) {
   return loadString($0, $1, $2);
  },
- 35893: function($0) {
+ 101259: function($0) {
   return getSystemMetrics($0);
  },
- 35921: function() {
+ 101287: function() {
   return shutdown();
  },
- 35939: function($0) {
+ 101305: function($0) {
   new Audio("resources/wavs/" + UTF8ToString($0)).play();
  },
- 35994: function($0) {
+ 101360: function($0) {
   return showApp($0);
  },
- 36013: function() {
+ 101379: function() {
   return Asyncify.handleAsync(function() {
    return loadStringResources();
   });
  },
- 36086: function() {
+ 101452: function() {
   return Asyncify.handleAsync(function() {
    return preload();
   });
  },
- 36147: function() {
+ 101513: function() {
   return eventListenerSetup();
  },
- 36175: function($0) {
+ 101541: function($0) {
   return setActiveWindow($0);
  },
- 36202: function() {
+ 101568: function() {
   return Asyncify.handleAsync(function() {
    return waitEvent();
   });
  },
- 36265: function($0, $1) {
-  return setIcon($0, $1);
- },
- 36287: function($0) {
+ 101631: function($0) {
   return showApp($0);
  },
- 36306: function($0, $1, $2, $3, $4) {
+ 101650: function($0, $1, $2, $3, $4) {
   return Asyncify.handleAsync(function() {
    return messageBox($0, $1, $2, $3, $4);
   });
  },
- 36384: function($0) {
+ 101728: function($0) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    localStorage.setItem(UTF8ToString($0), "{}");
   }
  },
- 36507: function($0) {
+ 101851: function($0) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1525,14 +1512,14 @@ var ASM_CONSTS = {
    return 0;
   }
  },
- 36613: function($0, $1) {
+ 101957: function($0, $1) {
   let item = localStorage.getItem(UTF8ToString($0));
   let dict = JSON.parse(item || "{}");
   dict[""] = UTF8ToString($1);
   item = JSON.stringify(dict);
   localStorage.setItem(UTF8ToString($0), item);
  },
- 36809: function($0, $1, $2, $3) {
+ 102153: function($0, $1, $2, $3) {
   let item = localStorage.getItem(UTF8ToString($0));
   let dict = JSON.parse(item || "{}");
   const key = UTF8ToString($1).toLowerCase();
@@ -1555,10 +1542,10 @@ var ASM_CONSTS = {
   item = JSON.stringify(dict);
   localStorage.setItem(UTF8ToString($0), item);
  },
- 37253: function($0) {
+ 102597: function($0) {
   localStorage.removeItem(UTF8ToString($0));
  },
- 37295: function($0, $1) {
+ 102639: function($0, $1) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1573,7 +1560,7 @@ var ASM_CONSTS = {
   localStorage.setItem(UTF8ToString($0), item);
   return 0;
  },
- 37624: function($0, $1, $2) {
+ 102968: function($0, $1, $2) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1588,7 +1575,7 @@ var ASM_CONSTS = {
   }
   return 0;
  },
- 37851: function($0, $1, $2, $3, $4) {
+ 103195: function($0, $1, $2, $3, $4) {
   let item = localStorage.getItem(UTF8ToString($0));
   if (item == null) {
    return 2;
@@ -1619,39 +1606,47 @@ var ASM_CONSTS = {
   }
   return 0;
  },
- 38326: function() {
+ 103670: function($0, $1, $2, $3, $4) {
+  return Asyncify.handleAsync(function() {
+   return drawImage($0, $1, $2, $3, $4);
+  });
+ },
+ 103747: function($0, $1) {
+  return setIcon($0, $1);
+ },
+ 103769: function() {
   return stopWaiting();
  },
- 38347: function($0, $1, $2, $3, $4, $5, $6, $7, $8, $9) {
+ 103790: function($0, $1, $2, $3, $4, $5, $6, $7, $8, $9) {
   return createWindow($0, $1, $2, $3, $4, $5, $6, $7, $8, $9);
  },
- 38398: function($0, $1) {
+ 103841: function($0, $1) {
   return Asyncify.handleAsync(function() {
    return addMenuToWindow($0, $1);
   });
  },
- 38472: function($0, $1) {
+ 103915: function($0, $1) {
   return showWindow($0, $1);
  },
- 38497: function($0, $1) {
+ 103940: function($0, $1) {
   return showWindow($0, $1);
  },
- 38522: function($0, $1, $2, $3, $4) {
+ 103965: function($0, $1, $2, $3, $4) {
   return moveWindow($0, $1, $2, $3, $4);
  },
- 38556: function($0, $1) {
+ 103999: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38593: function($0, $1) {
+ 104036: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38630: function($0, $1) {
+ 104073: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38667: function($0, $1) {
+ 104110: function($0, $1) {
   return getWindowRectDimension($0, $1);
  },
- 38704: function($0) {
+ 104147: function($0) {
   return destroyWindow($0);
  }
 };
@@ -5077,7 +5072,7 @@ var _GetDlgItem = Module["_GetDlgItem"] = createExportWrapper("GetDlgItem");
 
 var _PostMessage = Module["_PostMessage"] = createExportWrapper("PostMessage");
 
-var _AllocateDlgItem = Module["_AllocateDlgItem"] = createExportWrapper("AllocateDlgItem");
+var _AllocateControl = Module["_AllocateControl"] = createExportWrapper("AllocateControl");
 
 var _GetTickCount = Module["_GetTickCount"] = createExportWrapper("GetTickCount");
 

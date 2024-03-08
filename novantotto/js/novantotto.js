@@ -192,11 +192,12 @@
     }
 
     // Add main menu to a window
-    async function addMenuToWindow(hWnd, hMenu) {
+    async function addMenuToWindow(hWnd, lpMenuName) {
+        const menuName = UTF8ToString(lpMenuName);
         const win = document.querySelector(`#win${hWnd}`);
         if (win != null) {
             // Retrieve the menu
-            const response = await fetch(`resources/menus/${hMenu}.json`);
+            const response = await fetch(`resources/menus/${menuName}.json`);
             const menu = await response.json();
             win.querySelector('.menubar').innerHTML = generateMenuHTML(menu);
             // Activate the menu
@@ -296,7 +297,7 @@
     function setIcon(hWnd, icon) {
         const element = document.querySelector(`#win${hWnd} .title-bar-text`);
         if (element != null) {
-            const src = iconURL(icon);
+            const src = iconURL(UTF8ToString(icon));
             element.innerHTML = `<img src="${src}" height="16" />` + element.innerText
         }
     };
@@ -316,8 +317,9 @@
     };
 
     // Draw an image on a canvas
-    async function drawImage(hWnd, lpCanvasClass, imageId, x, y) {
+    async function drawImage(hWnd, lpCanvasClass, lpBitmapName, x, y) {
         const canvasClass = UTF8ToString(lpCanvasClass);
+        const imageId = UTF8ToString(lpBitmapName);
         const canvas = document.querySelector(`#win${hWnd} .${canvasClass}`);
         if (canvas) {
             // Load image
@@ -548,14 +550,14 @@
         setActiveWindow(hWnd);
         // Add menu
         addMainMenu(win);
-        // Allocate a DlgItem for each child
+        // Allocate a control for each child
         win.querySelectorAll('.dlg_item').forEach(element => {
             const hMenu = Number(element.className.match(/\d+/));
             const dataClass = element.getAttribute('data-class');
             if (hMenu != -1 && dataClass) {
                 const lpClassName = _malloc(128);
                 stringToUTF8(dataClass, lpClassName, 128);
-                _AllocateDlgItem(hInstance, lpClassName, hWnd, hMenu);
+                _AllocateControl(hInstance, lpClassName, hWnd, hMenu);
                 _free(lpClassName);
             }
         });

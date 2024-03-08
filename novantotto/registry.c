@@ -12,7 +12,7 @@
 #include <string.h>
 #include <time.h>
 #include "novantotto.h"
-#include "handler.h"
+#include "handle.h"
 #include "winreg.h"
 #include "winerror.h"
 #include "debug.h"
@@ -68,14 +68,14 @@ LPSTR LocalStorageKey(HKEY hKey, LPCSTR lpSubKey, LSTATUS *pStatus)
     }
     else
     {
-        HANDLE_ENTRY *handle = GetHandle((int)hKey);
-        if (handle == NULL)
+        RESOURCE *res = GetHandle(hKey, HANDLE_REGKEY);
+        if (res == NULL)
         {
             *pStatus = ERROR_INVALID_HANDLE;
             return NULL;
         }
         *pStatus = ERROR_SUCCESS;
-        return ConcatenateKeys(handle->regKey.lpSubKey, lpSubKey);
+        return ConcatenateKeys(res->regKey.lpSubKey, lpSubKey);
     }
 }
 
@@ -105,9 +105,9 @@ LSTATUS RegCreateKeyEx(HKEY hKey, LPCSTR lpSubKey, DWORD Reserved, LPSTR lpClass
         }
     }, localStorageKey);
     // clang-format on
-    HANDLE_ENTRY *handle = AllocateHandle(RegKey, NULL);
-    handle->regKey.lpSubKey = localStorageKey;
-    *phkResult = (HKEY)handle->id;
+    RESOURCE *res = AllocateHandle(HANDLE_REGKEY, NULL);
+    res->regKey.lpSubKey = localStorageKey;
+    *phkResult = (HKEY)res->handle;
     return status;
 }
 
@@ -151,9 +151,9 @@ LSTATUS RegOpenKeyEx(HKEY hKey, LPCSTR lpSubKey, DWORD ulOptions, REGSAM samDesi
     {
         return status;
     }
-    HANDLE_ENTRY *handle = AllocateHandle(RegKey, NULL);
-    handle->regKey.lpSubKey = localStorageKey;
-    *phkResult = (HKEY)handle->id;
+    RESOURCE *res = AllocateHandle(HANDLE_REGKEY, NULL);
+    res->regKey.lpSubKey = localStorageKey;
+    *phkResult = (HKEY)res->handle;
     return status;
 }
 
@@ -172,13 +172,13 @@ LSTATUS RegCloseKey(HKEY hKey)
     {
         return ERROR_SUCCESS;
     }
-    HANDLE_ENTRY *handle = GetHandle((int)hKey);
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hKey, HANDLE_REGKEY);
+    if (res == NULL)
     {
         return ERROR_INVALID_HANDLE;
     }
-    free(handle->regKey.lpSubKey);
-    ReleaseHandle(handle);
+    free(res->regKey.lpSubKey);
+    ReleaseHandle(res);
     return ERROR_SUCCESS;
 }
 

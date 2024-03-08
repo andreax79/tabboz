@@ -12,7 +12,7 @@
 #include <string.h>
 #include <time.h>
 #include "novantotto.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 //*******************************************************************
@@ -21,37 +21,37 @@
 
 INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc)
 {
-    int           controlId;
-    int           dialog = (int)lpTemplateName;
-    int           parentWindowId = -1;
-    MSG           msg;
-    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
+    int       controlId;
+    int       dialog = (int)lpTemplateName;
+    int       parentWindowId = -1;
+    MSG       msg;
+    RESOURCE *res = AllocateHandle(HANDLE_WINDOW, hWndParent);
 
     if (lpDialogFunc == NULL)
     {
         return 0;
     }
-    handle->lpfnWndProc = (WNDPROC)lpDialogFunc;
+    res->lpfnWndProc = (WNDPROC)lpDialogFunc;
     // Get parent window number
     if (hWndParent != NULL)
     {
         parentWindowId = (int)hWndParent;
     }
     // Show dialog
-    JS_ASYNC_CALL("dialogBox", handle, dialog, parentWindowId, hInstance);
+    JS_ASYNC_CALL("dialogBox", res->handle, dialog, parentWindowId, hInstance);
     // Dispatch Init
-    PostMessage((HWND)handle, WM_INITDIALOG, 0, 0);
+    PostMessage(res->handle, WM_INITDIALOG, 0, 0);
     // Dispatch Repaint
-    PostMessage((HWND)handle, WM_PAINT, 0, 0);
+    PostMessage(res->handle, WM_PAINT, 0, 0);
     // Message loop
-    while ((!handle->window.fEnd) && GetMessage(&msg, (HWND)handle, 0, 0) > 0)
+    while ((!res->window.fEnd) && GetMessage(&msg, res->handle, 0, 0) > 0)
     {
         printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
     // Destroy the window
-    DestroyWindow((HWND)handle);
-    return handle->window.dialogResult; // the value to be returned to the function that created the dialog box
+    DestroyWindow(res->handle);
+    return res->window.dialogResult; // the value to be returned to the function that created the dialog box
 }
 
 //*******************************************************************
@@ -60,15 +60,15 @@ INT_PTR DialogBox(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, D
 
 BOOL EndDialog(HWND hWnd, INT_PTR retval)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_WINDOW);
+    if (res == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
     // Set end flag and result
-    handle->window.dialogResult = retval;
-    handle->window.fEnd = TRUE;
+    res->window.dialogResult = retval;
+    res->window.fEnd = TRUE;
     return TRUE;
 }
 
@@ -78,25 +78,29 @@ BOOL EndDialog(HWND hWnd, INT_PTR retval)
 
 LRESULT dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    HANDLE_ENTRY *h = (HANDLE_ENTRY *)hWnd;
+    RESOURCE *res = GetHandle(hWnd, HANDLE_ANY);
+    if (res == NULL)
+    {
+        return FALSE;
+    }
     switch (uMsg)
     {
     case WM_LBUTTONDOWN:
         printf("Left button down\n");
         // Left button down
-        return SendMessage(h->hwndParent, WM_COMMAND, h->dlgItem.nIDDlgItem, lParam);
+        return SendMessage(res->hwndParent, WM_COMMAND, res->control.nIDDlgItem, lParam);
     case BM_GETCHECK:
         // Get the check state of a radio button or check box
-        return JS_CALL_INT("getCheck", h->hwndParent, h->dlgItem.nIDDlgItem);
+        return JS_CALL_INT("getCheck", res->hwndParent, res->control.nIDDlgItem);
     case BM_SETCHECK:
         // Set the check state of a radio button or check box
-        return JS_CALL_INT("setCheck", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
+        return JS_CALL_INT("setCheck", res->hwndParent, res->control.nIDDlgItem, wParam);
     case CB_ADDSTRING:
         // Add a string to the list box of a combo box
-        return JS_CALL_INT("comboBoxAddString", h->hwndParent, h->dlgItem.nIDDlgItem, lParam);
+        return JS_CALL_INT("comboBoxAddString", res->hwndParent, res->control.nIDDlgItem, lParam);
     case CB_SETCURSEL:
         // Select a string in the list of a combo box
-        return JS_CALL_INT("comboBoxSelect", h->hwndParent, h->dlgItem.nIDDlgItem, wParam);
+        return JS_CALL_INT("comboBoxSelect", res->hwndParent, res->control.nIDDlgItem, wParam);
     case WM_PAINT:
         return TRUE;
     default:
@@ -109,27 +113,27 @@ LRESULT dlgItemProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 // Allocate a dialog control
 //*******************************************************************
 
-HANDLE_ENTRY *AllocateDlgItem(HINSTANCE hInstance, LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu)
+RESOURCE *AllocateControl(HINSTANCE hInstance, LPCTSTR lpClassName, HWND hwndParent, HMENU hMenu)
 {
-    HANDLE_ENTRY *h = AllocateHandle(DlgItem, hwndParent);
-    if (h == NULL)
+    RESOURCE *res = AllocateHandle(HANDLE_CONTROL, hwndParent);
+    if (res == NULL)
     {
         return NULL;
     }
-    h->dlgItem.nIDDlgItem = (int)hMenu;
-    h->lpClassName = strdup(lpClassName);
+    res->control.nIDDlgItem = (int)hMenu;
+    res->lpClassName = strdup(lpClassName);
     // Get the dialog control class
     WNDCLASS wndClass;
     if (GetClassInfo(hInstance, lpClassName, &wndClass))
     {
-        h->lpfnWndProc = wndClass.lpfnWndProc;
+        res->lpfnWndProc = wndClass.lpfnWndProc;
     }
     else
     {
         // Class not found - use the default dialog control class
-        h->lpfnWndProc = &dlgItemProc;
+        res->lpfnWndProc = &dlgItemProc;
     }
-    return h;
+    return res;
 }
 
 //*******************************************************************
@@ -138,13 +142,13 @@ HANDLE_ENTRY *AllocateDlgItem(HINSTANCE hInstance, LPCTSTR lpClassName, HWND hwn
 
 UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hDlg, HANDLE_ANY);
+    if (res == NULL)
     {
         // Invalid window handle
         return 0;
     }
-    return JS_CALL_INT("getDlgItemText", handle, nIDDlgItem, lpString, nMaxCount);
+    return JS_CALL_INT("getDlgItemText", res->handle, nIDDlgItem, lpString, nMaxCount);
 }
 
 //*******************************************************************
@@ -153,11 +157,11 @@ UINT GetDlgItemText(HWND hDlg, int nIDDlgItem, LPSTR lpString, int nMaxCount)
 
 BOOL SetDlgItemText(HWND hDlg, int nIDDlgItem, LPCSTR lpString)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hDlg;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hDlg, HANDLE_ANY);
+    if (res == NULL)
     {
         // Invalid window handle
-        return FALSE;
+        return 0;
     }
-    return JS_CALL_INT("setDlgItemText", handle, nIDDlgItem, lpString);
+    return JS_CALL_INT("setDlgItemText", res->handle, nIDDlgItem, lpString);
 }

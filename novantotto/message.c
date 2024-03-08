@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "novantotto.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 static MESAGES_QUEUE *queue = NULL;
@@ -196,9 +196,14 @@ BOOL PostMessage(HWND hWnd, WORD Msg, WORD wParam, LONG lParam)
 
 LRESULT DispatchMessage(const MSG *lpMsg)
 {
-    LRESULT retval = 0;
-    WNDPROC lpfnWndProc = ((HANDLE_ENTRY *)lpMsg->hwnd)->lpfnWndProc;
-    if (lpfnWndProc == NULL)
+    LRESULT   retval = 0;
+    RESOURCE *res = GetHandle(lpMsg->hwnd, HANDLE_ANY);
+    if (res == NULL)
+    {
+        DEBUG_PRINTF("DispatchMessage - res is NULL\n");
+        return 0;
+    }
+    if (res->lpfnWndProc == NULL)
     {
         DEBUG_PRINTF("DispatchMessage - lpfnWndProc is NULL\n");
         return 0;
@@ -216,23 +221,19 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     {
         // Set window icon
         DEBUG_PRINTF("DispatchMessage - WM_SETICON\n");
-        HANDLE_ENTRY *handle = (HANDLE_ENTRY *)lpMsg->hwnd;
-        if (handle != NULL)
-        {
-            JS_CALL("setIcon", handle, (int)lpMsg->lParam);
-        }
+        SetIcon(lpMsg->hwnd, (HICON)lpMsg->lParam);
     }
     else if (lpMsg->wParam == SC_CLOSE)
     {
         // Close window
         DEBUG_PRINTF("DispatchMessage - SC_CLOSE\n");
-        if (!lpfnWndProc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
+        if (!res->lpfnWndProc(lpMsg->hwnd, WM_SYSCOMMAND, lpMsg->wParam, 0))
         {
             EndDialog(lpMsg->hwnd, TRUE);
             // Dispatch destroy to children
             DispatchToChildren(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
             // Dispatch Destroy
-            lpfnWndProc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
+            res->lpfnWndProc(lpMsg->hwnd, WM_DESTROY, lpMsg->wParam, 0);
         }
     }
     else if (lpMsg->wParam == SC_MINIMIZE)
@@ -245,14 +246,29 @@ LRESULT DispatchMessage(const MSG *lpMsg)
     {
         // Dispatch Commmand
         DEBUG_PRINTF("DispatchMessage - Dispatch command hwnd=%ld message=%d wParam=%d lParam=%ld\n", (long)lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
-        retval = lpfnWndProc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
-        // Dispatch Repaint
-        DEBUG_PRINTF("DispatchMessage - WM_PAINT\n");
-        /* lpfnWndProc(lpMsg->hwnd, WM_PAINT, lpMsg->wParam, 0); */
+        retval = res->lpfnWndProc(lpMsg->hwnd, lpMsg->message, lpMsg->wParam, lpMsg->lParam);
+        // Redraw window
         RedrawWindow(lpMsg->hwnd, NULL, NULL, 0);
     }
     DEBUG_PRINTF("DispatchMessage - done retval=%ld\n", retval);
     return retval;
+}
+
+//*******************************************************************
+// Send a message to the children of hWnd
+//*******************************************************************
+
+void DispatchToChildren(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    // Redraw children
+    for (int i = 0; i < global_table->count; i++)
+    {
+        RESOURCE *child = &global_table->entries[i];
+        if ((child->refcount > 0) && (hWnd == child->hwndParent) && (child->lpfnWndProc != NULL))
+        {
+            child->lpfnWndProc(hWnd, uMsg, wParam, lParam);
+        }
+    }
 }
 
 //*******************************************************************

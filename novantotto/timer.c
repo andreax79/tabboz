@@ -21,7 +21,7 @@
 
 static void TimerCb(TIMER *timer)
 {
-    DEBUG_PRINTF("Timer callback %d\n", timer->timeoutId);
+    DEBUG_PRINTF("Timer callback %ld\n", timer->timeoutId);
     if (timer->lpTimerFunc != NULL)
     {
         // Call timer function

@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../windefs.h"
-#include "../handler.h"
 #include "miniunit.h"
 
 int tests_run = 0;

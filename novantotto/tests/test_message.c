@@ -9,20 +9,19 @@
 
 #include <stdio.h>
 #include "../windefs.h"
-#include "../handler.h"
+#include "../handle.h"
 #include "miniunit.h"
 
-int           tests_run = 0;
-HANDLE_ENTRY *hwnd;
-HANDLE_ENTRY *hwnd2;
+int       tests_run = 0;
+RESOURCE *hwnd;
+RESOURCE *hwnd2;
 
 static char *test_post_messages()
 {
-    hwnd = AllocateHandle(Window, NULL);
+    hwnd = AllocateHandle(HANDLE_WINDOW, NULL);
     mu_assert("error, hwnd is NULL", hwnd != NULL);
     for (int i = 0; i < MESSAGE_LIMIT; i++)
     {
-        printf("%d\n", i);
         BOOL t = PostMessage(hwnd, WM_USER, i, i * 2);
         mu_assert("error, queue is full", t);
     }
@@ -56,7 +55,7 @@ static char *test_two_handlers()
 {
     MSG  msg;
     BOOL t;
-    hwnd2 = AllocateHandle(Window, NULL);
+    hwnd2 = AllocateHandle(HANDLE_WINDOW, NULL);
     mu_assert("error, hwnd2 is NULL", hwnd2 != NULL);
     t = PostMessage(hwnd, WM_USER, 1, 0);
     mu_assert("error, queue is full", t);

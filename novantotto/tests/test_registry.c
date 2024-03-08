@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "../windefs.h"
-#include "../handler.h"
 #include "../winreg.h"
 #include "../winerror.h"
 #include "miniunit.h"

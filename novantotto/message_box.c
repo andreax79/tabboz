@@ -11,10 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <emscripten/html5.h>
 #include "novantotto.h"
 #include "property.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 //*******************************************************************
@@ -55,25 +54,25 @@ LRESULT messageBoxProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int MessageBox(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
-    int           parentWindowId = -1;
-    MSG           msg;
-    HANDLE_ENTRY *handle = AllocateHandle(Window, hWnd);
+    int       parentWindowId = -1;
+    MSG       msg;
+    RESOURCE *res = AllocateHandle(HANDLE_WINDOW, hWnd);
 
-    handle->lpfnWndProc = &messageBoxProc;
+    res->lpfnWndProc = &messageBoxProc;
     // Get parent window number
     if (hWnd != NULL)
     {
         parentWindowId = (int)hWnd;
     }
-    JS_ASYNC_CALL_INT("messageBox", handle, lpText, lpCaption, uType, parentWindowId);
+    JS_ASYNC_CALL_INT("messageBox", res->handle, lpText, lpCaption, uType, parentWindowId);
     // Message loop
-    while ((!handle->window.fEnd) && GetMessage(&msg, (HWND)handle, 0, 0) > 0)
+    while ((!res->window.fEnd) && GetMessage(&msg, res->handle, 0, 0) > 0)
     {
         printf("message: %d, wParam: %d\n", msg.message, msg.wParam);
         DispatchMessage(&msg);
     }
     // Destroy the window
-    DestroyWindow((HWND)handle);
+    DestroyWindow(res->handle);
     return msg.wParam; // the value to be returned to the function that created the message box
 }
 

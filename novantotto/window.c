@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "novantotto.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 //*******************************************************************
@@ -34,11 +34,11 @@ LRESULT DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
 {
-    int           parentWindowId = -1;
-    WNDCLASS      wndClass;
-    HANDLE_ENTRY *handle = AllocateHandle(Window, hWndParent);
+    int       parentWindowId = -1;
+    WNDCLASS  wndClass;
+    RESOURCE *res = AllocateHandle(HANDLE_WINDOW, hWndParent);
 
-    handle->lpfnWndProc = &DefWindowProc;
+    res->lpfnWndProc = &DefWindowProc;
     // Get parent window number
     if (hWndParent != NULL)
     {
@@ -47,7 +47,7 @@ HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DW
     // Get class
     if (GetClassInfo(hInstance, lpClassName, &wndClass))
     {
-        handle->lpfnWndProc = wndClass.lpfnWndProc;
+        res->lpfnWndProc = wndClass.lpfnWndProc;
         if (wndClass.lpszMenuName != NULL && hMenu == NULL)
         {
             hMenu = LoadMenu(hInstance, wndClass.lpszMenuName);
@@ -56,15 +56,19 @@ HWND CreateWindowEx(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DW
         // TODO - wndClass.hbrBackground
         // TODO - wndClass.hIcon
     }
-    JS_CALL("createWindow", NULL, handle, X, Y, nWidth, nHeight, lpWindowName, dwStyle, dwExStyle, parentWindowId);
+    JS_CALL("createWindow", NULL, res->handle, X, Y, nWidth, nHeight, lpWindowName, dwStyle, dwExStyle, parentWindowId);
     // Main menu
     if (hMenu != NULL)
     {
-        JS_ASYNC_CALL("addMenuToWindow", handle, hMenu);
+        RESOURCE *menuHandle = GetHandle(hMenu, HANDLE_MENU);
+        if (menuHandle != NULL)
+        {
+            JS_ASYNC_CALL("addMenuToWindow", res->handle, menuHandle->lpResourceName);
+        }
     }
     // Show window
-    JS_CALL("showWindow", handle, 1);
-    return handle;
+    JS_CALL("showWindow", res->handle, 1);
+    return res->handle;
 }
 
 HWND CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam)
@@ -78,13 +82,7 @@ HWND CreateWindow(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWOR
 
 BOOL ShowWindow(HWND hWnd, int nCmdShow)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return FALSE;
-    }
-    return JS_CALL_INT("showWindow", handle, nCmdShow && SW_SHOWNORMAL);
+    return JS_CALL_INT("showWindow", hWnd, nCmdShow && SW_SHOWNORMAL);
 }
 
 //*******************************************************************
@@ -93,13 +91,7 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 
 BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
-    {
-        // Invalid window handle
-        return FALSE;
-    }
-    return JS_CALL_INT("moveWindow", handle, X, Y, nWidth, nHeight);
+    return JS_CALL_INT("moveWindow", hWnd, X, Y, nWidth, nHeight);
 }
 
 //*******************************************************************
@@ -108,18 +100,18 @@ BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
 
 BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_WINDOW);
+    if (res == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
     else
     {
-        lpRect->left = JS_CALL_INT("getWindowRectDimension", handle, 0);
-        lpRect->top = JS_CALL_INT("getWindowRectDimension", handle, 1);
-        lpRect->right = JS_CALL_INT("getWindowRectDimension", handle, 2);
-        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", handle, 3);
+        lpRect->left = JS_CALL_INT("getWindowRectDimension", res->handle, 0);
+        lpRect->top = JS_CALL_INT("getWindowRectDimension", res->handle, 1);
+        lpRect->right = JS_CALL_INT("getWindowRectDimension", res->handle, 2);
+        lpRect->bottom = JS_CALL_INT("getWindowRectDimension", res->handle, 3);
         return TRUE;
     }
 }
@@ -153,23 +145,23 @@ BOOL AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyl
 
 BOOL DestroyWindow(HWND hWnd)
 {
-    HANDLE_ENTRY *handle = (HANDLE_ENTRY *)hWnd;
-    if (handle == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_WINDOW);
+    if (res == NULL)
     {
         // Invalid window handle
         return FALSE;
     }
 
     // Send destroy message
-    SendMessage(hWnd, WM_DESTROY, 0, 0);
-    SendMessage(hWnd, WM_NCDESTROY, 0, 0);
+    SendMessage(res->handle, WM_DESTROY, 0, 0);
+    SendMessage(res->handle, WM_NCDESTROY, 0, 0);
 
     // Dispatch destroy to children
-    DispatchToChildren(hWnd, WM_DESTROY, 0, 0);
+    DispatchToChildren(res->handle, WM_DESTROY, 0, 0);
 
     // Destroy the window
-    JS_CALL("destroyWindow", handle);
-    ReleaseHandle(handle);
+    JS_CALL("destroyWindow", res->handle);
+    ReleaseHandle(res);
 
     return TRUE;
 }
@@ -178,15 +170,19 @@ BOOL DestroyWindow(HWND hWnd)
 
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags)
 {
-    // Redraw children
-    DispatchToChildren(hWnd, WM_PAINT, 0, 0);
-    // Redraw Window
-    WNDPROC lpfnWndProc = ((HANDLE_ENTRY *)hWnd)->lpfnWndProc;
-    if (lpfnWndProc == NULL)
+    RESOURCE *res = GetHandle(hWnd, HANDLE_WINDOW);
+    if (res == NULL)
     {
         return FALSE;
     }
-    return lpfnWndProc(hWnd, WM_PAINT, 0, 0);
+    // Redraw children
+    DispatchToChildren(res->handle, WM_PAINT, 0, 0);
+    // Redraw Window
+    if (res->lpfnWndProc == NULL)
+    {
+        return FALSE;
+    }
+    return res->lpfnWndProc(res->handle, WM_PAINT, 0, 0);
 }
 
 //*******************************************************************

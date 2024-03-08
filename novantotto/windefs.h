@@ -574,10 +574,14 @@ extern BOOL     PostMessage(HWND hwnd, WORD message, WORD wParam, LONG lParam);
 extern BOOL     PeekMessage(LPMSG msg, HWND hwnd, WORD wMsgFilterMin, WORD wMsgFilterMax, BOOL wRemoveMsg);
 extern BOOL     TranslateMessage(const MSG *lpMsg);
 extern HICON    LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName);
-extern HCURSOR  LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
-extern HMENU    LoadMenu(HINSTANCE hInstance, LPCSTR lpMenuName);
-extern HBITMAP  LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
 extern BOOL     DestroyIcon(HICON hIcon);
+extern HCURSOR  LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName);
+extern BOOL     DestroyCursor(HCURSOR hCursor);
+extern HMENU    LoadMenu(HINSTANCE hInstance, LPCSTR lpMenuName);
+extern BOOL     DestroyMenu(HMENU hMenu);
+extern HBITMAP  LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName);
+extern HACCEL   LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName);
+extern BOOL     DestroyAcceleratorTable(HACCEL hAccel);
 extern BOOL     DeleteObject(void *ho);
 extern HDC      BeginPaint(HWND hWnd, LPPAINTSTRUCT lpPaint);
 extern BOOL     EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
@@ -591,7 +595,6 @@ extern ATOM     RegisterClass(const WNDCLASS *lpWndClass);
 extern BOOL     UnregisterClass(LPCSTR lpClassName, HANDLE hInstance);
 extern BOOL     GetClassInfo(HINSTANCE hInstance, LPCSTR lpClassName, LPWNDCLASS lpWndClass);
 extern int      TranslateAccelerator(HWND hWnd, HACCEL hAccTable, LPMSG lpMsg);
-extern HACCEL   LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName);
 extern BOOL     DestroyWindow(HWND hWnd);
 extern BOOL     RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
 extern DWORD    GetTickCount();
@@ -612,6 +615,8 @@ extern BOOL     sndPlaySound(LPCTSTR lpszSound, UINT fuSound);
 extern HMENU    GetSystemMenu(HWND hWnd, BOOL bRevert);
 extern BOOL     InsertMenu(HMENU hMenu, UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, LPCSTR lpNewItem);
 extern void     randomize();
+extern BOOL     DrawBitmap(HDC hdc, LPCSTR lpCanvasClass, HBITMAP hBitmap, int X, int Y);
+extern BOOL     SetIcon(HWND hWnd, HICON hIcon);
 
 #include "winreg.h"
 

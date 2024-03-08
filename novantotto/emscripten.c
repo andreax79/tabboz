@@ -14,7 +14,7 @@
 #include <emscripten/html5.h>
 #include "novantotto.h"
 #include "property.h"
-#include "handler.h"
+#include "handle.h"
 #include "debug.h"
 
 //*******************************************************************
@@ -51,89 +51,6 @@ BOOL InsertMenu(HMENU hMenu, UINT uPosition, UINT uFlags, UINT_PTR uIDNewItem, L
 int GetSystemMetrics(int nIndex)
 {
     return JS_CALL_INT("getSystemMetrics", nIndex);
-}
-
-//*******************************************************************
-// Return cursor id
-//*******************************************************************
-
-HCURSOR LoadCursor(HINSTANCE hInstance, LPCSTR lpCursorName)
-{
-    if (HIWORD((unsigned long)lpCursorName) != 0)
-    {
-        return NULL;
-    }
-    return (HCURSOR)lpCursorName;
-}
-
-//*******************************************************************
-// Return icon id
-//*******************************************************************
-
-HICON LoadIcon(HINSTANCE hInstance, LPCSTR lpIconName)
-{
-    if (HIWORD((unsigned long)lpIconName) != 0)
-    {
-        return NULL;
-    }
-    return (HICON)lpIconName;
-}
-
-//*******************************************************************
-// Return menu id
-//*******************************************************************
-
-HMENU LoadMenu(HINSTANCE hInstance, LPCSTR lpMenuName)
-{
-    if (HIWORD((unsigned long)lpMenuName) != 0)
-    {
-        return NULL;
-    }
-    return (HMENU)lpMenuName;
-}
-
-//*******************************************************************
-// No nothing
-//*******************************************************************
-
-BOOL DestroyIcon(HICON hIcon)
-{
-    return TRUE;
-}
-
-//*******************************************************************
-// Return bitmap id
-//*******************************************************************
-
-HBITMAP LoadBitmap(HINSTANCE hInstance, LPCSTR lpBitmapName)
-{
-    if (HIWORD((unsigned long)lpBitmapName) != 0)
-    {
-        return NULL;
-    }
-    return (HBITMAP)lpBitmapName;
-}
-
-//*******************************************************************
-// No nothing
-//*******************************************************************
-
-BOOL DeleteObject(void *ho)
-{
-    return TRUE;
-}
-
-//*******************************************************************
-// Return accellerator table id
-//*******************************************************************
-
-HACCEL LoadAccelerators(HINSTANCE hInstance, LPCSTR lpTableName)
-{
-    if (HIWORD((unsigned long)lpTableName) != 0)
-    {
-        return NULL;
-    }
-    return (HACCEL)lpTableName;
 }
 
 //*******************************************************************
@@ -267,9 +184,9 @@ int WinMainStartup()
     if (!bIsOpen)
     {
         bIsOpen = TRUE;
-        HANDLE_ENTRY *handle = AllocateHandle(Window, NULL);
-        WinMain((HANDLE)handle, NULL, "", SW_SHOWNORMAL);
-        ReleaseHandle(handle);
+        RESOURCE *res = AllocateHandle(HANDLE_WINDOW, NULL);
+        WinMain(res->handle, NULL, "", SW_SHOWNORMAL);
+        ReleaseHandle(res);
         bIsOpen = FALSE;
     }
     else
