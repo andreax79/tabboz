@@ -39,7 +39,7 @@ test:
 	make -C novantotto test
 
 export:
-	RESOURCES_DIR="./resources" ./novantotto/export/export.sh *.RES
+	RESOURCES_DIR="./resources" ./novantotto/utils/export.sh *.RES
 
-dialogs:
-	RESOURCES_DIR="./resources/" ./novantotto/export/rc.sh resources/dialogs/dialogs.rc
+rc:
+	RESOURCES_DIR="./resources/" ./novantotto/utils/rc.sh resources/dialogs/dialogs.rc

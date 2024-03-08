@@ -208,6 +208,26 @@ class Dialog:
         }
         return self.post_parse(control)
 
+    def parse_icon(self, line: str, style: str = "SS_ICON") -> dict[str, str | int]:
+        x = split_string(line)
+        control = {
+            "text": prepare_text(x[0]),
+            "id": int(x[1]),
+            "x": int(x[2]) * SCALE + self.dx,
+            "y": int(x[3]) * SCALE + self.dy,
+            "width": None,
+            "height": None,
+            "style": (strip(x[6]).split("|") if len(x) > 6 else [])
+            + ([style] if style else []),
+            "combined_id": (int(x[1]) << 16) + int(self.dialog_id),
+            "css_class": (
+                f"dlg_item control{int(x[1])}" if int(x[1]) != -1 else "control"
+            ),
+            "class": "SS_ICON",
+            "extra": "",
+        }
+        return self.post_parse(control)
+
     def parse_pushbutton(self, line: str, style: str) -> dict[str, str | int]:
         x = split_string(line)
         if style:
@@ -520,6 +540,7 @@ def convert_rc(filename: str) -> None:
     dialog: Dialog | None = None
     with open(filename, "r") as file:
         in_definition = False
+        in_dialog = False
         for line in file:
             line = line.strip()
             if not line or line.startswith("#") or line.startswith("//"):
@@ -527,6 +548,7 @@ def convert_rc(filename: str) -> None:
             if " " in line:
                 t, line = line.split(" ", 1)
                 if line.startswith("DIALOG"):
+                    in_dialog = True
                     if dialog is not None:
                         dialog.write()
                     dialog = Dialog(t, line)
@@ -554,8 +576,9 @@ def convert_rc(filename: str) -> None:
                     x = split_string(line)
             elif t == "}" or t == "END":
                 in_definition = False
+                in_dialog = False
                 continue
-            if in_definition:
+            if in_definition and in_dialog:
                 if t == "CONTROL":
                     control = dialog.parse_control(line)
                     dialog.add_control(control)
@@ -574,6 +597,11 @@ def convert_rc(filename: str) -> None:
                 elif t == "PUSHBUTTON":
                     control = dialog.parse_pushbutton(line, "BS_PUSHBUTTON")
                     dialog.add_control(control)
+                elif t == "ICON":
+                    control = dialog.parse_icon(line)
+                    dialog.add_control(control)
+                else:
+                    print(t)
 
     if dialog is not None:
         dialog.write()

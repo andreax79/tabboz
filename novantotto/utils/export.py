@@ -37,8 +37,9 @@ class ResourceItem:
     type: ResourceType
     data: bytes
 
+
 if not "RESOURCES_DIR" in os.environ:
-    print("Error: RESOURCES_DIR environment variable is not set.");
+    print("Error: RESOURCES_DIR environment variable is not set.")
     sys.exit(1)
 
 base_path = Path(os.environ["RESOURCES_DIR"])
