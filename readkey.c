@@ -5,17 +5,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -42,14 +42,14 @@ char nome_del_file_su_cui_salvare[256];
 
 // Memorizza una stringa nel profilo.
 
-void TabbozAddKey(char *KeyName, char *KeyValue);
+void TabbozAddKey(char *KeyName, char *KeyValue)
 {
     WriteProfileString("Tabboz", KeyName, KeyValue);
 };
 
 // Legge una stringa dal profilo.
 
-extern char *TabbozReadKey(char *key, char *buf);
+extern char *TabbozReadKey(char *key, char *buf)
 {
     GetProfileString("Tabboz", key, NULL, buf, 32);
     if (*buf == NULL)
@@ -80,9 +80,11 @@ char *RRKey(char *xKey)
 // Windows 32 ---------------------------------------------------------------
 // Per Windows 9X, NT, 2000, ...
 
-#ifdef TABBOZ32
+#if defined(TABBOZ_WIN32) || defined(TABBOZ_EM)
 
+#ifdef TABBOZ_WIN32
 #include <mmsystem.h> // Per sndPlaySound
+#endif
 
 #define REG_MAXSIZE 30 // Numero massimo di caratteri
 #define TABBOZ_KEY_NAME "Software\\Obscured Truckware\\Tabboz Simulator 32"
@@ -90,7 +92,7 @@ char *RRKey(char *xKey)
 void SpegniISuoni()
 {
     PlaySound(NULL, NULL, 0x0040);
-    //	PlaySound(NULL,NULL,SND_PURGE);
+    //  PlaySound(NULL,NULL,SND_PURGE);
 }
 
 // Aggiunge una stringa al registro di configurazione
@@ -147,7 +149,7 @@ char *TabbozReadKey(char *KeyName, char *KeyValue)
     else
     { // 21 lug 2000 - Lettura da un file specifico.
         GetPrivateProfileString("Tabboz", KeyName, NULL, KeyValue, 32, nome_del_file_su_cui_salvare);
-        if (*KeyValue == NULL)
+        if (*KeyValue == '\0')
             return NULL;
         return KeyValue;
     }
@@ -157,7 +159,7 @@ char *TabbozReadKey(char *KeyName, char *KeyValue)
 void TabbozPlaySound(int number)
 {
     char filename[20];
-    sprintf(filename, "Tabs%04d.Wav", number);
+    sprintf(filename, "tabs%04d.wav", number);
     sndPlaySound(filename, SND_ASYNC | SND_NODEFAULT);
 };
 

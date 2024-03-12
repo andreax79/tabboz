@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>Tabboz Simulator</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes" />
+    <link rel="stylesheet" href="resources/css/98.css" />
+    <link rel="stylesheet" href="resources/css/novantotto.css" />
+    <script src="resources/js/novantotto.js"></script>
+    <link rel="icon" type="image/x-icon" href="resources/icons/1.ico" />
+  </head>
+  <body>
+    <a href="https://github.com/andreax79/tabboz/" style="position: absolute; top: 0; right: 0; z-index: 1" ><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1" /></a>
+    <div class="screen" id="screen">
+    </div>
+    <script type="text/javascript">
+    var Module = {
+        postRun: () => addDesktopIcon('zarrosim', 'ZARROSIM', 'Tabboz Simulator'),
+        print: (text) => console.log(text),
+    };
+    </script>
+    <script async type="text/javascript" src="zarrosim.js"></script>
+  </body>
+</html>

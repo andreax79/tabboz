@@ -5,17 +5,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -31,28 +31,27 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 /* Per una questione di svogliatezza del programmatore, viene usata STSCOOTER anche x i vestiti, */
 /* le materie scolastiche e qualche altra cosa che adesso non mi viene in mente...               */
 
-STSCOOTER MaterieMem[] =
-    {
-        {0, 0, 0, 0, 0, 0, 0, 0, "---"                  },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Agraria"              },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Fisica"               },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Attivita' culturali"  }, /* fine alla 0.6.3 era "culurali..." */
-        {0, 0, 0, 0, 0, 0, 0, 0, "Attivita' matematiche"},
-        {0, 0, 0, 0, 0, 0, 0, 0, "Scienze industriali"  },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Elettrochimica"       },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Petrolchimica"        },
-        {0, 0, 0, 0, 0, 0, 0, 0, "Filosofia aziendale"  }, /* fino alla 0.5.3 "aziendale" aveva due zeta... */
-        {0, 0, 0, 0, 0, 0, 0, 0, "Metallurgia"          }
+STSCOOTER MaterieMem[] = {
+    {0, 0, 0, 0, 0, 0, 0, 0, "---"                  },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Agraria"              },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Fisica"               },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Attivita' culturali"  }, /* fine alla 0.6.3 era "culurali..." */
+    {0, 0, 0, 0, 0, 0, 0, 0, "Attivita' matematiche"},
+    {0, 0, 0, 0, 0, 0, 0, 0, "Scienze industriali"  },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Elettrochimica"       },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Petrolchimica"        },
+    {0, 0, 0, 0, 0, 0, 0, 0, "Filosofia aziendale"  }, /* fino alla 0.5.3 "aziendale" aveva due zeta... */
+    {0, 0, 0, 0, 0, 0, 0, 0, "Metallurgia"          }
 };
-/*     |			*/
-/*     \voto in una materia */
+/*         |                    */
+/*         \voto in una materia */
 
 void ScriviVoti(HWND parent);
 void Aggiorna(HWND parent);
 BOOL CheckVacanza(HWND parent);
 
 /********************************************************************/
-/* Scuola...							    */
+/* Scuola...                                                        */
 /********************************************************************/
 
 #pragma argsused

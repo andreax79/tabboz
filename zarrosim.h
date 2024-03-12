@@ -5,17 +5,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+     it under the terms of the GNU General Public License as published by
      the Free Software Foundation, either version 3 of the License, or
      (at your option) any later version.
 
-     Nome-Programma is distributed in the hope that it will be useful,
+     Tabboz Simulator is distributed in the hope that it will be useful,
      but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      GNU General Public License for more details.
 
      You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // #define VERSION	      "Version 0.9pr"
@@ -46,7 +46,6 @@ static char copyright[] =
 #endif /* not lint */
 
 #ifdef NOT_WINDOWS
-
 #define IDOK 1
 #define IDCANCEL 2
 #define IDABORT 3
@@ -55,6 +54,7 @@ static char copyright[] =
 #endif
 
 #define QX_NOME 102
+#define QX_BMP 103
 #define QX_SOLDI 105
 #define QX_LOAD 106
 #define QX_SAVE 107
@@ -104,6 +104,7 @@ static char copyright[] =
 #define LOGO 12
 #define LAVORO 13
 #define CONFIGURATION 14
+#define FORMAT 15
 #define SPEGNIMI 16
 #define NETWORK 17
 #define PROMPT 20
@@ -272,8 +273,12 @@ extern char   un_una[];
 extern char  *n_attivita[]; //  7 Maggio 1998
 
 #ifdef TABBOZ_DEBUG // Sistema di Debug... [12 Giugno 1998]
-extern FILE *debugfile;
-extern void  writelog(char *s); // 22 Giugno 1998
+#ifdef TABBOZ_EM
+#define LOGFILE "/dev/stdout"
+#else
+#define LOGFILE "\\ZARROSIM.LOG"
+#endif
+extern void writelog(const char *s); // 22 Giugno 1998
 #endif
 
 #ifndef NONETWORK
@@ -287,11 +292,9 @@ extern void TabbozStartNet(HANDLE hDlg); // 24 Giugno 1998
 
 // POI LE STRONZATE PER LE FINESTRELLE...
 
-#ifdef TABBOZ_WIN
 extern HANDLE hInst;
 extern HWND   hWndMain;
 extern HANDLE hdlgr;
-#endif
 
 // ED I PROTOTIPI FUNZIONI...
 
@@ -352,3 +355,5 @@ extern void AggiornaPrincipale();
 extern void Giorno(HANDLE hInstance);
 extern void CalcolaStudio(void);
 extern void CalcolaVelocita(HANDLE hDlg);
+extern void SalvaTutto(void);
+extern void AggiornaTipa(HWND hDlg);

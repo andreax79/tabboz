@@ -5,17 +5,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Iniziato il 26 Febbraio 1999         */
@@ -27,11 +27,25 @@
 #include "os.h"
 #include "zarrosim.h"
 #include <stdio.h>
+#include <string.h>
 
 #define IMG_SIZEX 143
 #define IMG_SIZEY 275
 #define IMG_X_INC 10
 #define IMG_Y_INC 0
+
+// clang-format off
+#ifdef DEBUG
+#define DEBUG_PRINTF(...) printf("DEBUG: " __VA_ARGS__)
+#else
+#ifdef __BORLANDC__
+static void debug_printf(const char *format, ...) {}
+#define DEBUG_PRINTF debug_printf
+#else
+#define DEBUG_PRINTF(...) do {} while (0)
+#endif
+#endif
+// clang-format on
 
 static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 
@@ -39,9 +53,19 @@ static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
 /* Parte per (cercare) di disegnare le immagini trasparenti...       */
 /*********************************************************************/
 
+#ifdef TABBOZ_EM
+
+#pragma argsused
+static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
+                                  HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
+{
+    DrawBitmap(hdc, "BMPView", hbmpSrc, x, y);
+}
+
+#else
+
 // Disegna una BMP trasparente
 // Necessita della BMP stessa e di una maschera.
-
 #pragma argsused
 static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
                                   HBITMAP hbmpMsk, int x, int y, int cx, int cy, int sx, int sy)
@@ -65,6 +89,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
     DeleteDC(hdcSrc);
     DeleteDC(hdcMsk);
 }
+#endif
 
 /*********************************************************************/
 // Genera una maschera per una determinata immagine ed adatta
@@ -73,6 +98,7 @@ static void DrawTransparentBitmap(HDC hdc, HBITMAP hbmpSrc,
 #pragma argsused
 static HBITMAP CreateTransparentMask(HBITMAP hbmpSrc, COLORREF rgbTransparent)
 {
+#ifndef TABBOZ_EM
     BITMAP  bm;
     HBITMAP hbmpMsk;
     HDC     hdc = GetDC(NULL); // get the screen DC
@@ -105,6 +131,9 @@ static HBITMAP CreateTransparentMask(HBITMAP hbmpSrc, COLORREF rgbTransparent)
     DeleteDC(hdcMsk);
     DeleteDC(hdcSrc);
     return hbmpMsk;
+#else
+    return NULL;
+#endif
 }
 
 /*********************************************************************/
@@ -122,6 +151,7 @@ int static NEAR PASCAL WMCreate(HWND hwnd, LPCREATESTRUCT lpCS)
     HBITMAP hbmp_scarpe;
     HBITMAP hbmp_sfondo;
 
+    DEBUG_PRINTF("WMCreate\n");
     TabbozRedraw = 0; // Visto che sta venendo caricato ora, non necessita di essere caricato ancora...
 
     switch (ImgSelector)
@@ -174,10 +204,10 @@ int static NEAR PASCAL WMCreate(HWND hwnd, LPCREATESTRUCT lpCS)
         SetProp(hwnd, "hbmp_sfondo", hbmp_sfondo);
 
         SetWindowPos(hwnd, NULL, 0, 0, IMG_SIZEX, IMG_SIZEY, SWP_NOMOVE | SWP_NOZORDER);
-        return 0;
     }
 
-    return 0; // report failure
+    DEBUG_PRINTF("WMCreate done\n");
+    return 0;
 }
 
 /*********************************************************************/
@@ -197,6 +227,7 @@ int static NEAR PASCAL WMDestroy(HWND hwnd)
     HBITMAP hmask_scarpe = GetProp(hwnd, "hmask_scarpe");
     HBITMAP hmask_sfondo = GetProp(hwnd, "hmask_sfondo");
 
+    DEBUG_PRINTF("WMDestroy\n");
     if (hbmp_testa)
     {
         DeleteObject(hbmp_testa);
@@ -249,6 +280,7 @@ int static NEAR PASCAL WMDestroy(HWND hwnd)
         RemoveProp(hwnd, "hmask_sfondo");
     }
 
+    DEBUG_PRINTF("WMDestroy done\n");
     return 0;
 }
 
@@ -269,8 +301,10 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
     HBITMAP     hmask_pantaloni;
     HBITMAP     hmask_scarpe;
     HBITMAP     hmask_sfondo;
+    HDC         hdc;
 
-    HDC hdc = BeginPaint(hwnd, &ps);
+    DEBUG_PRINTF("WMPaint TabbozRedraw=%d\n", TabbozRedraw);
+    hdc = BeginPaint(hwnd, &ps);
 
     if (TabbozRedraw)
     { // Ricarica le immagini...
@@ -324,6 +358,7 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
     }
 
     EndPaint(hwnd, &ps);
+    DEBUG_PRINTF("WMPaint done\n");
 
     return 0;
 }
@@ -332,7 +367,6 @@ int static NEAR PASCAL WMPaint(HWND hwnd)
 // Classe BMPView
 
 #pragma argsused
-
 long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
                                WORD wParam, LONG lParam)
 {
@@ -343,10 +377,16 @@ long FAR PASCAL BMPViewWndProc(HWND hWnd, WORD msg,
     case WM_DESTROY:
         return WMDestroy(hWnd);
     case WM_PAINT:
+#ifdef TABBOZ_EM
+        if (!TabbozRedraw)
+        {
+            return (0);
+        }
+#endif
         return WMPaint(hWnd);
     case WM_LBUTTONDOWN:
         /* Display Personal Information box. */
-        DialogBox(hInst, MAKEINTRESOURCE(PERSONALINFO), hWnd, PersonalInfo);
+        DialogBox(hInst, MAKEINTRESOURCE(PERSONALINFO), hWnd, (DLGPROC)PersonalInfo);
         AggiornaPrincipale(hWndMain);
         return (0);
     }
@@ -362,13 +402,13 @@ ATOM RegisterBMPViewClass(HANDLE hInst)
     WNDCLASS wc;
     memset(&wc, 0, sizeof(wc));
 
-    wc.lpfnWndProc = BMPViewWndProc;
+    wc.lpfnWndProc = (WNDPROC)BMPViewWndProc;
     wc.hInstance = hInst;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 #ifdef TABBOZ_WIN16
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW) + 1;
 #else
-    wc.hbrBackground = (COLOR_WINDOW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 #endif
     wc.lpszClassName = "BMPView";
     return RegisterClass(&wc);
@@ -387,15 +427,22 @@ ATOM RegisterBMPViewClass(HANDLE hInst)
 int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
 {
     HBITMAP hbmp = LoadBitmap(hInst, MAKEINTRESOURCE(current_tipa + 1204));
+    DEBUG_PRINTF("WMTipaCreate\n");
     if (hbmp)
     {
+#ifndef TABBOZ_EM
         BITMAP bm;
+#endif
         SetProp(hwnd, "hTipa", hbmp);
+#ifndef TABBOZ_EM
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         SetWindowPos(hwnd, NULL, 0, 0, bm.bmWidth, bm.bmHeight,
                      SWP_NOMOVE | SWP_NOZORDER);
+#endif
+        DEBUG_PRINTF("WMTipaCreate done\n");
         return 0;
     }
+    DEBUG_PRINTF("WMTipaCreate failure (error loading resource)\n");
     return -1; // report failure
 }
 
@@ -406,11 +453,13 @@ int static NEAR PASCAL WMTipaCreate(HWND hwnd, LPCREATESTRUCT lpCS)
 int static NEAR PASCAL WMTipaDestroy(HWND hwnd)
 {
     HBITMAP hbmp = GetProp(hwnd, "hTipa");
+    DEBUG_PRINTF("WMTipaDestroy\n");
     if (hbmp)
     {
         DeleteObject(hbmp);
         RemoveProp(hwnd, "hTipa");
     }
+    DEBUG_PRINTF("WMTipaDestroy done\n");
     return 0;
 }
 
@@ -422,18 +471,24 @@ int static NEAR PASCAL WMTipaPaint(HWND hwnd)
 {
     PAINTSTRUCT ps;
     HDC         hdc = BeginPaint(hwnd, &ps);
-    HDC         hdcMem = CreateCompatibleDC(hdc);
     HBITMAP     hbmp = GetProp(hwnd, "hTipa");
+    DEBUG_PRINTF("WMTipaPaint\n");
     if (hbmp)
     {
+#ifdef TABBOZ_EM
+        DrawBitmap(hdc, "BMPTipa", hbmp, 0, 0);
+#else
         BITMAP bm;
+        HDC    hdcMem = CreateCompatibleDC(hdc);
         GetObject(hbmp, sizeof(bm), (LPSTR)&bm);
         hbmp = SelectObject(hdcMem, hbmp);
         BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
         hbmp = SelectObject(hdcMem, hbmp);
+        DeleteDC(hdcMem);
+#endif
     }
-    DeleteDC(hdcMem);
     EndPaint(hwnd, &ps);
+    DEBUG_PRINTF("WMTipaPaint done\n");
     return 0;
 }
 
@@ -487,9 +542,11 @@ long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
             else
             {
                 MessageBox(hWnd, "Mmhhhhhhhh.........", "Palpatina...", MB_OK | MB_ICONINFORMATION);
+#ifdef WONTFIX
                 Rapporti + 3;
                 if (Rapporti < 100)
                     Rapporti = 100;
+#endif
                 Giorno(hWnd);
                 AggiornaTipa(tipahDlg);
             }
@@ -507,15 +564,10 @@ ATOM RegisterBMPTipaClass(HANDLE hInst)
 {
     WNDCLASS wc;
     memset(&wc, 0, sizeof(wc));
-    wc.lpfnWndProc = BMPTipaWndProc;
+    wc.lpfnWndProc = (WNDPROC)BMPTipaWndProc;
     wc.hInstance = hInst;
     wc.hCursor = LoadCursor(hInst, MAKEINTRESOURCE(10));
-//	wc.hCursor = LoadCursor(NULL,IDC_ARROW);
-#ifdef TABBOZ_WIN16
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
-#else
-    wc.hbrBackground = (COLOR_WINDOW);
-#endif
     wc.lpszClassName = "BMPTipa";
     return RegisterClass(&wc);
 }

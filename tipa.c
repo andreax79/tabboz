@@ -6,17 +6,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -38,7 +38,8 @@ BOOL FAR PASCAL CercaTipa(HWND hDlg, WORD message, WORD wParam, LONG lParam);
 BOOL FAR PASCAL DueDiPicche(HWND hDlg, WORD message, WORD wParam, LONG lParam);
 void            DescrizioneTipa(int f);
 void            DescrizioneTipo(int f);
-void            AggiornaTipa(HWND hDlg);
+long FAR PASCAL BMPTipaWndProc(HWND hWnd, WORD msg,
+                               WORD wParam, LONG lParam);
 
 // ------------------------------------------------------------------------------------------
 // Tipa...
@@ -52,8 +53,10 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
     FARPROC lpproc;
     int     lasciaoraddoppia;
 
-    if (message == WM_INITDIALOG)
+    switch (message)
     {
+
+    case WM_INITDIALOG:
         if (sesso == 'M')
             spostamento = 0;
         else
@@ -61,10 +64,8 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
         AggiornaTipa(hDlg);
         tipahDlg = hDlg;
         return (TRUE);
-    }
 
-    else if (message == WM_COMMAND)
-    {
+    case WM_COMMAND:
         switch (wParam)
         {
         case 110: // Cerca tipa
@@ -226,7 +227,7 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
             Soldi -= 15;
 #ifdef TABBOZ_DEBUG
-            sprintf(tmp, "tipa: Esci con la tipa\/o (%s)", MostraSoldi(15));
+            sprintf(tmp, "tipa: Esci con la tipa/o (%s)", MostraSoldi(15));
             writelog(tmp);
 #endif
 
@@ -246,6 +247,12 @@ BOOL FAR PASCAL Tipa(HWND hDlg, WORD message, WORD wParam, LONG lParam)
 
             AggiornaTipa(hDlg);
             return (TRUE);
+
+#ifdef TABBOZ_EM
+        case 130:
+            BMPTipaWndProc(hDlg, WM_LBUTTONDOWN, wParam, lParam);
+            break;
+#endif
 
         case IDCANCEL:
         case IDOK:
@@ -476,7 +483,7 @@ void DescrizioneTipa(int f)
     else
         sprintf(buf, "E' un tipo...");
 
-    sprintf(descrizione, buf);
+    strncpy(descrizione, buf, sizeof(buf));
 }
 
 // ------------------------------------------------------------------------------------------
@@ -506,7 +513,7 @@ void DescrizioneTipo(int f)
     else
         sprintf(buf, "Inutile...");
 
-    sprintf(descrizione, buf);
+    strncpy(descrizione, buf, sizeof(buf));
 }
 
 // ------------------------------------------------------------------------------------------
@@ -552,7 +559,7 @@ BOOL FAR PASCAL DueDiPicche(HWND hDlg, WORD message, WORD wParam, LONG lParam)
             i++;
             if (i > 5)
             {
-                sprintf(tmp, "Fino ad ora hai preso %d due di picche !\nNon ti preoccupare, capita a tutti di prendere qualche due di picche nella vita ...", DDP);
+                sprintf(tmp, "Fino ad ora hai preso %lu due di picche !\nNon ti preoccupare, capita a tutti di prendere qualche due di picche nella vita ...", DDP);
                 MessageBox(hDlg,
                            tmp, "La vita e' bella...", MB_OK | MB_ICONINFORMATION);
                 i = 0;

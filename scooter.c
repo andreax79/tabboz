@@ -6,17 +6,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+     along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -600,7 +600,7 @@ void AggiornaScooter(HWND hDlg)
         SetDlgItemText(hDlg, 112, n_carburatore[ScooterData.carburatore]);
         SetDlgItemText(hDlg, 113, n_cc[ScooterData.cc]);
         SetDlgItemText(hDlg, 114, n_filtro[ScooterData.filtro]);
-        sprintf(tmp, "%d%", ScooterData.stato);
+        sprintf(tmp, "%d%%", ScooterData.stato);
         SetDlgItemText(hDlg, 115, tmp);
 
         SetDlgItemText(hDlg, 117, MostraSoldi(ScooterData.prezzo));

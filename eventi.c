@@ -5,17 +5,17 @@
      This file is part of Tabboz Simulator.
 
      Tabboz Simulator is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
 
-    Nome-Programma is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+     Tabboz Simulator is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-     along with Nome-Programma.  If not, see <http://www.gnu.org/licenses/>.
+     You should have received a copy of the GNU General Public License
+      along with Tabboz Simulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "os.h"
@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef TABBOZ_EM
+#include <ctype.h>
+#endif
 
 #include "zarrosim.h"
 static char sccsid[] = "@(#)" __FILE__ " " VERSION " (Andrea Bonomi) " __DATE__;
@@ -349,15 +352,15 @@ void Evento(HANDLE hInstance)
 
             // -------------- Figosita' --------------------------------------------------------------------
 
-        case 21: // + gravi
-        case 22: //  |
-        case 23:
+        case 21:       // + gravi
+        case 22:       //  |
+        case 23:       //  |
             Fama -= 5; //  |
         case 24:       //  |
-        case 25:
+        case 25:       //  |
             Fama -= 1; //  |
         case 26:       //  |
-        case 27:
+        case 27:       //  |
             Fama -= 1; //  |
         case 28:       // \|/
         case 29:       // - gravi
@@ -484,6 +487,7 @@ void Evento(HANDLE hInstance)
         case 44:
 
             if ((Rapporti > 0) && (sesso == 'M'))
+            {
                 if (caso == 43)
                 {
                     i = MessageBox(hInstance,
@@ -514,6 +518,7 @@ void Evento(HANDLE hInstance)
                             Rapporti = 5;
                     }
                 }
+            }
 
 #ifdef TABBOZ_DEBUG
             writelog("eventi: Domande inutili della tipa...");
@@ -555,6 +560,10 @@ void Evento(HANDLE hInstance)
             ;
         }
     }
+
+#ifdef TABBOZ_EM
+    SalvaTutto();
+#endif
 }
 
 //
