@@ -1,35 +1,51 @@
-# tabboz
-Tabboz Simulator
+<div align="center">
+  <a href="https://andreax79.github.io/tabboz/" target="_blank"><img alt="Tabboz Simulator" src="https://github.com/andreax79/tabboz/assets/1288154/64269165-8958-4f3a-945a-82c3ffffd4de"/></a>
+</div>
+<br/>
 
-## Istruzioni per la build
+Simply tap the icon to launch the Tabboz Simulator directly in your browser.
 
-A giudicare da alcune scelte tecnologiche e dalle date, si puo' concludere che tabbozz sia stato sviluppato sotto Windows 95/98 con il compilatore Borland C++ 4.5 (da non confondere con il piu' moderno Borland/Embarcadero C++ Builder).
+## 🖥️ Web development
 
-E' possibile tuttavia fare la build del progetto con del software leggermente meno datato, in modo da poter evitare di lanciare  madonne ai noti problemi di stabilita' di wWin95/98 e riservarle per il succo del lavoro, ovvero lo sviluppo.
+<div align="center">
+  <a href="https://andreax79.github.io/tabboz/" target="_blank"><img alt="Tabboz Simulator Screenshot" src="https://github.com/andreax79/tabboz/assets/1288154/0999ef77-3e7a-45a0-9a0b-1206a6f5bddd"/></a>
+</div>
+<br/>
 
-### Prerequisiti
+### 📖 Prerequisites
 
-Per poter fare la build di tabbozz sono necessari i seguenti tool:
+In order to compile the project we need the following software installed on our development machine:
+- Python >= 3.8
+- [Emscripten](https://emscripten.org/)
 
-1. Installazione di Windows XP (si puo' usare un macchina virtuale VirtualBox con windows xp SP2 su Linux se si vuole)
-2. Borland C++ 5 (reperibile [qui](https://winworldpc.com/product/borland-c/5x))
+### 📦 Builds
 
-Essendo il codice un po' datato non e' facile reperire aiuto online, percio' puo' tornare utile avere una copia del [Manuale per Sviluppatori del Borland C++ 5](http://www.google.com/url?q=http%3A%2F%2Fbitsavers.informatik.uni-stuttgart.de%2Fpdf%2Fborland%2Fborland_C%2B%2B%2FBorland_C%2B%2B_Version_5_Programmers_Guide_1997.pdf&sa=D&sntz=1&usg=AOvVaw3eHAJijDEbPyPtNe9qBNy6) e della [Guida dell'utente](http://www.google.com/url?q=http%3A%2F%2Fbitsavers.informatik.uni-stuttgart.de%2Fpdf%2Fborland%2Fborland_C%2B%2B%2FBorland_C%2B%2B_Version_5_Users_Guide_1997.pdf&sa=D&sntz=1&usg=AOvVaw20euRa10hVNODGo3es1tWU).
+Build the project.
 
-### Preparare la build
+```shell
+make build
+```
 
-Assumendo di aver installato il Borland C++ nella sua cartella di default, e di avere is sorgenti di tabbozz salvati dentro la macchina virtuale (e non su una cartella condivisa con l'host), i passaggi sono i seguenti.
+We also have a script for updating dialogs used in the project, you only need to run this if you modify the `.rc` files:
 
-1. Avviare Borland C++ e caricare il progetto TABBOZ.ide
-2. Andare su `Options -> Project -> Directories` 
-3. Cambiare i campi `Include` e `Library` da `c:\bc45\include` e `c:\bc45\lib` in `c:\bc5\include` e `c:\bc5\lib` rispettivamente (questo passo non e' necessario se si usa il Borland C++ 4.5)
-4. Compilare facendo `Project -> Build all` e la compilazione dovrebbe aver successo a meno di qualche warning
+```shell
+make rc
+```
 
-## Analisi dei file del progetto
+### 🎨 Code linting
 
-Un'analisi approfondita del codice non e' stata fatta, ma si possono concludere le seguenti nozioni:
+To fix the linting errors, use the following command:
 
-- Il progetto sembra essere stato compilato in modalita' 32 bit soltanto. 
-- Il file zarro32.res contiene gli asset del gioco (immagini, icone) e le finestre (sono riuscito ad editarle solo tramite Borland C++).
-- Il file text.res contiene le stringhe usate nel gioco.
-- La libreria BWCC32 (Borland Windows Custom Controls) e' la libreria grafica del gioco che gli da' il suo look and feel caratteristico. Presumo sia necessaria solo la versione .lib ma e' da confermare.
+```shell
+make format
+```
+
+### 🚀 Links
+
+- [Novantotto, A tool for porting Windows programs to WebAssembly](https://github.com/andreax79/novantotto)
+- [Emscripten, A complete compiler toolchain to WebAssembly](https://emscripten.org/)
+- [98.css, A design system for building faithful recreations of old UIs](https://github.com/jdan/98.css)
+
+## ⚖️ LICENSE
+
+[![GPL 3](https://www.gnu.org/graphics/gplv3-or-later.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
