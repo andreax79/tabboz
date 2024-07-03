@@ -43,6 +43,7 @@ export: copy
 .PHONY: rc
 rc: copy
 	RESOURCES_DIR="./resources/" $(novantotto_home)/utils/rc.sh resources/dialogs/dialogs.rc
+	RESOURCES_DIR="./resources/" $(novantotto_home)/utils/index_gen.sh
 
 .PHONY: copy
 copy: $(novantotto_home)
